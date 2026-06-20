@@ -1,0 +1,10 @@
+{
+  "profiles": {
+    "SmoothScrollModern (Package)": {
+      "commandName": "MsixPackage"
+    },
+    "SmoothScrollModern (Unpackaged)": {
+      "commandName": "Project"
+    }
+  }
+}
