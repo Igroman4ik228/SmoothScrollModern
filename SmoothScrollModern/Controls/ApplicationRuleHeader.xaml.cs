@@ -23,7 +23,7 @@ public sealed partial class ApplicationRuleHeader : UserControl
         nameof(Subtitle),
         typeof(string),
         typeof(ApplicationRuleHeader),
-        new PropertyMetadata(string.Empty));
+        new PropertyMetadata(string.Empty, OnTextPropertyChanged));
 
     public static readonly DependencyProperty DetailProperty = DependencyProperty.Register(
         nameof(Detail),
@@ -73,6 +73,8 @@ public sealed partial class ApplicationRuleHeader : UserControl
     }
 
     public Visibility HasLabel => string.IsNullOrWhiteSpace(Label) ? Visibility.Collapsed : Visibility.Visible;
+
+    public Visibility HasSubtitle => string.IsNullOrWhiteSpace(Subtitle) ? Visibility.Collapsed : Visibility.Visible;
 
     public Visibility HasDetail => string.IsNullOrWhiteSpace(Detail) ? Visibility.Collapsed : Visibility.Visible;
 

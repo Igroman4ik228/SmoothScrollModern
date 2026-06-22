@@ -15,16 +15,32 @@
             <vm:BooleanToOpacityConverter x:Key="BooleanToOpacityConverter" />
 
             <Style x:Key="CardBorderStyle" TargetType="Border">
-                <Setter Property="Padding" Value="18" />
-                <Setter Property="CornerRadius" Value="8" />
-                <Setter Property="Background" Value="{ThemeResource CardBackgroundFillColorDefaultBrush}" />
-                <Setter Property="BorderBrush" Value="{ThemeResource CardStrokeColorDefaultBrush}" />
-                <Setter Property="BorderThickness" Value="1" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="CornerRadius" Value="0" />
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
             </Style>
 
             <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
                 <Setter Property="FontSize" Value="18" />
                 <Setter Property="FontWeight" Value="SemiBold" />
+                <Setter Property="Margin" Value="0,0,0,2" />
+            </Style>
+
+            <Style x:Key="BorderlessListViewStyle" TargetType="ListView">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="Padding" Value="0,0,14,0" />
+            </Style>
+
+            <Style x:Key="BorderlessListViewItemStyle" TargetType="ListViewItem">
+                <Setter Property="Background" Value="Transparent" />
+                <Setter Property="BorderBrush" Value="Transparent" />
+                <Setter Property="BorderThickness" Value="0" />
+                <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                <Setter Property="MinHeight" Value="0" />
+                <Setter Property="Padding" Value="0" />
+                <Setter Property="UseSystemFocusVisuals" Value="True" />
             </Style>
 
             <Style x:Key="CaptionTextStyle" TargetType="TextBlock">

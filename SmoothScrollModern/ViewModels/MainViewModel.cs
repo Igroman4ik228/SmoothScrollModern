@@ -426,9 +426,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         get
         {
             return string.IsNullOrWhiteSpace(ApplicationSearchQuery)
-                ? ApplicationRules.Count == 0 ? "Правил нет" : $"{ApplicationRules.Count} правил"
+                ? $"{ApplicationRules.Count} из {ApplicationRules.Count}"
                 : FilteredApplicationRules.Count == 0
-                    ? "Ничего не найдено"
+                    ? $"0 из {ApplicationRules.Count}"
                     : $"{FilteredApplicationRules.Count} из {ApplicationRules.Count}";
         }
     }
@@ -446,7 +446,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
 
     public string CurrentApplicationText => _currentApplication == ApplicationInfo.Empty
-        ? "Активное приложение не определено"
+        ? "Текущее приложение не определено"
         : $"{GetApplicationDisplayName(_currentApplication)} ({GetApplicationProcessName(_currentApplication)})";
 
     public string CurrentWindowTitle => string.IsNullOrWhiteSpace(_currentApplication.WindowTitle)

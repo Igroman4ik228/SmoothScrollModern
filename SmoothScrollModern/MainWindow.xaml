@@ -16,8 +16,8 @@
 
     <Grid
         x:Name="ContentRoot"
-        Padding="22"
-        Background="{ThemeResource ApplicationPageBackgroundThemeBrush}">
+        Padding="28,24,28,26"
+        Background="Transparent">
         <Grid.Resources>
             <numberFormatting:DecimalFormatter x:Key="DecimalValueFormatter" FractionDigits="3" />
 
@@ -36,6 +36,11 @@
                 <Setter Property="SnapsTo" Value="StepValues" />
             </Style>
 
+            <Style x:Key="TabContentPanelStyle" TargetType="StackPanel">
+                <Setter Property="Margin" Value="4,18,18,0" />
+                <Setter Property="Spacing" Value="24" />
+            </Style>
+
             <DataTemplate x:Key="ApplicationRuleTemplate">
                 <controls:ApplicationRuleItem />
             </DataTemplate>
@@ -46,7 +51,7 @@
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid Margin="0,0,0,18" ColumnSpacing="20">
+        <Grid Margin="0,0,0,22" ColumnSpacing="20">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*" />
                 <ColumnDefinition Width="Auto" />
@@ -54,7 +59,7 @@
 
             <StackPanel>
                 <TextBlock
-                    FontSize="28"
+                    FontSize="26"
                     FontWeight="SemiBold"
                     Text="SmoothScroll" />
                 <TextBlock
@@ -73,13 +78,18 @@
 
         <TabView
             Grid.Row="1"
+            Background="Transparent"
             CanDragTabs="False"
             IsAddTabButtonVisible="False">
             <TabViewItem Header="Профили" IsClosable="False">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="0,12,0,0" Spacing="12">
-                        <Border Style="{StaticResource CardBorderStyle}">
-                            <StackPanel Spacing="10">
+                    <StackPanel Style="{StaticResource TabContentPanelStyle}">
+                        <Border
+                            Padding="0,0,0,22"
+                            BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                            BorderThickness="0,0,0,1"
+                            Style="{StaticResource CardBorderStyle}">
+                            <StackPanel Spacing="16">
                                 <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Глобальный профиль" />
 
                                 <Grid ColumnSpacing="14" RowSpacing="4">
@@ -241,7 +251,7 @@
                         </Border>
 
                         <Border Style="{StaticResource CardBorderStyle}">
-                            <StackPanel Spacing="12">
+                            <StackPanel Spacing="16">
                                 <Grid ColumnSpacing="18">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
@@ -269,23 +279,26 @@
                                     <Button
                                         Grid.Column="1"
                                         Command="{Binding AddScrollProfileCommand}"
-                                        Content="Создать" />
+                                        Style="{StaticResource AccentButtonStyle}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <SymbolIcon Symbol="Add" />
+                                            <TextBlock Text="Создать" />
+                                        </StackPanel>
+                                    </Button>
                                 </Grid>
 
                                 <ListView
-                                    BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
-                                    BorderThickness="1"
+                                    ItemContainerStyle="{StaticResource BorderlessListViewItemStyle}"
                                     ItemsSource="{Binding UserScrollProfiles}"
-                                    SelectionMode="None">
-                                    <ListView.ItemContainerStyle>
-                                        <Style TargetType="ListViewItem">
-                                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                            <Setter Property="Padding" Value="0" />
-                                        </Style>
-                                    </ListView.ItemContainerStyle>
+                                    SelectionMode="None"
+                                    Style="{StaticResource BorderlessListViewStyle}">
                                     <ListView.ItemTemplate>
                                         <DataTemplate>
-                                            <StackPanel Padding="12" Spacing="10">
+                                            <StackPanel
+                                                Padding="0,16,0,18"
+                                                BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                                                BorderThickness="0,1,0,0"
+                                                Spacing="12">
                                                 <Grid ColumnSpacing="14">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*" />
@@ -299,8 +312,12 @@
                                                         Grid.Column="1"
                                                         MinWidth="92"
                                                         VerticalAlignment="Center"
-                                                        Click="OnRemoveScrollProfileClick"
-                                                        Content="Удалить" />
+                                                        Click="OnRemoveScrollProfileClick">
+                                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                                            <SymbolIcon Symbol="Delete" />
+                                                            <TextBlock Text="Удалить" />
+                                                        </StackPanel>
+                                                    </Button>
                                                 </Grid>
 
                                                 <Grid ColumnSpacing="14" RowSpacing="4">
@@ -470,26 +487,17 @@
 
             <TabViewItem Header="Исключения" IsClosable="False">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="0,16,0,0" Spacing="14">
-                        <Border Style="{StaticResource CardBorderStyle}">
-                            <StackPanel Spacing="10">
-                                <TextBlock
-                                    FontSize="16"
-                                    FontWeight="SemiBold"
-                                    Text="Полноэкранные окна" />
-                                <ToggleSwitch
-                                    IsOn="{Binding AutoDetectExcludedApps, Mode=TwoWay}"
-                                    OffContent="Не отключать fullscreen автоматически"
-                                    OnContent="Отключать плавную прокрутку в fullscreen" />
-                            </StackPanel>
-                        </Border>
+                    <StackPanel Style="{StaticResource TabContentPanelStyle}">
+                        <controls:ActiveApplicationRuleBlock />
 
-                        <Border Style="{StaticResource CardBorderStyle}">
-                            <StackPanel Spacing="14">
-                                <StackPanel Spacing="5">
-                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Добавить приложение" />
-                                </StackPanel>
-                                <Grid ColumnSpacing="8">
+                        <Border
+                            Padding="0,0,0,22"
+                            BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                            BorderThickness="0,0,0,1"
+                            Style="{StaticResource CardBorderStyle}">
+                            <StackPanel Spacing="16">
+                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Добавить исключение" />
+                                <Grid ColumnSpacing="10">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
@@ -497,29 +505,50 @@
                                     </Grid.ColumnDefinitions>
                                     <TextBox
                                         VerticalContentAlignment="Center"
-                                        PlaceholderText="Chrome.exe"
+                                        PlaceholderText="Например: chrome.exe"
                                         Text="{Binding ManualProcessName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                     <Button
                                         Grid.Column="1"
                                         Command="{Binding AddManualRuleCommand}"
-                                        Content="Добавить" />
-                                    <Button
-                                        Grid.Column="2"
-                                        Command="{Binding BrowseApplicationCommand}"
-                                        Content="Выбрать .exe" />
+                                        Style="{StaticResource AccentButtonStyle}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <SymbolIcon Symbol="Add" />
+                                            <TextBlock Text="Добавить" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Grid.Column="2" Command="{Binding BrowseApplicationCommand}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <SymbolIcon Symbol="OpenFile" />
+                                            <TextBlock Text="Обзор" />
+                                        </StackPanel>
+                                    </Button>
                                 </Grid>
                             </StackPanel>
                         </Border>
 
+                        <Border
+                            Padding="0,0,0,22"
+                            BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                            BorderThickness="0,0,0,1"
+                            Style="{StaticResource CardBorderStyle}">
+                            <StackPanel Spacing="12">
+                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Автоматические исключения" />
+                                <ToggleSwitch
+                                    IsOn="{Binding AutoDetectExcludedApps, Mode=TwoWay}"
+                                    OffContent="Не отключать в fullscreen"
+                                    OnContent="Отключать в полноэкранных окнах" />
+                            </StackPanel>
+                        </Border>
+
                         <Border Style="{StaticResource CardBorderStyle}">
-                            <StackPanel Spacing="14">
+                            <StackPanel Spacing="16">
                                 <Grid ColumnSpacing="18">
                                     <Grid.ColumnDefinitions>
                                         <ColumnDefinition Width="*" />
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Spacing="5">
-                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Правила приложений" />
+                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Список исключений" />
                                     </StackPanel>
                                     <TextBlock
                                         Grid.Column="1"
@@ -528,33 +557,18 @@
                                         Text="{Binding ProfileCountText}" />
                                 </Grid>
 
-                                <Grid ColumnSpacing="12">
-                                    <TextBox
-                                        VerticalContentAlignment="Center"
-                                        PlaceholderText="Поиск по названию, процессу или пути"
-                                        Text="{Binding ApplicationSearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                </Grid>
+                                <AutoSuggestBox
+                                    PlaceholderText="Поиск по приложению, процессу или пути"
+                                    QueryIcon="Find"
+                                    Text="{Binding ApplicationSearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
                                 <ListView
                                     MaxHeight="520"
-                                    BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
-                                    BorderThickness="1"
-                                    Header="{Binding}"
+                                    ItemContainerStyle="{StaticResource BorderlessListViewItemStyle}"
                                     ItemTemplate="{StaticResource ApplicationRuleTemplate}"
                                     ItemsSource="{Binding FilteredApplicationRules}"
-                                    SelectionMode="None">
-                                    <ListView.ItemContainerStyle>
-                                        <Style TargetType="ListViewItem">
-                                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
-                                            <Setter Property="Padding" Value="0" />
-                                        </Style>
-                                    </ListView.ItemContainerStyle>
-                                    <ListView.HeaderTemplate>
-                                        <DataTemplate>
-                                            <controls:ActiveApplicationRuleBlock />
-                                        </DataTemplate>
-                                    </ListView.HeaderTemplate>
-                                </ListView>
+                                    SelectionMode="None"
+                                    Style="{StaticResource BorderlessListViewStyle}" />
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -563,9 +577,13 @@
 
             <TabViewItem Header="Приложение" IsClosable="False">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
-                    <StackPanel Margin="0,16,0,0" Spacing="14">
-                        <Border Style="{StaticResource CardBorderStyle}">
-                            <StackPanel Spacing="12">
+                    <StackPanel Style="{StaticResource TabContentPanelStyle}">
+                        <Border
+                            Padding="0,0,0,22"
+                            BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+                            BorderThickness="0,0,0,1"
+                            Style="{StaticResource CardBorderStyle}">
+                            <StackPanel Spacing="14">
                                 <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Запуск и окно" />
                                 <ToggleSwitch
                                     IsOn="{Binding StartWithWindows, Mode=TwoWay}"
@@ -585,7 +603,7 @@
                         </Border>
 
                         <Border Style="{StaticResource CardBorderStyle}">
-                            <StackPanel Spacing="12">
+                            <StackPanel Spacing="14">
                                 <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Настройки приложения" />
                                 <TextBlock Text="Тема" />
                                 <ComboBox
@@ -600,9 +618,24 @@
                                     Margin="0,6,0,0"
                                     Orientation="Horizontal"
                                     Spacing="10">
-                                    <Button Command="{Binding ExportSettingsCommand}" Content="Экспорт" />
-                                    <Button Command="{Binding ImportSettingsCommand}" Content="Импорт" />
-                                    <Button Command="{Binding ResetDefaultsCommand}" Content="Сбросить" />
+                                    <Button Command="{Binding ExportSettingsCommand}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <SymbolIcon Symbol="Save" />
+                                            <TextBlock Text="Экспорт" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{Binding ImportSettingsCommand}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <SymbolIcon Symbol="OpenFile" />
+                                            <TextBlock Text="Импорт" />
+                                        </StackPanel>
+                                    </Button>
+                                    <Button Command="{Binding ResetDefaultsCommand}">
+                                        <StackPanel Orientation="Horizontal" Spacing="6">
+                                            <SymbolIcon Symbol="Refresh" />
+                                            <TextBlock Text="Сбросить" />
+                                        </StackPanel>
+                                    </Button>
                                 </StackPanel>
                             </StackPanel>
                         </Border>

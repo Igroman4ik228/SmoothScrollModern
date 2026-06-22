@@ -5,7 +5,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:SmoothScrollModern.Controls">
 
-    <Grid Padding="14" RowSpacing="14">
+    <Grid
+        Padding="0,16,0,18"
+        BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+        BorderThickness="0,1,0,0"
+        RowSpacing="14">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -18,8 +22,12 @@
             <controls:ApplicationRuleHeader.ActionContent>
                 <Button
                     MinWidth="92"
-                    Click="OnRemoveRuleClick"
-                    Content="Удалить" />
+                    Click="OnRemoveRuleClick">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <SymbolIcon Symbol="Delete" />
+                        <TextBlock Text="Удалить" />
+                    </StackPanel>
+                </Button>
             </controls:ApplicationRuleHeader.ActionContent>
         </controls:ApplicationRuleHeader>
 

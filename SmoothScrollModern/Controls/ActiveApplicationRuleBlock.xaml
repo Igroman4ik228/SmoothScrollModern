@@ -5,7 +5,11 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:SmoothScrollModern.Controls">
 
-    <Grid RowSpacing="14">
+    <Grid
+        Padding="0,0,0,18"
+        BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
+        BorderThickness="0,0,0,1"
+        RowSpacing="12">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -13,9 +17,8 @@
         </Grid.RowDefinitions>
 
         <controls:ApplicationRuleHeader
-            Margin="14,14,14,0"
             Detail="{Binding CurrentWindowTitle}"
-            Label="Активное приложение"
+            Label="Текущее окно"
             Subtitle=""
             Title="{Binding CurrentApplicationText}">
             <controls:ApplicationRuleHeader.ActionContent>
@@ -23,24 +26,32 @@
                     MinWidth="92"
                     Command="{Binding RemoveRuleCommand}"
                     CommandParameter="{Binding CurrentApplicationRule}"
-                    Content="Удалить"
-                    Visibility="{Binding HasCurrentApplicationRule, Converter={StaticResource BooleanToVisibilityConverter}}" />
+                    Visibility="{Binding HasCurrentApplicationRule, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <SymbolIcon Symbol="Delete" />
+                        <TextBlock Text="Удалить" />
+                    </StackPanel>
+                </Button>
             </controls:ApplicationRuleHeader.ActionContent>
         </controls:ApplicationRuleHeader>
 
         <Grid
             Grid.Row="1"
-            Margin="14,0,14,0"
             Visibility="{Binding HasCurrentApplicationRule, Converter={StaticResource BooleanToVisibilityConverter}}">
             <controls:ApplicationRuleSettings DataContext="{Binding CurrentApplicationRule}" />
         </Grid>
 
         <Button
             Grid.Row="2"
+            HorizontalAlignment="Left"
             MinWidth="190"
-            Margin="14,0,14,14"
             Command="{Binding DisableCurrentApplicationCommand}"
-            Content="Добавить в исключения"
-            Visibility="{Binding IsCurrentApplicationRuleMissing, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            Style="{StaticResource AccentButtonStyle}"
+            Visibility="{Binding IsCurrentApplicationRuleMissing, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel Orientation="Horizontal" Spacing="6">
+                <SymbolIcon Symbol="Add" />
+                <TextBlock Text="Исключить текущее приложение" />
+            </StackPanel>
+        </Button>
     </Grid>
 </UserControl>
