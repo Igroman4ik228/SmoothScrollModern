@@ -131,7 +131,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public IReadOnlyList<SelectionOption<string>> ThemeOptions { get; } =
     [
-        new("System", "Как в Windows"),
+        new("System", "Системная"),
         new("Light", "Светлая"),
         new("Dark", "Темная")
     ];
@@ -530,16 +530,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _activeApplicationTimer.Tick -= OnActiveApplicationTimerTick;
         _saveTimer.Stop();
         _saveTimer.Tick -= OnSaveTimerTick;
-        foreach (var rule in ApplicationRules)
-        {
-            rule.PropertyChanged -= OnRulePropertyChanged;
-        }
 
+        UnsubscribeApplicationRules();
         GlobalScrollProfile.PropertyChanged -= OnGlobalScrollProfilePropertyChanged;
-        foreach (var profile in UserScrollProfiles)
-        {
-            profile.PropertyChanged -= OnScrollProfilePropertyChanged;
-        }
+        UnsubscribeScrollProfiles();
 
         _disposed = true;
     }
@@ -603,8 +597,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         };
 
         profile.Validate();
-        profile.PropertyChanged += OnScrollProfilePropertyChanged;
-        UserScrollProfiles.Add(profile);
+        AddScrollProfileToCollection(profile);
         NewScrollProfileName = string.Empty;
         RebuildScrollProfileChoices();
         SaveAndNotify(nameof(ScrollProfilesCountText));
@@ -712,31 +705,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void ResetDefaults()
     {
-        foreach (var rule in ApplicationRules)
-        {
-            rule.PropertyChanged -= OnRulePropertyChanged;
-        }
-
-        Settings = new AppSettings();
+        ReplaceSettings(new AppSettings());
         _settingsService.Save(Settings);
-        ApplicationRules.Clear();
-        UserScrollProfiles.Clear();
-        GlobalScrollProfile.Scroll = Settings.Scroll;
-        foreach (var rule in Settings.ApplicationRules)
-        {
-            AddRuleToCollection(rule);
-        }
-        foreach (var profile in Settings.ScrollProfiles)
-        {
-            profile.PropertyChanged += OnScrollProfilePropertyChanged;
-            UserScrollProfiles.Add(profile);
-        }
-
-        RebuildScrollProfileChoices();
-        RefreshApplicationRulesFilter();
-        OnPropertyChanged(string.Empty);
-        ApplyTheme();
-        StateChanged?.Invoke();
     }
 
     private void ExportSettings()
@@ -767,33 +737,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             return;
         }
 
-        foreach (var rule in ApplicationRules)
-        {
-            rule.PropertyChanged -= OnRulePropertyChanged;
-        }
-
-        Settings = _settingsService.Import(dialog.FileName);
-        ApplicationRules.Clear();
-        UserScrollProfiles.Clear();
-        GlobalScrollProfile.Scroll = Settings.Scroll;
-        foreach (var rule in Settings.ApplicationRules)
-        {
-            AddRuleToCollection(rule);
-        }
-        foreach (var profile in Settings.ScrollProfiles)
-        {
-            profile.PropertyChanged += OnScrollProfilePropertyChanged;
-            UserScrollProfiles.Add(profile);
-        }
-
-        RebuildScrollProfileChoices();
-        NormalizeApplicationRuleProfileReferences();
-        RefreshApplicationRulesFilter();
+        ReplaceSettings(_settingsService.Import(dialog.FileName));
         _settingsService.Save(Settings);
-        ApplyTheme();
-        SyncStartup();
-        OnPropertyChanged(string.Empty);
-        StateChanged?.Invoke();
     }
 
     private void AddRuleToCollection(ApplicationRule rule)
@@ -804,6 +749,57 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             rule.PropertyChanged += OnRulePropertyChanged;
             RefreshApplicationRulesFilter();
             OnPropertyChanged(nameof(ProfileCountText));
+        }
+    }
+
+    private void AddScrollProfileToCollection(ScrollProfile profile)
+    {
+        profile.PropertyChanged += OnScrollProfilePropertyChanged;
+        UserScrollProfiles.Add(profile);
+    }
+
+    private void ReplaceSettings(AppSettings settings)
+    {
+        UnsubscribeApplicationRules();
+        UnsubscribeScrollProfiles();
+
+        Settings = settings;
+        ApplicationRules.Clear();
+        UserScrollProfiles.Clear();
+        GlobalScrollProfile.Scroll = Settings.Scroll;
+
+        foreach (var rule in Settings.ApplicationRules)
+        {
+            AddRuleToCollection(rule);
+        }
+
+        foreach (var profile in Settings.ScrollProfiles)
+        {
+            AddScrollProfileToCollection(profile);
+        }
+
+        RebuildScrollProfileChoices();
+        NormalizeApplicationRuleProfileReferences();
+        RefreshApplicationRulesFilter();
+        SyncStartup();
+        ApplyTheme();
+        OnPropertyChanged(string.Empty);
+        StateChanged?.Invoke();
+    }
+
+    private void UnsubscribeApplicationRules()
+    {
+        foreach (var rule in ApplicationRules)
+        {
+            rule.PropertyChanged -= OnRulePropertyChanged;
+        }
+    }
+
+    private void UnsubscribeScrollProfiles()
+    {
+        foreach (var profile in UserScrollProfiles)
+        {
+            profile.PropertyChanged -= OnScrollProfilePropertyChanged;
         }
     }
 

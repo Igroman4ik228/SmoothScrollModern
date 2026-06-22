@@ -1,5 +1,4 @@
 using System.ComponentModel;
-using Microsoft.UI;
 using Microsoft.UI.Input;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
@@ -9,25 +8,22 @@ using Microsoft.UI.Xaml.Media;
 using SmoothScrollModern.Scroll;
 using SmoothScrollModern.Settings;
 using SmoothScrollModern.ViewModels;
-using Windows.Graphics;
-using WinRT.Interop;
+using WinUIEx;
 
 namespace SmoothScrollModern;
 
 public sealed partial class MainWindow : Window
 {
-    private const int ShowWindowHide = 0;
-    private const int ShowWindowNormal = 1;
-    private const int InitialWidth = 1040;
-    private const int InitialHeight = 760;
-    private const int MinWidth = 820;
-    private const int MinHeight = 620;
+    private const double InitialWindowWidth = 1120;
+    private const double InitialWindowHeight = 760;
+    private const double MinimumWindowWidth = 820;
+    private const double MinimumWindowHeight = 560;
 
     private readonly Dictionary<ScrollViewer, double> _scrollTargets = [];
     private readonly Action<CancelEventArgs> _closingHandler;
     private readonly MainViewModel _viewModel;
-    private readonly nint _hwnd;
-    private readonly AppWindow _appWindow;
+    private readonly WindowManager _windowManager;
+    private bool _isPlacementApplied;
 
     public MainWindow(MainViewModel viewModel, Action<CancelEventArgs> closingHandler)
     {
@@ -38,11 +34,10 @@ public sealed partial class MainWindow : Window
         ContentRoot.DataContext = viewModel;
         ContentRoot.AddHandler(UIElement.PointerWheelChangedEvent, new PointerEventHandler(OnPointerWheelChanged), true);
 
-        _hwnd = WindowNative.GetWindowHandle(this);
-        _appWindow = AppWindow.GetFromWindowId(Win32Interop.GetWindowIdFromWindow(_hwnd));
-        _appWindow.Title = Core.Constants.ApplicationName;
-        ConfigureWindowSize();
-        _appWindow.Closing += OnAppWindowClosing;
+        _windowManager = WindowManager.Get(this);
+        _windowManager.MinWidth = MinimumWindowWidth;
+        _windowManager.MinHeight = MinimumWindowHeight;
+        _windowManager.AppWindow.Closing += OnAppWindowClosing;
 
         viewModel.ThemeChanged += ApplyTheme;
         ApplyTheme(viewModel.Theme);
@@ -50,12 +45,24 @@ public sealed partial class MainWindow : Window
 
     public void HideWindow()
     {
-        Native.NativeMethods.ShowWindow(_hwnd, ShowWindowHide);
+        WindowExtensions.Hide(this);
     }
 
     public void ShowWindow()
     {
-        Native.NativeMethods.ShowWindow(_hwnd, ShowWindowNormal);
+        ApplyInitialPlacement();
+        WindowExtensions.Show(this);
+    }
+
+    private void ApplyInitialPlacement()
+    {
+        if (_isPlacementApplied)
+        {
+            return;
+        }
+
+        this.CenterOnScreen(InitialWindowWidth, InitialWindowHeight);
+        _isPlacementApplied = true;
     }
 
     private void OnAppWindowClosing(AppWindow sender, AppWindowClosingEventArgs args)
@@ -73,29 +80,6 @@ public sealed partial class MainWindow : Window
             "Dark" => ElementTheme.Dark,
             _ => ElementTheme.Default
         };
-    }
-
-    private void ConfigureWindowSize()
-    {
-        if (_appWindow.Presenter is OverlappedPresenter presenter)
-        {
-            presenter.PreferredMinimumWidth = MinWidth;
-            presenter.PreferredMinimumHeight = MinHeight;
-        }
-
-        _appWindow.Resize(new SizeInt32(InitialWidth, InitialHeight));
-        CenterWindow();
-    }
-
-    private void CenterWindow()
-    {
-        var displayArea = DisplayArea.GetFromWindowId(_appWindow.Id, DisplayAreaFallback.Primary);
-        var workArea = displayArea.WorkArea;
-
-        var x = workArea.X + Math.Max(0, (workArea.Width - InitialWidth) / 2);
-        var y = workArea.Y + Math.Max(0, (workArea.Height - InitialHeight) / 2);
-
-        _appWindow.Move(new PointInt32(x, y));
     }
 
     private void OnRemoveScrollProfileClick(object sender, RoutedEventArgs e)

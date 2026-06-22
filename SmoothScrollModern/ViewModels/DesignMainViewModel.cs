@@ -81,7 +81,7 @@ public sealed class DesignMainViewModel
 
     public IReadOnlyList<SelectionOption<string>> ThemeOptions { get; } =
     [
-        new("System", "Как в Windows"),
+        new("System", "Системная"),
         new("Light", "Светлая"),
         new("Dark", "Темная")
     ];

@@ -30,6 +30,15 @@
                 <Setter Property="Foreground" Value="{ThemeResource TextFillColorSecondaryBrush}" />
                 <Setter Property="TextWrapping" Value="Wrap" />
             </Style>
+
+            <Style x:Key="CompactNumberBoxStyle" TargetType="NumberBox">
+                <Setter Property="SpinButtonPlacementMode" Value="Compact" />
+            </Style>
+
+            <Style x:Key="SelectionComboBoxStyle" TargetType="ComboBox">
+                <Setter Property="DisplayMemberPath" Value="Name" />
+                <Setter Property="SelectedValuePath" Value="Value" />
+            </Style>
         </ResourceDictionary>
     </Application.Resources>
 </Application>

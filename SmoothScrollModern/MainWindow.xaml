@@ -1,4 +1,4 @@
-<?xml version="1.0" encoding="utf-8"?>
+<?xml version="1.0" encoding="utf-8" ?>
 <Window
     x:Class="SmoothScrollModern.MainWindow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
@@ -50,13 +50,12 @@
             Grid.Row="1"
             CanDragTabs="False"
             IsAddTabButtonVisible="False">
-            <TabViewItem Header="Прокрутка" IsClosable="False">
+            <TabViewItem Header="Профили" IsClosable="False">
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="0,16,0,0" Spacing="14">
                         <Border Style="{StaticResource CardBorderStyle}">
                             <StackPanel Spacing="12">
                                 <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Глобальный профиль" />
-                                <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Базовый набор настроек прокрутки. Он применяется ко всем приложениям, если в правиле не выбран другой профиль." />
 
                                 <Grid ColumnSpacing="16">
                                     <Grid.ColumnDefinitions>
@@ -69,14 +68,13 @@
                                         Maximum="6"
                                         Minimum="0.2"
                                         SmallChange="0.1"
-                                        SpinButtonPlacementMode="Compact"
+                                        Style="{StaticResource CompactNumberBoxStyle}"
                                         Value="{Binding ScrollMultiplier, Mode=TwoWay}" />
                                 </Grid>
                                 <Slider
                                     Maximum="6"
                                     Minimum="0.2"
                                     Value="{Binding ScrollMultiplier, Mode=TwoWay}" />
-                                <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Чем выше значение, тем дальше страница прокручивается за один шаг колеса." />
 
                                 <Grid ColumnSpacing="16">
                                     <Grid.ColumnDefinitions>
@@ -89,7 +87,7 @@
                                         Maximum="900"
                                         Minimum="30"
                                         SmallChange="10"
-                                        SpinButtonPlacementMode="Compact"
+                                        Style="{StaticResource CompactNumberBoxStyle}"
                                         Value="{Binding DurationMs, Mode=TwoWay}" />
                                 </Grid>
                                 <Slider
@@ -97,7 +95,6 @@
                                     Minimum="30"
                                     StepFrequency="10"
                                     Value="{Binding DurationMs, Mode=TwoWay}" />
-                                <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Короткая длительность ощущается отзывчивее, длинная - мягче и инерционнее." />
 
                                 <Grid ColumnSpacing="16">
                                     <Grid.ColumnDefinitions>
@@ -110,7 +107,7 @@
                                         Maximum="1"
                                         Minimum="0"
                                         SmallChange="0.05"
-                                        SpinButtonPlacementMode="Compact"
+                                        Style="{StaticResource CompactNumberBoxStyle}"
                                         Value="{Binding Smoothness, Mode=TwoWay}" />
                                 </Grid>
                                 <Slider
@@ -118,7 +115,6 @@
                                     Minimum="0"
                                     StepFrequency="0.01"
                                     Value="{Binding Smoothness, Mode=TwoWay}" />
-                                <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Увеличивайте, если движение кажется резким или ступенчатым." />
 
                                 <Grid ColumnSpacing="16">
                                     <Grid.ColumnDefinitions>
@@ -131,31 +127,27 @@
                                         Maximum="4"
                                         Minimum="0.2"
                                         SmallChange="0.1"
-                                        SpinButtonPlacementMode="Compact"
+                                        Style="{StaticResource CompactNumberBoxStyle}"
                                         Value="{Binding Acceleration, Mode=TwoWay}" />
                                 </Grid>
                                 <Slider
                                     Maximum="4"
                                     Minimum="0.2"
                                     Value="{Binding Acceleration, Mode=TwoWay}" />
-                                <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Влияет на серию быстрых повторных прокруток: чем выше, тем быстрее набирается скорость." />
 
                                 <TextBlock Text="Кривая анимации" />
                                 <ComboBox
                                     Width="220"
                                     HorizontalAlignment="Left"
-                                    DisplayMemberPath="Name"
                                     ItemsSource="{Binding EasingOptions}"
                                     PlaceholderText="Мягкая"
                                     SelectedValue="{Binding EasingType, Mode=TwoWay}"
-                                    SelectedValuePath="Value" />
-                                <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Форма затухания анимации. Мягкая кривая обычно даёт естественный старт и плавную остановку." />
+                                    Style="{StaticResource SelectionComboBoxStyle}" />
 
                                 <ToggleSwitch
                                     IsOn="{Binding EnableHorizontalScroll, Mode=TwoWay}"
                                     OffContent="Горизонтальная прокрутка выключена"
                                     OnContent="Горизонтальная прокрутка включена" />
-                                <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Включает плавную обработку горизонтального колеса или жеста, если устройство его отправляет." />
                             </StackPanel>
                         </Border>
 
@@ -167,8 +159,7 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Spacing="5">
-                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Профили прокрутки" />
-                                        <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Профиль хранит параметры прокрутки. Его можно назначить одному или нескольким правилам приложений." />
+                                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Пользовательские профили" />
                                     </StackPanel>
                                     <TextBlock
                                         Grid.Column="1"
@@ -183,8 +174,8 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <TextBox
-                                        PlaceholderText="Например: Рабочие приложения"
                                         VerticalContentAlignment="Center"
+                                        PlaceholderText="Новый профиль"
                                         Text="{Binding NewScrollProfileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                     <Button
                                         Grid.Column="1"
@@ -197,91 +188,123 @@
                                     BorderThickness="1"
                                     ItemsSource="{Binding UserScrollProfiles}"
                                     SelectionMode="None">
+                                    <ListView.ItemContainerStyle>
+                                        <Style TargetType="ListViewItem">
+                                            <Setter Property="HorizontalContentAlignment" Value="Stretch" />
+                                            <Setter Property="Padding" Value="0" />
+                                        </Style>
+                                    </ListView.ItemContainerStyle>
                                     <ListView.ItemTemplate>
                                         <DataTemplate>
-                                            <StackPanel Padding="4,10,4,12" Spacing="14">
+                                            <StackPanel Padding="14,12,14,16" Spacing="12">
                                                 <Grid ColumnSpacing="14">
                                                     <Grid.ColumnDefinitions>
                                                         <ColumnDefinition Width="*" />
                                                         <ColumnDefinition Width="Auto" />
                                                     </Grid.ColumnDefinitions>
-                                                    <StackPanel>
-                                                        <TextBlock Text="Название профиля" />
-                                                        <TextBox
-                                                            Margin="0,5,0,0"
-                                                            PlaceholderText="Новый профиль"
-                                                            Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                                                    </StackPanel>
+                                                    <TextBox
+                                                        VerticalContentAlignment="Center"
+                                                        PlaceholderText="Название профиля"
+                                                        Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                                     <Button
                                                         Grid.Column="1"
                                                         MinWidth="92"
-                                                        VerticalAlignment="Bottom"
+                                                        VerticalAlignment="Center"
                                                         Click="OnRemoveScrollProfileClick"
                                                         Content="Удалить" />
                                                 </Grid>
 
-                                                <Grid ColumnSpacing="12" RowSpacing="10">
+                                                <Grid ColumnSpacing="16">
                                                     <Grid.ColumnDefinitions>
-                                                        <ColumnDefinition Width="128" />
-                                                        <ColumnDefinition Width="128" />
-                                                        <ColumnDefinition Width="128" />
-                                                        <ColumnDefinition Width="128" />
-                                                        <ColumnDefinition Width="170" />
-                                                        <ColumnDefinition Width="185" />
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="120" />
                                                     </Grid.ColumnDefinitions>
-                                                    <StackPanel>
-                                                        <TextBlock Text="Сила" />
-                                                        <NumberBox
-                                                            Margin="0,4,0,0"
-                                                            Maximum="6"
-                                                            Minimum="0.2"
-                                                            SmallChange="0.1"
-                                                            Value="{Binding ProfileScrollMultiplier, Mode=TwoWay}" />
-                                                    </StackPanel>
-                                                    <StackPanel Grid.Column="1">
-                                                        <TextBlock Text="Длительность, мс" />
-                                                        <NumberBox
-                                                            Margin="0,4,0,0"
-                                                            Maximum="900"
-                                                            Minimum="30"
-                                                            SmallChange="10"
-                                                            Value="{Binding ProfileDurationMs, Mode=TwoWay}" />
-                                                    </StackPanel>
-                                                    <StackPanel Grid.Column="2">
-                                                        <TextBlock Text="Плавность" />
-                                                        <NumberBox
-                                                            Margin="0,4,0,0"
-                                                            Maximum="1"
-                                                            Minimum="0"
-                                                            SmallChange="0.05"
-                                                            Value="{Binding ProfileSmoothness, Mode=TwoWay}" />
-                                                    </StackPanel>
-                                                    <StackPanel Grid.Column="3">
-                                                        <TextBlock Text="Ускорение" />
-                                                        <NumberBox
-                                                            Margin="0,4,0,0"
-                                                            Maximum="4"
-                                                            Minimum="0.2"
-                                                            SmallChange="0.1"
-                                                            Value="{Binding ProfileAcceleration, Mode=TwoWay}" />
-                                                    </StackPanel>
-                                                    <StackPanel Grid.Column="4">
-                                                        <TextBlock Text="Кривая" />
-                                                        <ComboBox
-                                                            Margin="0,4,0,0"
-                                                            DisplayMemberPath="Name"
-                                                            Loaded="OnEasingComboBoxLoaded"
-                                                            PlaceholderText="Мягкая"
-                                                            SelectedValue="{Binding ProfileEasingType, Mode=TwoWay}"
-                                                            SelectedValuePath="Value" />
-                                                    </StackPanel>
-                                                    <ToggleSwitch
-                                                        Grid.Column="5"
-                                                        VerticalAlignment="Bottom"
-                                                        IsOn="{Binding ProfileEnableHorizontalScroll, Mode=TwoWay}"
-                                                        OffContent="Без горизонтальной"
-                                                        OnContent="Горизонтальная прокрутка" />
+                                                    <TextBlock VerticalAlignment="Center" Text="Сила прокрутки" />
+                                                    <NumberBox
+                                                        Grid.Column="1"
+                                                        Maximum="6"
+                                                        Minimum="0.2"
+                                                        SmallChange="0.1"
+                                                        Style="{StaticResource CompactNumberBoxStyle}"
+                                                        Value="{Binding ProfileScrollMultiplier, Mode=TwoWay}" />
                                                 </Grid>
+                                                <Slider
+                                                    Maximum="6"
+                                                    Minimum="0.2"
+                                                    Value="{Binding ProfileScrollMultiplier, Mode=TwoWay}" />
+
+                                                <Grid ColumnSpacing="16">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="120" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock VerticalAlignment="Center" Text="Длительность анимации, мс" />
+                                                    <NumberBox
+                                                        Grid.Column="1"
+                                                        Maximum="900"
+                                                        Minimum="30"
+                                                        SmallChange="10"
+                                                        Style="{StaticResource CompactNumberBoxStyle}"
+                                                        Value="{Binding ProfileDurationMs, Mode=TwoWay}" />
+                                                </Grid>
+                                                <Slider
+                                                    Maximum="900"
+                                                    Minimum="30"
+                                                    StepFrequency="10"
+                                                    Value="{Binding ProfileDurationMs, Mode=TwoWay}" />
+
+                                                <Grid ColumnSpacing="16">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="120" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock VerticalAlignment="Center" Text="Плавность" />
+                                                    <NumberBox
+                                                        Grid.Column="1"
+                                                        Maximum="1"
+                                                        Minimum="0"
+                                                        SmallChange="0.05"
+                                                        Style="{StaticResource CompactNumberBoxStyle}"
+                                                        Value="{Binding ProfileSmoothness, Mode=TwoWay}" />
+                                                </Grid>
+                                                <Slider
+                                                    Maximum="1"
+                                                    Minimum="0"
+                                                    StepFrequency="0.01"
+                                                    Value="{Binding ProfileSmoothness, Mode=TwoWay}" />
+
+                                                <Grid ColumnSpacing="16">
+                                                    <Grid.ColumnDefinitions>
+                                                        <ColumnDefinition Width="*" />
+                                                        <ColumnDefinition Width="120" />
+                                                    </Grid.ColumnDefinitions>
+                                                    <TextBlock VerticalAlignment="Center" Text="Ускорение" />
+                                                    <NumberBox
+                                                        Grid.Column="1"
+                                                        Maximum="4"
+                                                        Minimum="0.2"
+                                                        SmallChange="0.1"
+                                                        Style="{StaticResource CompactNumberBoxStyle}"
+                                                        Value="{Binding ProfileAcceleration, Mode=TwoWay}" />
+                                                </Grid>
+                                                <Slider
+                                                    Maximum="4"
+                                                    Minimum="0.2"
+                                                    Value="{Binding ProfileAcceleration, Mode=TwoWay}" />
+
+                                                <TextBlock Text="Кривая анимации" />
+                                                <ComboBox
+                                                    Width="220"
+                                                    HorizontalAlignment="Left"
+                                                    Loaded="OnEasingComboBoxLoaded"
+                                                    PlaceholderText="Мягкая"
+                                                    SelectedValue="{Binding ProfileEasingType, Mode=TwoWay}"
+                                                    Style="{StaticResource SelectionComboBoxStyle}" />
+
+                                                <ToggleSwitch
+                                                    IsOn="{Binding ProfileEnableHorizontalScroll, Mode=TwoWay}"
+                                                    OffContent="Горизонтальная прокрутка выключена"
+                                                    OnContent="Горизонтальная прокрутка включена" />
                                             </StackPanel>
                                         </DataTemplate>
                                     </ListView.ItemTemplate>
@@ -296,31 +319,22 @@
                 <ScrollViewer VerticalScrollBarVisibility="Auto">
                     <StackPanel Margin="0,16,0,0" Spacing="14">
                         <Border Style="{StaticResource CardBorderStyle}">
-                            <Grid ColumnSpacing="18">
-                                <Grid.ColumnDefinitions>
-                                    <ColumnDefinition Width="*" />
-                                    <ColumnDefinition Width="Auto" />
-                                </Grid.ColumnDefinitions>
-
-                                <StackPanel Spacing="6">
-                                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Активное приложение" />
-                                    <TextBlock
-                                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                        Text="{Binding CurrentApplicationText}"
-                                        TextWrapping="Wrap" />
-                                    <TextBlock
-                                        Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                                        Text="{Binding CurrentWindowTitle}"
-                                        TextTrimming="CharacterEllipsis" />
-                                </StackPanel>
-
+                            <StackPanel Spacing="6">
+                                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Активное приложение" />
+                                <TextBlock
+                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                                    Text="{Binding CurrentApplicationText}"
+                                    TextWrapping="Wrap" />
+                                <TextBlock
+                                    Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                                    Text="{Binding CurrentWindowTitle}"
+                                    TextTrimming="CharacterEllipsis" />
                                 <CheckBox
-                                    Grid.Column="1"
                                     MinWidth="190"
-                                    VerticalAlignment="Center"
+                                    Margin="0,4,0,0"
                                     Content="Исключение активно"
                                     IsChecked="{Binding IsCurrentApplicationBypassed, Mode=TwoWay}" />
-                            </Grid>
+                            </StackPanel>
                         </Border>
 
                         <Border Style="{StaticResource CardBorderStyle}">
@@ -333,7 +347,6 @@
                                     IsOn="{Binding AutoDetectExcludedApps, Mode=TwoWay}"
                                     OffContent="Не отключать fullscreen автоматически"
                                     OnContent="Отключать плавную прокрутку в fullscreen" />
-                                <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Полезно для игр, видео и приложений, где своя прокрутка уже работает правильно." />
                             </StackPanel>
                         </Border>
 
@@ -341,7 +354,6 @@
                             <StackPanel Spacing="14">
                                 <StackPanel Spacing="5">
                                     <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Добавить приложение" />
-                                    <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Введите имя процесса или выберите файл приложения." />
                                 </StackPanel>
                                 <Grid ColumnSpacing="8">
                                     <Grid.ColumnDefinitions>
@@ -350,8 +362,8 @@
                                         <ColumnDefinition Width="Auto" />
                                     </Grid.ColumnDefinitions>
                                     <TextBox
-                                        PlaceholderText="Например: chrome.exe"
                                         VerticalContentAlignment="Center"
+                                        PlaceholderText="Например: chrome.exe"
                                         Text="{Binding ManualProcessName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                     <Button
                                         Grid.Column="1"
@@ -374,7 +386,6 @@
                                     </Grid.ColumnDefinitions>
                                     <StackPanel Spacing="5">
                                         <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Правила приложений" />
-                                        <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Правило выбирает приложение, решает обрабатывать ли его прокрутку и какой профиль использовать." />
                                     </StackPanel>
                                     <TextBlock
                                         Grid.Column="1"
@@ -394,8 +405,8 @@
                                         Text="Поиск" />
                                     <TextBox
                                         Grid.Column="1"
-                                        PlaceholderText="Название, процесс или путь"
                                         VerticalContentAlignment="Center"
+                                        PlaceholderText="Название, процесс или путь"
                                         Text="{Binding ApplicationSearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                                 </Grid>
 
@@ -425,7 +436,7 @@
                                                         <ColumnDefinition Width="Auto" />
                                                     </Grid.ColumnDefinitions>
 
-                                                    <StackPanel Spacing="4" VerticalAlignment="Center">
+                                                    <StackPanel VerticalAlignment="Center" Spacing="4">
                                                         <TextBlock
                                                             FontSize="16"
                                                             FontWeight="SemiBold"
@@ -480,22 +491,20 @@
                                                         OnContent="Отключить прокрутку" />
 
                                                     <StackPanel Grid.Row="1" Spacing="5">
-                                                        <TextBlock
-                                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                            Text="Режим" />
+                                                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Режим" />
                                                         <ComboBox
                                                             HorizontalAlignment="Stretch"
-                                                            DisplayMemberPath="Name"
                                                             Loaded="OnDeliveryModeComboBoxLoaded"
                                                             PlaceholderText="Плавный режим"
                                                             SelectedValue="{Binding DeliveryMode, Mode=TwoWay}"
-                                                            SelectedValuePath="Value" />
+                                                            Style="{StaticResource SelectionComboBoxStyle}" />
                                                     </StackPanel>
 
-                                                    <StackPanel Grid.Row="1" Grid.Column="1" Spacing="5">
-                                                        <TextBlock
-                                                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                                            Text="Профиль прокрутки" />
+                                                    <StackPanel
+                                                        Grid.Row="1"
+                                                        Grid.Column="1"
+                                                        Spacing="5">
+                                                        <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Профиль прокрутки" />
                                                         <ComboBox
                                                             HorizontalAlignment="Stretch"
                                                             DisplayMemberPath="Name"
@@ -509,8 +518,6 @@
                                         </DataTemplate>
                                     </ListView.ItemTemplate>
                                 </ListView>
-
-                                <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Удаление правила убирает только привязку приложения. Профили прокрутки остаются в разделе Прокрутка." />
                             </StackPanel>
                         </Border>
                     </StackPanel>
@@ -527,19 +534,16 @@
                                     IsOn="{Binding StartWithWindows, Mode=TwoWay}"
                                     OffContent="Автозапуск выключен"
                                     OnContent="Автозапуск включён" />
-                                <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Запускает SmoothScroll вместе с Windows для текущего пользователя." />
 
                                 <ToggleSwitch
                                     IsOn="{Binding StartMinimizedToTray, Mode=TwoWay}"
                                     OffContent="Показывать окно при запуске"
                                     OnContent="Запускать в tray" />
-                                <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Если включено, приложение стартует скрытым и остаётся доступным через tray." />
 
                                 <ToggleSwitch
                                     IsOn="{Binding CloseToTray, Mode=TwoWay}"
                                     OffContent="Крестик завершает приложение"
                                     OnContent="Крестик сворачивает окно в tray" />
-                                <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Определяет, скрывать окно в tray или полностью завершать программу по крестику." />
                             </StackPanel>
                         </Border>
 
@@ -550,12 +554,10 @@
                                 <ComboBox
                                     Width="220"
                                     HorizontalAlignment="Left"
-                                    DisplayMemberPath="Name"
                                     ItemsSource="{Binding ThemeOptions}"
-                                    PlaceholderText="Как в Windows"
+                                    PlaceholderText="Системная"
                                     SelectedValue="{Binding Theme, Mode=TwoWay}"
-                                    SelectedValuePath="Value" />
-                                <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Как в Windows следует системной теме, Светлая и Темная задают оформление принудительно." />
+                                    Style="{StaticResource SelectionComboBoxStyle}" />
 
                                 <StackPanel
                                     Margin="0,6,0,0"
@@ -565,10 +567,6 @@
                                     <Button Command="{Binding ImportSettingsCommand}" Content="Импорт" />
                                     <Button Command="{Binding ResetDefaultsCommand}" Content="Сбросить" />
                                 </StackPanel>
-
-                                <TextBlock
-                                    Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                                    Text="SmoothScroll на .NET 10 / WinUI 3" />
                             </StackPanel>
                         </Border>
                     </StackPanel>
