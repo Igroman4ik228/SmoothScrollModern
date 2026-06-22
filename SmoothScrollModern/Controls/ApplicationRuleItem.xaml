@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="SmoothScrollModern.Controls.ApplicationRuleItem"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:SmoothScrollModern.Controls">
+
+    <Grid Padding="14" RowSpacing="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <controls:ApplicationRuleHeader
+            Detail="{Binding ExecutablePathText}"
+            Subtitle="{Binding ProcessNameText}"
+            Title="{Binding DisplayNameText}">
+            <controls:ApplicationRuleHeader.ActionContent>
+                <Button
+                    MinWidth="92"
+                    Click="OnRemoveRuleClick"
+                    Content="Удалить" />
+            </controls:ApplicationRuleHeader.ActionContent>
+        </controls:ApplicationRuleHeader>
+
+        <controls:ApplicationRuleSettings Grid.Row="1" />
+    </Grid>
+</UserControl>

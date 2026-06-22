@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="SmoothScrollModern.Controls.ActiveApplicationRuleBlock"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:SmoothScrollModern.Controls">
+
+    <Grid RowSpacing="14">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+
+        <controls:ApplicationRuleHeader
+            Margin="14,14,14,0"
+            Detail="{Binding CurrentWindowTitle}"
+            Label="Активное приложение"
+            Subtitle=""
+            Title="{Binding CurrentApplicationText}">
+            <controls:ApplicationRuleHeader.ActionContent>
+                <Button
+                    MinWidth="92"
+                    Command="{Binding RemoveRuleCommand}"
+                    CommandParameter="{Binding CurrentApplicationRule}"
+                    Content="Удалить"
+                    Visibility="{Binding HasCurrentApplicationRule, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            </controls:ApplicationRuleHeader.ActionContent>
+        </controls:ApplicationRuleHeader>
+
+        <Grid
+            Grid.Row="1"
+            Margin="14,0,14,0"
+            Visibility="{Binding HasCurrentApplicationRule, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <controls:ApplicationRuleSettings DataContext="{Binding CurrentApplicationRule}" />
+        </Grid>
+
+        <Button
+            Grid.Row="2"
+            MinWidth="190"
+            Margin="14,0,14,14"
+            Command="{Binding DisableCurrentApplicationCommand}"
+            Content="Добавить в исключения"
+            Visibility="{Binding IsCurrentApplicationRuleMissing, Converter={StaticResource BooleanToVisibilityConverter}}" />
+    </Grid>
+</UserControl>

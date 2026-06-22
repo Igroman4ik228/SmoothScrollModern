@@ -46,7 +46,7 @@ public sealed class ScrollProfile : INotifyPropertyChanged
         get => Scroll.ScrollMultiplier;
         set
         {
-            if (Math.Abs(Scroll.ScrollMultiplier - value) < 0.001)
+            if (Math.Abs(Scroll.ScrollMultiplier - value) < 0.0005)
             {
                 return;
             }
@@ -80,7 +80,7 @@ public sealed class ScrollProfile : INotifyPropertyChanged
         get => Scroll.Smoothness;
         set
         {
-            if (Math.Abs(Scroll.Smoothness - value) < 0.001)
+            if (Math.Abs(Scroll.Smoothness - value) < 0.0005)
             {
                 return;
             }
@@ -97,7 +97,7 @@ public sealed class ScrollProfile : INotifyPropertyChanged
         get => Scroll.Acceleration;
         set
         {
-            if (Math.Abs(Scroll.Acceleration - value) < 0.001)
+            if (Math.Abs(Scroll.Acceleration - value) < 0.0005)
             {
                 return;
             }

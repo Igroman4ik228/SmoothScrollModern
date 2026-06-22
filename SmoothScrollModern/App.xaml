@@ -12,6 +12,7 @@
             </ResourceDictionary.MergedDictionaries>
 
             <vm:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <vm:BooleanToOpacityConverter x:Key="BooleanToOpacityConverter" />
 
             <Style x:Key="CardBorderStyle" TargetType="Border">
                 <Setter Property="Padding" Value="18" />
@@ -33,6 +34,7 @@
 
             <Style x:Key="CompactNumberBoxStyle" TargetType="NumberBox">
                 <Setter Property="SpinButtonPlacementMode" Value="Compact" />
+                <Setter Property="ValidationMode" Value="InvalidInputOverwritten" />
             </Style>
 
             <Style x:Key="SelectionComboBoxStyle" TargetType="ComboBox">

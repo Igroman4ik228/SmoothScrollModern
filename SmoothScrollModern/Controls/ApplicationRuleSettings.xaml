@@ -1,0 +1,59 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="SmoothScrollModern.Controls.ApplicationRuleSettings"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid ColumnSpacing="18" RowSpacing="12">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="*" />
+        </Grid.ColumnDefinitions>
+
+        <ToggleSwitch
+            IsOn="{Binding IsRuleEnabled, Mode=TwoWay}"
+            OffContent="Правило выключено"
+            OnContent="Правило активно" />
+
+        <ToggleSwitch
+            Grid.Column="1"
+            IsEnabled="{Binding IsRuleEnabled}"
+            IsOn="{Binding IsSmoothScrollDisabled, Mode=TwoWay}"
+            OffContent="Использовать профиль"
+            OnContent="Отключить прокрутку" />
+
+        <StackPanel
+            Grid.Row="1"
+            Opacity="{Binding IsRuleEnabled, Converter={StaticResource BooleanToOpacityConverter}}"
+            Spacing="5">
+            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Режим" />
+            <ComboBox
+                HorizontalAlignment="Stretch"
+                IsEnabled="{Binding IsRuleEnabled}"
+                Loaded="OnDeliveryModeComboBoxLoaded"
+                PlaceholderText="Плавный режим"
+                SelectedValue="{Binding DeliveryMode, Mode=TwoWay}"
+                Style="{StaticResource SelectionComboBoxStyle}" />
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="1"
+            Grid.Column="1"
+            Opacity="{Binding IsRuleEnabled, Converter={StaticResource BooleanToOpacityConverter}}"
+            Spacing="5">
+            <TextBlock Foreground="{ThemeResource TextFillColorSecondaryBrush}" Text="Профиль прокрутки" />
+            <ComboBox
+                HorizontalAlignment="Stretch"
+                DisplayMemberPath="Name"
+                IsEnabled="{Binding IsRuleEnabled}"
+                Loaded="OnRuleProfileComboBoxLoaded"
+                PlaceholderText="Глобальный профиль"
+                SelectedValue="{Binding ScrollProfileId, Mode=TwoWay}"
+                SelectedValuePath="Id" />
+        </StackPanel>
+    </Grid>
+</UserControl>

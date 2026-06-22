@@ -61,6 +61,16 @@ public sealed class DesignMainViewModel
 
     public string CurrentWindowTitle { get; set; } = "SmoothScroll - MainWindow.xaml";
 
+    public ApplicationRule? CurrentApplicationRule => ApplicationRules.FirstOrDefault(rule => rule.ProcessName == "devenv.exe");
+
+    public bool HasCurrentApplicationRule => CurrentApplicationRule is not null;
+
+    public bool IsCurrentApplicationRuleMissing => !HasCurrentApplicationRule;
+
+    public bool IsCurrentApplicationExcluded => CurrentApplicationRule is { IsRuleEnabled: true, IsSmoothScrollDisabled: true };
+
+    public bool IsCurrentApplicationNotExcluded => !IsCurrentApplicationExcluded;
+
     public bool IsCurrentApplicationBypassed { get; set; }
 
     public ApplicationRule? SelectedRule { get; set; }

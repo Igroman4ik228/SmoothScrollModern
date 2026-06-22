@@ -186,12 +186,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         get => Settings.Scroll.ScrollMultiplier;
         set
         {
-            if (Math.Abs(Settings.Scroll.ScrollMultiplier - value) < 0.001)
+            var previousValue = Settings.Scroll.ScrollMultiplier;
+            if (Math.Abs(previousValue - value) < 0.0005)
             {
                 return;
             }
 
             Settings.Scroll.ScrollMultiplier = value;
+            Settings.Scroll.Validate();
+            if (Math.Abs(previousValue - Settings.Scroll.ScrollMultiplier) < 0.0005)
+            {
+                OnPropertyChanged(nameof(ScrollMultiplier));
+                return;
+            }
+
             SaveAndNotify(nameof(ScrollMultiplier));
         }
     }
@@ -201,12 +209,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         get => Settings.Scroll.DurationMs;
         set
         {
-            if (Settings.Scroll.DurationMs == value)
+            var previousValue = Settings.Scroll.DurationMs;
+            if (previousValue == value)
             {
                 return;
             }
 
             Settings.Scroll.DurationMs = value;
+            Settings.Scroll.Validate();
+            if (previousValue == Settings.Scroll.DurationMs)
+            {
+                OnPropertyChanged(nameof(DurationMs));
+                return;
+            }
+
             SaveAndNotify(nameof(DurationMs));
         }
     }
@@ -216,12 +232,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         get => Settings.Scroll.Smoothness;
         set
         {
-            if (Math.Abs(Settings.Scroll.Smoothness - value) < 0.001)
+            var previousValue = Settings.Scroll.Smoothness;
+            if (Math.Abs(previousValue - value) < 0.0005)
             {
                 return;
             }
 
             Settings.Scroll.Smoothness = value;
+            Settings.Scroll.Validate();
+            if (Math.Abs(previousValue - Settings.Scroll.Smoothness) < 0.0005)
+            {
+                OnPropertyChanged(nameof(Smoothness));
+                return;
+            }
+
             SaveAndNotify(nameof(Smoothness));
         }
     }
@@ -231,12 +255,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         get => Settings.Scroll.Acceleration;
         set
         {
-            if (Math.Abs(Settings.Scroll.Acceleration - value) < 0.001)
+            var previousValue = Settings.Scroll.Acceleration;
+            if (Math.Abs(previousValue - value) < 0.0005)
             {
                 return;
             }
 
             Settings.Scroll.Acceleration = value;
+            Settings.Scroll.Validate();
+            if (Math.Abs(previousValue - Settings.Scroll.Acceleration) < 0.0005)
+            {
+                OnPropertyChanged(nameof(Acceleration));
+                return;
+            }
+
             SaveAndNotify(nameof(Acceleration));
         }
     }
@@ -421,6 +453,16 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ? "Без заголовка окна"
         : _currentApplication.WindowTitle;
 
+    public ApplicationRule? CurrentApplicationRule => FindCurrentApplicationRule();
+
+    public bool HasCurrentApplicationRule => CurrentApplicationRule is not null;
+
+    public bool IsCurrentApplicationRuleMissing => !HasCurrentApplicationRule;
+
+    public bool IsCurrentApplicationExcluded => IsExcludedRule(CurrentApplicationRule);
+
+    public bool IsCurrentApplicationNotExcluded => !IsCurrentApplicationExcluded;
+
     public bool IsCurrentApplicationBypassed
     {
         get => _applicationRulesService.ShouldBypass(_currentApplication, Settings);
@@ -450,8 +492,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             _pausedUntil = null;
         }
 
+        RefreshApplicationRulesFilter();
         OnPropertyChanged(nameof(CurrentApplicationText));
         OnPropertyChanged(nameof(CurrentWindowTitle));
+        OnPropertyChanged(nameof(CurrentApplicationRule));
+        OnPropertyChanged(nameof(HasCurrentApplicationRule));
+        OnPropertyChanged(nameof(IsCurrentApplicationRuleMissing));
+        OnPropertyChanged(nameof(IsCurrentApplicationExcluded));
+        OnPropertyChanged(nameof(IsCurrentApplicationNotExcluded));
         OnPropertyChanged(nameof(IsCurrentApplicationBypassed));
         OnPropertyChanged(nameof(IsOwnApplicationActive));
         OnPropertyChanged(nameof(IsPaused));
@@ -471,7 +519,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         var rule = _applicationRulesService.AddOrUpdateRule(Settings, _currentApplication);
         AddRuleToCollection(rule);
-        SaveAndNotify(nameof(IsCurrentApplicationBypassed));
+        SaveAndNotifyCurrentApplicationRuleState();
     }
 
     public bool ShouldHandleScroll()
@@ -543,7 +591,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         var rule = _applicationRulesService.AddManualRule(Settings, ManualProcessName, ManualProcessName);
         AddRuleToCollection(rule);
         ManualProcessName = string.Empty;
-        SaveAndNotify(nameof(IsCurrentApplicationBypassed));
+        SaveAndNotifyCurrentApplicationRuleState();
     }
 
     private void BrowseApplication()
@@ -566,7 +614,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         var rule = _applicationRulesService.AddApplicationPath(Settings, dialog.FileName, displayName);
         AddRuleToCollection(rule);
         ManualProcessName = processName;
-        SaveAndNotify(nameof(IsCurrentApplicationBypassed));
+        SaveAndNotifyCurrentApplicationRuleState();
     }
 
     private void OnActiveApplicationTimerTick(DispatcherQueueTimer sender, object args)
@@ -643,7 +691,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             SelectedRule = null;
         }
 
-        SaveAndNotify(nameof(IsCurrentApplicationBypassed));
+        SaveAndNotifyCurrentApplicationRuleState();
     }
 
     private bool CanRemoveSelectedRule()
@@ -701,6 +749,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             application.ProcessName,
             CurrentProcessName,
             StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsExcludedRule(ApplicationRule? rule)
+    {
+        return rule is { IsRuleEnabled: true, IsSmoothScrollDisabled: true };
     }
 
     private void ResetDefaults()
@@ -817,7 +870,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             OnPropertyChanged(nameof(ProfileCountText));
         }
 
-        SaveAndNotify(nameof(IsCurrentApplicationBypassed));
+        SaveAndNotifyCurrentApplicationRuleState();
     }
 
     private void OnGlobalScrollProfilePropertyChanged(object? sender, PropertyChangedEventArgs e)
@@ -884,7 +937,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void RefreshApplicationRulesFilter()
     {
-        var visibleRules = ApplicationRules.Where(FilterApplicationRule).ToList();
+        var currentRule = CurrentApplicationRule;
+        var visibleRules = ApplicationRules
+            .Where(rule => !ReferenceEquals(rule, currentRule) && FilterApplicationRule(rule))
+            .ToList();
+
         var visibleSet = visibleRules.ToHashSet();
 
         for (var index = FilteredApplicationRules.Count - 1; index >= 0; index--)
@@ -971,6 +1028,17 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             OnPropertyChanged(propertyName);
         }
+    }
+
+    private void SaveAndNotifyCurrentApplicationRuleState()
+    {
+        SaveAndNotify(
+            nameof(CurrentApplicationRule),
+            nameof(HasCurrentApplicationRule),
+            nameof(IsCurrentApplicationRuleMissing),
+            nameof(IsCurrentApplicationExcluded),
+            nameof(IsCurrentApplicationNotExcluded),
+            nameof(IsCurrentApplicationBypassed));
     }
 
     private void QueueSave()

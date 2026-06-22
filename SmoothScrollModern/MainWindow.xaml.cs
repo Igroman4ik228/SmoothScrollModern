@@ -91,36 +91,11 @@ public sealed partial class MainWindow : Window
         }
     }
 
-    private void OnRemoveRuleClick(object sender, RoutedEventArgs e)
-    {
-        if (sender is FrameworkElement { DataContext: ApplicationRule rule }
-            && _viewModel.RemoveRuleCommand.CanExecute(rule))
-        {
-            _viewModel.RemoveRuleCommand.Execute(rule);
-        }
-    }
-
     private void OnEasingComboBoxLoaded(object sender, RoutedEventArgs e)
     {
         if (sender is ComboBox comboBox)
         {
             comboBox.ItemsSource = _viewModel.EasingOptions;
-        }
-    }
-
-    private void OnDeliveryModeComboBoxLoaded(object sender, RoutedEventArgs e)
-    {
-        if (sender is ComboBox comboBox)
-        {
-            comboBox.ItemsSource = _viewModel.DeliveryModeOptions;
-        }
-    }
-
-    private void OnRuleProfileComboBoxLoaded(object sender, RoutedEventArgs e)
-    {
-        if (sender is ComboBox comboBox)
-        {
-            comboBox.ItemsSource = _viewModel.ScrollProfileChoices;
         }
     }
 

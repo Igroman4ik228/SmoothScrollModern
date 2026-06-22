@@ -64,73 +64,37 @@ public sealed class ApplicationRule : INotifyPropertyChanged
     public string ScrollProfileId
     {
         get => _scrollProfileId;
-        set
-        {
-            if (SetField(ref _scrollProfileId, value?.Trim() ?? string.Empty))
-            {
-                OnStatusPropertiesChanged();
-            }
-        }
+        set => SetField(ref _scrollProfileId, value?.Trim() ?? string.Empty);
     }
 
     public bool IsSmoothScrollDisabled
     {
         get => _isSmoothScrollDisabled;
-        set
-        {
-            if (SetField(ref _isSmoothScrollDisabled, value))
-            {
-                OnStatusPropertiesChanged();
-            }
-        }
+        set => SetField(ref _isSmoothScrollDisabled, value);
     }
 
     public bool IsUserRule
     {
         get => _isUserRule;
-        set
-        {
-            if (SetField(ref _isUserRule, value))
-            {
-                OnPropertyChanged(nameof(RuleKindText));
-            }
-        }
+        set => SetField(ref _isUserRule, value);
     }
 
     public bool IsRuleEnabled
     {
         get => _isRuleEnabled;
-        set
-        {
-            if (SetField(ref _isRuleEnabled, value))
-            {
-                OnStatusPropertiesChanged();
-            }
-        }
+        set => SetField(ref _isRuleEnabled, value);
     }
 
     public bool UseCustomScrollSettings
     {
         get => _useCustomScrollSettings;
-        set
-        {
-            if (SetField(ref _useCustomScrollSettings, value))
-            {
-                OnStatusPropertiesChanged();
-            }
-        }
+        set => SetField(ref _useCustomScrollSettings, value);
     }
 
     public ScrollDeliveryMode DeliveryMode
     {
         get => _deliveryMode;
-        set
-        {
-            if (SetField(ref _deliveryMode, value))
-            {
-                OnStatusPropertiesChanged();
-            }
-        }
+        set => SetField(ref _deliveryMode, value);
     }
 
     public ScrollSettings Scroll
@@ -151,7 +115,7 @@ public sealed class ApplicationRule : INotifyPropertyChanged
         get => Scroll.ScrollMultiplier;
         set
         {
-            if (Math.Abs(Scroll.ScrollMultiplier - value) < 0.001)
+            if (Math.Abs(Scroll.ScrollMultiplier - value) < 0.0005)
             {
                 return;
             }
@@ -185,7 +149,7 @@ public sealed class ApplicationRule : INotifyPropertyChanged
         get => Scroll.Smoothness;
         set
         {
-            if (Math.Abs(Scroll.Smoothness - value) < 0.001)
+            if (Math.Abs(Scroll.Smoothness - value) < 0.0005)
             {
                 return;
             }
@@ -202,7 +166,7 @@ public sealed class ApplicationRule : INotifyPropertyChanged
         get => Scroll.Acceleration;
         set
         {
-            if (Math.Abs(Scroll.Acceleration - value) < 0.001)
+            if (Math.Abs(Scroll.Acceleration - value) < 0.0005)
             {
                 return;
             }
@@ -247,9 +211,6 @@ public sealed class ApplicationRule : INotifyPropertyChanged
     }
 
     [JsonIgnore]
-    public string RuleKindText => "Правило приложения";
-
-    [JsonIgnore]
     public string DisplayNameText => string.IsNullOrWhiteSpace(DisplayName)
         ? UnknownDisplayName
         : DisplayName;
@@ -266,30 +227,6 @@ public sealed class ApplicationRule : INotifyPropertyChanged
 
     [JsonIgnore]
     public bool HasExecutablePath => !string.IsNullOrWhiteSpace(ExecutablePath);
-
-    [JsonIgnore]
-    public string ActiveStateText
-    {
-        get
-        {
-            if (!IsRuleEnabled)
-            {
-                return "Правило выключено";
-            }
-
-            if (IsSmoothScrollDisabled)
-            {
-                return "Плавная прокрутка отключена для этого приложения";
-            }
-
-            var settingsText = string.IsNullOrWhiteSpace(ScrollProfileId) ? "глобальный профиль" : "выбранный профиль";
-            var modeText = DeliveryMode == ScrollDeliveryMode.WheelStep
-                ? "режим совместимости"
-                : "плавный режим";
-
-            return $"{settingsText}, {modeText}";
-        }
-    }
 
     public void Validate()
     {
@@ -339,11 +276,6 @@ public sealed class ApplicationRule : INotifyPropertyChanged
     private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
     {
         PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
-    }
-
-    private void OnStatusPropertiesChanged()
-    {
-        OnPropertyChanged(nameof(ActiveStateText));
     }
 
     private void OnScrollPropertiesChanged()
