@@ -94,6 +94,12 @@ public sealed class DesignMainViewModel
 
     public string CurrentApplicationText { get; set; } = "Visual Studio (devenv.exe)";
 
+    public string CurrentApplicationDisplayNameText { get; set; } = "Visual Studio";
+
+    public string CurrentApplicationProcessNameText { get; set; } = "devenv.exe";
+
+    public string CurrentApplicationExecutablePathText { get; set; } = @"C:\Program Files\Microsoft Visual Studio\2022\Community\Common7\IDE\devenv.exe";
+
     public string CurrentWindowTitle { get; set; } = "SmoothScroll - MainWindow.xaml";
 
     public ApplicationRule? CurrentApplicationRule => ApplicationRules.FirstOrDefault(rule => rule.ProcessName == "devenv.exe");

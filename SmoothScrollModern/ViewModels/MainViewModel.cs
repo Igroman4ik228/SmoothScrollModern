@@ -540,6 +540,14 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ? "Приложение не определено"
         : $"{GetApplicationDisplayName(_currentApplication)} ({GetApplicationProcessName(_currentApplication)})";
 
+    public string CurrentApplicationDisplayNameText => GetApplicationDisplayName(_currentApplication);
+
+    public string CurrentApplicationProcessNameText => GetApplicationProcessName(_currentApplication);
+
+    public string CurrentApplicationExecutablePathText => string.IsNullOrWhiteSpace(_currentApplication.ExecutablePath)
+        ? string.Empty
+        : _currentApplication.ExecutablePath;
+
     public string CurrentWindowTitle => string.IsNullOrWhiteSpace(_currentApplication.WindowTitle)
         ? "Без заголовка окна"
         : _currentApplication.WindowTitle;
@@ -585,6 +593,9 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         RefreshApplicationRulesFilter();
         OnPropertyChanged(nameof(CurrentApplicationText));
+        OnPropertyChanged(nameof(CurrentApplicationDisplayNameText));
+        OnPropertyChanged(nameof(CurrentApplicationProcessNameText));
+        OnPropertyChanged(nameof(CurrentApplicationExecutablePathText));
         OnPropertyChanged(nameof(CurrentWindowTitle));
         OnPropertyChanged(nameof(CurrentApplicationRule));
         OnPropertyChanged(nameof(HasCurrentApplicationRule));
@@ -1051,9 +1062,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private void RefreshApplicationRulesFilter(bool resetPage = false)
     {
-        var currentRule = CurrentApplicationRule;
         var visibleRules = ApplicationRules
-            .Where(rule => !ReferenceEquals(rule, currentRule) && FilterApplicationRule(rule))
+            .Where(FilterApplicationRule)
             .ToList();
 
         _filteredApplicationRuleMatches.Clear();

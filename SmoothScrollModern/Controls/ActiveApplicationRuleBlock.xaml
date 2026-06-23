@@ -11,36 +11,19 @@
             <Grid ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
-                <StackPanel Spacing="3">
+                <StackPanel Spacing="6">
                     <TextBlock
                         FontSize="12"
                         FontWeight="SemiBold"
                         Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                         Text="Активное приложение" />
-                    <TextBlock
-                        FontSize="16"
-                        FontWeight="SemiBold"
-                        Text="{Binding CurrentApplicationText}" />
-                    <TextBlock
-                        Style="{StaticResource CaptionTextStyle}"
-                        Text="{Binding CurrentWindowTitle}" />
+                    <controls:ApplicationRuleHeader
+                        DisplayName="{Binding CurrentApplicationDisplayNameText}"
+                        ExecutablePath="{Binding CurrentApplicationExecutablePathText}"
+                        ProcessName="{Binding CurrentApplicationProcessNameText}" />
                 </StackPanel>
-
-                <Button
-                    Grid.Column="1"
-                    Command="{Binding RemoveRuleCommand}"
-                    CommandParameter="{Binding CurrentApplicationRule}"
-                    Visibility="{Binding HasCurrentApplicationRule, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <FontIcon
-                            Glyph="&#xE74D;"
-                            Style="{StaticResource InlineButtonIconStyle}" />
-                        <TextBlock Text="Удалить" />
-                    </StackPanel>
-                </Button>
             </Grid>
 
             <controls:ApplicationRuleSettings

@@ -12,11 +12,10 @@
                     <ColumnDefinition Width="*" />
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
-                <StackPanel Spacing="2">
-                    <TextBlock FontWeight="SemiBold" Text="{Binding DisplayNameText}" />
-                    <TextBlock Style="{StaticResource CaptionTextStyle}" Text="{Binding ProcessNameText}" />
-                    <TextBlock Style="{StaticResource CaptionTextStyle}" Text="{Binding ExecutablePathText}" />
-                </StackPanel>
+                <controls:ApplicationRuleHeader
+                    DisplayName="{Binding DisplayNameText}"
+                    ExecutablePath="{Binding ExecutablePathText}"
+                    ProcessName="{Binding ProcessNameText}" />
                 <Button Grid.Column="1" Click="OnRemoveRuleClick">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <FontIcon Glyph="&#xE74D;" Style="{StaticResource InlineButtonIconStyle}" />
