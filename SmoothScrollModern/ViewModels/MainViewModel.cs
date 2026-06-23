@@ -15,6 +15,8 @@ namespace SmoothScrollModern.ViewModels;
 
 public sealed class MainViewModel : ObservableObject, IDisposable
 {
+    private const int ListPageSize = 8;
+    private static readonly TimeSpan SearchDebounceInterval = TimeSpan.FromMilliseconds(300);
     private static readonly string CurrentProcessName = $"{Process.GetCurrentProcess().ProcessName}.exe".ToLowerInvariant();
     private readonly ISettingsService _settingsService;
     private readonly IActiveWindowService _activeWindowService;
@@ -22,13 +24,21 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private readonly IStartupService _startupService;
     private readonly DispatcherQueueTimer _activeApplicationTimer;
     private readonly DispatcherQueueTimer _saveTimer;
+    private readonly DispatcherQueueTimer _applicationSearchTimer;
+    private readonly DispatcherQueueTimer _scrollProfileSearchTimer;
+    private readonly List<ApplicationRule> _filteredApplicationRuleMatches = [];
+    private readonly List<ScrollProfile> _filteredScrollProfileMatches = [];
     private ApplicationInfo _currentApplication = ApplicationInfo.Empty;
     private string _manualProcessName = string.Empty;
     private string _applicationSearchQuery = string.Empty;
+    private string _appliedApplicationSearchQuery = string.Empty;
     private string _scrollProfileSearchQuery = string.Empty;
+    private string _appliedScrollProfileSearchQuery = string.Empty;
     private string _newScrollProfileName = string.Empty;
     private ApplicationRule? _selectedRule;
     private DateTimeOffset? _pausedUntil;
+    private int _applicationRulesPageIndex;
+    private int _scrollProfilesPageIndex;
     private bool _disposed;
 
     public MainViewModel(
@@ -43,6 +53,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         _activeWindowService = activeWindowService;
         _applicationRulesService = applicationRulesService;
         _startupService = startupService;
+        var dispatcherQueue = DispatcherQueue.GetForCurrentThread();
 
         ApplicationRules = new ObservableCollection<ApplicationRule>(Settings.ApplicationRules);
 
@@ -70,11 +81,6 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             rule.PropertyChanged += OnRulePropertyChanged;
         }
 
-        FilteredApplicationRules = [];
-        RefreshApplicationRulesFilter();
-        FilteredUserScrollProfiles = [];
-        RefreshScrollProfilesFilter();
-
         ToggleEnabledCommand = new RelayCommand(() => IsEnabled = !IsEnabled);
         DisableCurrentApplicationCommand = new RelayCommand(DisableCurrentApplication, CanDisableCurrentApplication);
         AddManualRuleCommand = new RelayCommand(AddManualRule, () => !string.IsNullOrWhiteSpace(ManualProcessName));
@@ -88,12 +94,25 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         ImportSettingsCommand = new RelayCommand(ImportSettings);
         PauseCommand = new RelayCommand(() => PauseFor(TimeSpan.FromMinutes(Constants.TrayPauseMinutes)));
 
-        _activeApplicationTimer = DispatcherQueue.GetForCurrentThread().CreateTimer();
+        _applicationSearchTimer = dispatcherQueue.CreateTimer();
+        _applicationSearchTimer.Interval = SearchDebounceInterval;
+        _applicationSearchTimer.Tick += OnApplicationSearchTimerTick;
+
+        _scrollProfileSearchTimer = dispatcherQueue.CreateTimer();
+        _scrollProfileSearchTimer.Interval = SearchDebounceInterval;
+        _scrollProfileSearchTimer.Tick += OnScrollProfileSearchTimerTick;
+
+        FilteredApplicationRules = [];
+        RefreshApplicationRulesFilter();
+        FilteredUserScrollProfiles = [];
+        RefreshScrollProfilesFilter();
+
+        _activeApplicationTimer = dispatcherQueue.CreateTimer();
         _activeApplicationTimer.Interval = TimeSpan.FromMilliseconds(Constants.ActiveApplicationRefreshMs);
         _activeApplicationTimer.Tick += OnActiveApplicationTimerTick;
         _activeApplicationTimer.Start();
 
-        _saveTimer = DispatcherQueue.GetForCurrentThread().CreateTimer();
+        _saveTimer = dispatcherQueue.CreateTimer();
         _saveTimer.Interval = TimeSpan.FromMilliseconds(350);
         _saveTimer.Tick += OnSaveTimerTick;
 
@@ -404,8 +423,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             if (SetField(ref _applicationSearchQuery, value))
             {
-                RefreshApplicationRulesFilter();
-                OnPropertyChanged(nameof(ProfileCountText));
+                QueueApplicationRulesSearch();
             }
         }
     }
@@ -417,8 +435,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         {
             if (SetField(ref _scrollProfileSearchQuery, value))
             {
-                RefreshScrollProfilesFilter();
-                OnPropertyChanged(nameof(ScrollProfilesCountText));
+                QueueScrollProfilesSearch();
             }
         }
     }
@@ -435,27 +452,77 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    public string ScrollProfilesCountText => string.IsNullOrWhiteSpace(ScrollProfileSearchQuery)
-        ? $"{UserScrollProfiles.Count} из {UserScrollProfiles.Count}"
-        : $"{FilteredUserScrollProfiles.Count} из {UserScrollProfiles.Count}";
+    public string ScrollProfilesCountText => BuildListCountText(
+        _filteredScrollProfileMatches.Count,
+        UserScrollProfiles.Count,
+        ScrollProfilesPageIndex,
+        !string.IsNullOrWhiteSpace(_appliedScrollProfileSearchQuery));
 
     public bool HasVisibleUserScrollProfiles => FilteredUserScrollProfiles.Count > 0;
 
     public bool IsUserScrollProfilesEmpty => UserScrollProfiles.Count == 0;
 
-    public bool IsScrollProfileSearchEmpty => UserScrollProfiles.Count > 0 && FilteredUserScrollProfiles.Count == 0;
+    public bool IsScrollProfileSearchEmpty => UserScrollProfiles.Count > 0
+        && !string.IsNullOrWhiteSpace(_appliedScrollProfileSearchQuery)
+        && _filteredScrollProfileMatches.Count == 0;
+
+    public int ScrollProfilesPageIndex
+    {
+        get => _scrollProfilesPageIndex;
+        set
+        {
+            var pageIndex = CoercePageIndex(value, ScrollProfilesPageCount);
+            if (SetField(ref _scrollProfilesPageIndex, pageIndex))
+            {
+                RefreshScrollProfilesPage();
+            }
+        }
+    }
+
+    public int ScrollProfilesPageCount => GetPageCount(_filteredScrollProfileMatches.Count);
+
+    public bool HasScrollProfilesPagination => _filteredScrollProfileMatches.Count > ListPageSize;
+
+    public string ScrollProfilesPageText => $"Страница {ScrollProfilesPageIndex + 1} из {ScrollProfilesPageCount}";
 
     public string ProfileCountText
     {
         get
         {
-            return string.IsNullOrWhiteSpace(ApplicationSearchQuery)
-                ? $"{ApplicationRules.Count} из {ApplicationRules.Count}"
-                : FilteredApplicationRules.Count == 0
-                    ? $"0 из {ApplicationRules.Count}"
-                    : $"{FilteredApplicationRules.Count} из {ApplicationRules.Count}";
+            return BuildListCountText(
+                _filteredApplicationRuleMatches.Count,
+                ApplicationRules.Count,
+                ApplicationRulesPageIndex,
+                !string.IsNullOrWhiteSpace(_appliedApplicationSearchQuery));
         }
     }
+
+    public bool HasVisibleApplicationRules => FilteredApplicationRules.Count > 0;
+
+    public bool IsApplicationRulesEmpty => ApplicationRules.Count == 0;
+
+    public bool IsApplicationRuleSearchEmpty => ApplicationRules.Count > 0
+        && !string.IsNullOrWhiteSpace(_appliedApplicationSearchQuery)
+        && _filteredApplicationRuleMatches.Count == 0;
+
+    public int ApplicationRulesPageIndex
+    {
+        get => _applicationRulesPageIndex;
+        set
+        {
+            var pageIndex = CoercePageIndex(value, ApplicationRulesPageCount);
+            if (SetField(ref _applicationRulesPageIndex, pageIndex))
+            {
+                RefreshApplicationRulesPage();
+            }
+        }
+    }
+
+    public int ApplicationRulesPageCount => GetPageCount(_filteredApplicationRuleMatches.Count);
+
+    public bool HasApplicationRulesPagination => _filteredApplicationRuleMatches.Count > ListPageSize;
+
+    public string ApplicationRulesPageText => $"Страница {ApplicationRulesPageIndex + 1} из {ApplicationRulesPageCount}";
 
     public ApplicationRule? SelectedRule
     {
@@ -600,6 +667,10 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         _activeApplicationTimer.Stop();
         _activeApplicationTimer.Tick -= OnActiveApplicationTimerTick;
+        _applicationSearchTimer.Stop();
+        _applicationSearchTimer.Tick -= OnApplicationSearchTimerTick;
+        _scrollProfileSearchTimer.Stop();
+        _scrollProfileSearchTimer.Tick -= OnScrollProfileSearchTimerTick;
         _saveTimer.Stop();
         _saveTimer.Tick -= OnSaveTimerTick;
 
@@ -652,6 +723,20 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         Save();
     }
 
+    private void OnApplicationSearchTimerTick(DispatcherQueueTimer sender, object args)
+    {
+        sender.Stop();
+        _appliedApplicationSearchQuery = ApplicationSearchQuery;
+        RefreshApplicationRulesFilter(resetPage: true);
+    }
+
+    private void OnScrollProfileSearchTimerTick(DispatcherQueueTimer sender, object args)
+    {
+        sender.Stop();
+        _appliedScrollProfileSearchQuery = ScrollProfileSearchQuery;
+        RefreshScrollProfilesFilter(resetPage: true);
+    }
+
     private void AddScrollProfile()
     {
         var profile = new ScrollProfile
@@ -672,7 +757,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         AddScrollProfileToCollection(profile);
         NewScrollProfileName = string.Empty;
         RebuildScrollProfileChoices();
-        RefreshScrollProfilesFilter();
+        RefreshScrollProfilesFilter(resetPage: true);
         SaveAndNotify(nameof(ScrollProfilesCountText));
     }
 
@@ -685,7 +770,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         profile.PropertyChanged -= OnScrollProfilePropertyChanged;
         UserScrollProfiles.Remove(profile);
-        RefreshScrollProfilesFilter();
+        RefreshScrollProfilesFilter(resetPage: true);
         foreach (var rule in ApplicationRules.Where(rule =>
                      string.Equals(rule.ScrollProfileId, profile.Id, StringComparison.OrdinalIgnoreCase)))
         {
@@ -711,7 +796,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         rule.PropertyChanged -= OnRulePropertyChanged;
         Settings.ApplicationRules.Remove(rule);
         ApplicationRules.Remove(rule);
-        RefreshApplicationRulesFilter();
+        RefreshApplicationRulesFilter(resetPage: true);
         if (ReferenceEquals(SelectedRule, rule))
         {
             SelectedRule = null;
@@ -860,8 +945,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         RebuildScrollProfileChoices();
         NormalizeApplicationRuleProfileReferences();
-        RefreshApplicationRulesFilter();
-        RefreshScrollProfilesFilter();
+        RefreshApplicationRulesFilter(resetPage: true);
+        RefreshScrollProfilesFilter(resetPage: true);
         SyncStartup();
         ApplyTheme();
         OnPropertyChanged(string.Empty);
@@ -964,76 +1049,57 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    private void RefreshApplicationRulesFilter()
+    private void RefreshApplicationRulesFilter(bool resetPage = false)
     {
         var currentRule = CurrentApplicationRule;
         var visibleRules = ApplicationRules
             .Where(rule => !ReferenceEquals(rule, currentRule) && FilterApplicationRule(rule))
             .ToList();
 
-        var visibleSet = visibleRules.ToHashSet();
-
-        for (var index = FilteredApplicationRules.Count - 1; index >= 0; index--)
-        {
-            if (!visibleSet.Contains(FilteredApplicationRules[index]))
-            {
-                FilteredApplicationRules.RemoveAt(index);
-            }
-        }
-
-        for (var targetIndex = 0; targetIndex < visibleRules.Count; targetIndex++)
-        {
-            var rule = visibleRules[targetIndex];
-            var currentIndex = FilteredApplicationRules.IndexOf(rule);
-            if (currentIndex < 0)
-            {
-                FilteredApplicationRules.Insert(targetIndex, rule);
-                continue;
-            }
-
-            if (currentIndex != targetIndex)
-            {
-                FilteredApplicationRules.Move(currentIndex, targetIndex);
-            }
-        }
+        _filteredApplicationRuleMatches.Clear();
+        _filteredApplicationRuleMatches.AddRange(visibleRules);
+        ApplyApplicationRulesPageIndex(resetPage);
+        RefreshApplicationRulesPage();
     }
 
-    private void RefreshScrollProfilesFilter()
+    private void RefreshApplicationRulesPage()
+    {
+        var pageItems = GetPageItems(_filteredApplicationRuleMatches, ApplicationRulesPageIndex);
+        SyncCollection(FilteredApplicationRules, pageItems);
+
+        OnPropertyChanged(nameof(ProfileCountText));
+        OnPropertyChanged(nameof(HasVisibleApplicationRules));
+        OnPropertyChanged(nameof(IsApplicationRulesEmpty));
+        OnPropertyChanged(nameof(IsApplicationRuleSearchEmpty));
+        OnPropertyChanged(nameof(ApplicationRulesPageCount));
+        OnPropertyChanged(nameof(HasApplicationRulesPagination));
+        OnPropertyChanged(nameof(ApplicationRulesPageText));
+    }
+
+    private void RefreshScrollProfilesFilter(bool resetPage = false)
     {
         var visibleProfiles = UserScrollProfiles
             .Where(FilterScrollProfile)
             .ToList();
 
-        var visibleSet = visibleProfiles.ToHashSet();
+        _filteredScrollProfileMatches.Clear();
+        _filteredScrollProfileMatches.AddRange(visibleProfiles);
+        ApplyScrollProfilesPageIndex(resetPage);
+        RefreshScrollProfilesPage();
+    }
 
-        for (var index = FilteredUserScrollProfiles.Count - 1; index >= 0; index--)
-        {
-            if (!visibleSet.Contains(FilteredUserScrollProfiles[index]))
-            {
-                FilteredUserScrollProfiles.RemoveAt(index);
-            }
-        }
-
-        for (var targetIndex = 0; targetIndex < visibleProfiles.Count; targetIndex++)
-        {
-            var profile = visibleProfiles[targetIndex];
-            var currentIndex = FilteredUserScrollProfiles.IndexOf(profile);
-            if (currentIndex < 0)
-            {
-                FilteredUserScrollProfiles.Insert(targetIndex, profile);
-                continue;
-            }
-
-            if (currentIndex != targetIndex)
-            {
-                FilteredUserScrollProfiles.Move(currentIndex, targetIndex);
-            }
-        }
+    private void RefreshScrollProfilesPage()
+    {
+        var pageItems = GetPageItems(_filteredScrollProfileMatches, ScrollProfilesPageIndex);
+        SyncCollection(FilteredUserScrollProfiles, pageItems);
 
         OnPropertyChanged(nameof(ScrollProfilesCountText));
         OnPropertyChanged(nameof(HasVisibleUserScrollProfiles));
         OnPropertyChanged(nameof(IsUserScrollProfilesEmpty));
         OnPropertyChanged(nameof(IsScrollProfileSearchEmpty));
+        OnPropertyChanged(nameof(ScrollProfilesPageCount));
+        OnPropertyChanged(nameof(HasScrollProfilesPagination));
+        OnPropertyChanged(nameof(ScrollProfilesPageText));
     }
 
     private static bool RulePropertyAffectsSearch(string? propertyName)
@@ -1045,7 +1111,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private bool FilterApplicationRule(ApplicationRule rule)
     {
-        if (string.IsNullOrWhiteSpace(ApplicationSearchQuery))
+        if (string.IsNullOrWhiteSpace(_appliedApplicationSearchQuery))
         {
             return true;
         }
@@ -1057,14 +1123,117 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     private bool FilterScrollProfile(ScrollProfile profile)
     {
-        return string.IsNullOrWhiteSpace(ScrollProfileSearchQuery)
-               || ContainsSearchText(profile.Name);
+        return string.IsNullOrWhiteSpace(_appliedScrollProfileSearchQuery)
+               || ContainsSearchText(profile.Name, _appliedScrollProfileSearchQuery);
     }
 
     private bool ContainsSearchText(string value)
     {
+        return ContainsSearchText(value, _appliedApplicationSearchQuery);
+    }
+
+    private static bool ContainsSearchText(string value, string searchQuery)
+    {
         return !string.IsNullOrWhiteSpace(value)
-               && value.Contains(ApplicationSearchQuery, StringComparison.OrdinalIgnoreCase);
+               && !string.IsNullOrWhiteSpace(searchQuery)
+               && value.Contains(searchQuery, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private void QueueApplicationRulesSearch()
+    {
+        _applicationSearchTimer.Stop();
+        _applicationSearchTimer.Start();
+    }
+
+    private void QueueScrollProfilesSearch()
+    {
+        _scrollProfileSearchTimer.Stop();
+        _scrollProfileSearchTimer.Start();
+    }
+
+    private void ApplyApplicationRulesPageIndex(bool resetPage)
+    {
+        var pageIndex = CoercePageIndex(resetPage ? 0 : _applicationRulesPageIndex, ApplicationRulesPageCount);
+        if (_applicationRulesPageIndex != pageIndex)
+        {
+            _applicationRulesPageIndex = pageIndex;
+            OnPropertyChanged(nameof(ApplicationRulesPageIndex));
+        }
+    }
+
+    private void ApplyScrollProfilesPageIndex(bool resetPage)
+    {
+        var pageIndex = CoercePageIndex(resetPage ? 0 : _scrollProfilesPageIndex, ScrollProfilesPageCount);
+        if (_scrollProfilesPageIndex != pageIndex)
+        {
+            _scrollProfilesPageIndex = pageIndex;
+            OnPropertyChanged(nameof(ScrollProfilesPageIndex));
+        }
+    }
+
+    private static int CoercePageIndex(int pageIndex, int pageCount)
+    {
+        return Math.Clamp(pageIndex, 0, Math.Max(0, pageCount - 1));
+    }
+
+    private static int GetPageCount(int itemCount)
+    {
+        return Math.Max(1, (int)Math.Ceiling(itemCount / (double)ListPageSize));
+    }
+
+    private static List<T> GetPageItems<T>(IReadOnlyList<T> items, int pageIndex)
+    {
+        return items
+            .Skip(pageIndex * ListPageSize)
+            .Take(ListPageSize)
+            .ToList();
+    }
+
+    private static void SyncCollection<T>(ObservableCollection<T> collection, IReadOnlyList<T> items)
+    {
+        var itemSet = items.ToHashSet();
+        for (var index = collection.Count - 1; index >= 0; index--)
+        {
+            if (!itemSet.Contains(collection[index]))
+            {
+                collection.RemoveAt(index);
+            }
+        }
+
+        for (var targetIndex = 0; targetIndex < items.Count; targetIndex++)
+        {
+            var item = items[targetIndex];
+            var currentIndex = collection.IndexOf(item);
+            if (currentIndex < 0)
+            {
+                collection.Insert(targetIndex, item);
+                continue;
+            }
+
+            if (currentIndex != targetIndex)
+            {
+                collection.Move(currentIndex, targetIndex);
+            }
+        }
+    }
+
+    private static string BuildListCountText(int filteredCount, int totalCount, int pageIndex, bool isSearching)
+    {
+        if (filteredCount == 0)
+        {
+            return $"0 из {totalCount}";
+        }
+
+        if (filteredCount <= ListPageSize)
+        {
+            return isSearching ? $"{filteredCount} из {totalCount}" : $"{totalCount} из {totalCount}";
+        }
+
+        var firstItem = pageIndex * ListPageSize + 1;
+        var lastItem = Math.Min(firstItem + ListPageSize - 1, filteredCount);
+        return isSearching
+            ? $"{firstItem}-{lastItem} из {filteredCount} (всего {totalCount})"
+            : $"{firstItem}-{lastItem} из {totalCount}";
     }
 
     private static string GetApplicationDisplayName(ApplicationInfo application)

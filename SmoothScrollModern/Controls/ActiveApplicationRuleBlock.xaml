@@ -16,9 +16,12 @@
 
                 <StackPanel Spacing="3">
                     <TextBlock
-                        Style="{StaticResource SectionTitleStyle}"
+                        FontSize="12"
+                        FontWeight="SemiBold"
+                        Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                         Text="Активное приложение" />
                     <TextBlock
+                        FontSize="16"
                         FontWeight="SemiBold"
                         Text="{Binding CurrentApplicationText}" />
                     <TextBlock

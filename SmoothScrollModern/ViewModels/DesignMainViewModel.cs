@@ -70,6 +70,28 @@ public sealed class DesignMainViewModel
 
     public bool IsScrollProfileSearchEmpty { get; set; }
 
+    public int ScrollProfilesPageIndex { get; set; }
+
+    public int ScrollProfilesPageCount { get; set; } = 1;
+
+    public bool HasScrollProfilesPagination { get; set; }
+
+    public string ScrollProfilesPageText { get; set; } = "Страница 1 из 1";
+
+    public bool HasVisibleApplicationRules { get; set; } = true;
+
+    public bool IsApplicationRulesEmpty { get; set; }
+
+    public bool IsApplicationRuleSearchEmpty { get; set; }
+
+    public int ApplicationRulesPageIndex { get; set; }
+
+    public int ApplicationRulesPageCount { get; set; } = 1;
+
+    public bool HasApplicationRulesPagination { get; set; }
+
+    public string ApplicationRulesPageText { get; set; } = "Страница 1 из 1";
+
     public string CurrentApplicationText { get; set; } = "Visual Studio (devenv.exe)";
 
     public string CurrentWindowTitle { get; set; } = "SmoothScroll - MainWindow.xaml";

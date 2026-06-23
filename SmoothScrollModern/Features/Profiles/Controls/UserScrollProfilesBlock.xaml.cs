@@ -24,12 +24,4 @@ public sealed partial class UserScrollProfilesBlock : UserControl
         e.Handled = true;
     }
 
-    private void OnScrollProfileSearchTextChanged(AutoSuggestBox sender, AutoSuggestBoxTextChangedEventArgs args)
-    {
-        if (DataContext is MainViewModel viewModel
-            && !string.Equals(viewModel.ScrollProfileSearchQuery, sender.Text, StringComparison.Ordinal))
-        {
-            viewModel.ScrollProfileSearchQuery = sender.Text;
-        }
-    }
 }

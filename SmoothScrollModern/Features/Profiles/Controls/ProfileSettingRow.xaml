@@ -45,6 +45,7 @@
             MinHeight="32"
             Maximum="{Binding Maximum, ElementName=Root}"
             Minimum="{Binding Minimum, ElementName=Root}"
+            SmallChange="{Binding StepFrequency, ElementName=Root}"
             StepFrequency="{Binding StepFrequency, ElementName=Root}"
             Style="{StaticResource ProfileSliderStyle}"
             Value="{Binding Value, ElementName=Root, Mode=TwoWay}" />

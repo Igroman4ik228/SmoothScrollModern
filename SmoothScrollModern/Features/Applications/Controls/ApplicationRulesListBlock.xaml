@@ -41,19 +41,49 @@
                 QueryIcon="Find"
                 Text="{Binding ApplicationSearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
+            <controls:ListEmptyState
+                Description="Добавьте текущее приложение, укажите процесс вручную или выберите exe-файл, чтобы настроить исключение."
+                Title="Список правил пуст"
+                Visibility="{Binding IsApplicationRulesEmpty, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
+            <controls:ListEmptyState
+                Description="Проверьте название приложения, имя процесса или путь к файлу и попробуйте другой запрос."
+                Title="Правила не найдены"
+                Visibility="{Binding IsApplicationRuleSearchEmpty, Converter={StaticResource BooleanToVisibilityConverter}}" />
+
             <ListView
                 MaxHeight="620"
                 HorizontalContentAlignment="Stretch"
                 ItemContainerStyle="{StaticResource BorderlessListViewItemStyle}"
                 ItemsSource="{Binding FilteredApplicationRules}"
                 SelectionMode="None"
-                Style="{StaticResource BorderlessListViewStyle}">
+                Style="{StaticResource BorderlessListViewStyle}"
+                Visibility="{Binding HasVisibleApplicationRules, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
                         <controls:ApplicationRuleItem />
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
+
+            <Grid Visibility="{Binding HasApplicationRulesPagination, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBlock
+                    VerticalAlignment="Center"
+                    Style="{StaticResource CaptionTextStyle}"
+                    Text="{Binding ApplicationRulesPageText}" />
+                <PipsPager
+                    Grid.Column="1"
+                    HorizontalAlignment="Right"
+                    MaxVisiblePips="7"
+                    NextButtonVisibility="Visible"
+                    NumberOfPages="{Binding ApplicationRulesPageCount}"
+                    PreviousButtonVisibility="Visible"
+                    SelectedPageIndex="{Binding ApplicationRulesPageIndex, Mode=TwoWay}" />
+            </Grid>
         </StackPanel>
     </Border>
 </UserControl>

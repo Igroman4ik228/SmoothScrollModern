@@ -3,6 +3,7 @@
     x:Class="SmoothScrollModern.Features.Profiles.Controls.UserScrollProfilesBlock"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:SmoothScrollModern.Controls"
     xmlns:profiles="using:SmoothScrollModern.Features.Profiles.Controls">
 
     <StackPanel Spacing="16">
@@ -70,22 +71,17 @@
                     x:Name="ScrollProfileSearchBox"
                     PlaceholderText="Поиск по названию профиля"
                     QueryIcon="Find"
-                    Text="{Binding ScrollProfileSearchQuery, Mode=TwoWay}"
-                    TextChanged="OnScrollProfileSearchTextChanged" />
+                    Text="{Binding ScrollProfileSearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-                <Grid Padding="18,16" Visibility="{Binding IsUserScrollProfilesEmpty, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel Spacing="3">
-                        <TextBlock FontWeight="SemiBold" Text="Профилей пока нет" />
-                        <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Создайте первый профиль выше, чтобы использовать разные настройки прокрутки для исключений." />
-                    </StackPanel>
-                </Grid>
+                <controls:ListEmptyState
+                    Description="Создайте первый профиль, чтобы назначать приложениям отдельные параметры прокрутки."
+                    Title="Список профилей пуст"
+                    Visibility="{Binding IsUserScrollProfilesEmpty, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-                <Grid Padding="18,16" Visibility="{Binding IsScrollProfileSearchEmpty, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <StackPanel Spacing="3">
-                        <TextBlock FontWeight="SemiBold" Text="Ничего не найдено" />
-                        <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Измените запрос или очистите поиск, чтобы снова увидеть все профили." />
-                    </StackPanel>
-                </Grid>
+                <controls:ListEmptyState
+                    Description="Проверьте название профиля или очистите строку поиска, чтобы вернуться к полному списку."
+                    Title="Профили не найдены"
+                    Visibility="{Binding IsScrollProfileSearchEmpty, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
                 <ListView
                     MaxHeight="620"
@@ -101,6 +97,25 @@
                         </DataTemplate>
                     </ListView.ItemTemplate>
                 </ListView>
+
+                <Grid Visibility="{Binding HasScrollProfilesPagination, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBlock
+                        VerticalAlignment="Center"
+                        Style="{StaticResource CaptionTextStyle}"
+                        Text="{Binding ScrollProfilesPageText}" />
+                    <PipsPager
+                        Grid.Column="1"
+                        HorizontalAlignment="Right"
+                        MaxVisiblePips="7"
+                        NextButtonVisibility="Visible"
+                        NumberOfPages="{Binding ScrollProfilesPageCount}"
+                        PreviousButtonVisibility="Visible"
+                        SelectedPageIndex="{Binding ScrollProfilesPageIndex, Mode=TwoWay}" />
+                </Grid>
             </StackPanel>
         </Border>
     </StackPanel>
