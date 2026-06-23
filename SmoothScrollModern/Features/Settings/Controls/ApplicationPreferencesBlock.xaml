@@ -56,8 +56,8 @@
                 Width="48"
                 Height="48"
                 HorizontalAlignment="Center"
-                Background="{ThemeResource ControlFillColorDefaultBrush}"
-                BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                Background="{ThemeResource CardBackgroundFillColorSecondaryBrush}"
+                BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
                 BorderThickness="1"
                 CornerRadius="10">
                 <FontIcon
@@ -72,20 +72,16 @@
                 TextAlignment="Center" />
             <TextBlock
                 Style="{StaticResource CaptionTextStyle}"
-                Text="Плавная прокрутка для Windows с профилями и исключениями для приложений."
+                Text="Современная плавная прокрутка для Windows для любых приложений."
                 TextAlignment="Center" />
-            <TextBlock
-                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
-                Text="WinUI 3"
-                TextAlignment="Center" />
-            <HyperlinkButton
-                HorizontalAlignment="Center"
-                Content="Igroman4ik228/SmoothScrollModern"
-                NavigateUri="https://github.com/Igroman4ik228/SmoothScrollModern" />
             <TextBlock
                 Foreground="{ThemeResource TextFillColorTertiaryBrush}"
                 Text="© Igroman4ik228"
                 TextAlignment="Center" />
+            <HyperlinkButton
+                HorizontalAlignment="Center"
+                Content="GitHub"
+                NavigateUri="https://github.com/Igroman4ik228/SmoothScrollModern" />
         </StackPanel>
     </StackPanel>
 </UserControl>

@@ -32,13 +32,4 @@ public sealed partial class UserScrollProfilesBlock : UserControl
             viewModel.ScrollProfileSearchQuery = sender.Text;
         }
     }
-
-    private void OnClearScrollProfileSearchClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
-    {
-        ScrollProfileSearchBox.Text = string.Empty;
-        if (DataContext is MainViewModel viewModel)
-        {
-            viewModel.ScrollProfileSearchQuery = string.Empty;
-        }
-    }
 }

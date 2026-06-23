@@ -7,17 +7,34 @@
 
     <Border Style="{StaticResource SurfacePanelStyle}">
         <StackPanel Spacing="14">
-            <StackPanel Spacing="3">
-                <TextBlock
-                    Style="{StaticResource SectionTitleStyle}"
-                    Text="Правила исключений" />
-                <TextBlock
-                    Style="{StaticResource CaptionTextStyle}"
-                    Text="Найдите исключение, отключите его или назначьте отдельный профиль прокрутки." />
-            </StackPanel>
-            <TextBlock
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                Text="{Binding ProfileCountText}" />
+            <Grid ColumnSpacing="16">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Spacing="3">
+                    <TextBlock
+                        Style="{StaticResource SectionTitleStyle}"
+                        Text="Правила исключений" />
+                    <TextBlock
+                        Style="{StaticResource CaptionTextStyle}"
+                        Text="Найдите исключение, отключите его или назначьте отдельный профиль прокрутки." />
+                </StackPanel>
+                <Border
+                    Grid.Column="1"
+                    MinWidth="76"
+                    Padding="10,5"
+                    VerticalAlignment="Top"
+                    Background="{ThemeResource ControlFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="4">
+                    <TextBlock
+                        HorizontalAlignment="Center"
+                        Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                        Text="{Binding ProfileCountText}" />
+                </Border>
+            </Grid>
 
             <AutoSuggestBox
                 PlaceholderText="Поиск по названию, процессу или пути"

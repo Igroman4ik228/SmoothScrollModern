@@ -15,21 +15,15 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Spacing="6">
-            <TextBlock
-                FontWeight="SemiBold"
-                Text="Правило активно" />
+            <TextBlock FontWeight="SemiBold" Text="Активировать правило" />
             <ToggleSwitch
                 IsOn="{Binding IsRuleEnabled, Mode=TwoWay}"
                 OffContent="Откл."
                 OnContent="Вкл." />
         </StackPanel>
 
-        <StackPanel
-            Grid.Column="1"
-            Spacing="6">
-            <TextBlock
-                FontWeight="SemiBold"
-                Text="SmoothScroll выключен" />
+        <StackPanel Grid.Column="1" Spacing="6">
+            <TextBlock FontWeight="SemiBold" Text="Отключить плавную прокрутку" />
             <ToggleSwitch
                 IsEnabled="{Binding IsRuleEnabled}"
                 IsOn="{Binding IsSmoothScrollDisabled, Mode=TwoWay}"
@@ -41,12 +35,10 @@
             Grid.Row="1"
             Opacity="{Binding IsRuleEnabled, Converter={StaticResource BooleanToOpacityConverter}}"
             Spacing="6">
-            <TextBlock
-                FontWeight="SemiBold"
-                Text="Режим прокрутки" />
+            <TextBlock FontWeight="SemiBold" Text="Режим прокрутки" />
             <ComboBox
-                DisplayMemberPath="Name"
                 HorizontalAlignment="Stretch"
+                DisplayMemberPath="Name"
                 IsEnabled="{Binding IsRuleEnabled}"
                 Loaded="OnDeliveryModeComboBoxLoaded"
                 PlaceholderText="Плавный режим"
@@ -59,9 +51,7 @@
             Grid.Column="1"
             Opacity="{Binding IsRuleEnabled, Converter={StaticResource BooleanToOpacityConverter}}"
             Spacing="6">
-            <TextBlock
-                FontWeight="SemiBold"
-                Text="Профиль прокрутки" />
+            <TextBlock FontWeight="SemiBold" Text="Профиль прокрутки" />
             <ComboBox
                 HorizontalAlignment="Stretch"
                 DisplayMemberPath="Name"

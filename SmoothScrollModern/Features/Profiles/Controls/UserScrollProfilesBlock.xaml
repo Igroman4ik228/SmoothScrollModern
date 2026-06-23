@@ -31,9 +31,7 @@
                         Command="{Binding AddScrollProfileCommand}"
                         Style="{StaticResource AccentButtonStyle}">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <FontIcon
-                                Glyph="&#xE710;"
-                                Style="{StaticResource InlineButtonIconStyle}" />
+                            <FontIcon Glyph="&#xE710;" Style="{StaticResource InlineButtonIconStyle}" />
                             <TextBlock Text="Создать" />
                         </StackPanel>
                     </Button>
@@ -68,36 +66,12 @@
                     </Border>
                 </Grid>
 
-                <Border
-                    Padding="12"
-                    Background="{ThemeResource LayerFillColorDefaultBrush}"
-                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
-                    BorderThickness="1"
-                    CornerRadius="6">
-                    <Grid ColumnSpacing="10">
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="*" />
-                            <ColumnDefinition Width="Auto" />
-                        </Grid.ColumnDefinitions>
-                        <AutoSuggestBox
-                            x:Name="ScrollProfileSearchBox"
-                            PlaceholderText="Поиск по названию профиля"
-                            QueryIcon="Find"
-                            Text="{Binding ScrollProfileSearchQuery, Mode=TwoWay}"
-                            TextChanged="OnScrollProfileSearchTextChanged" />
-                        <Button
-                            Grid.Column="1"
-                            Width="40"
-                            Height="32"
-                            VerticalAlignment="Center"
-                            Click="OnClearScrollProfileSearchClick"
-                            ToolTipService.ToolTip="Очистить поиск">
-                            <FontIcon
-                                Glyph="&#xE711;"
-                                Style="{StaticResource InlineButtonIconStyle}" />
-                        </Button>
-                    </Grid>
-                </Border>
+                <AutoSuggestBox
+                    x:Name="ScrollProfileSearchBox"
+                    PlaceholderText="Поиск по названию профиля"
+                    QueryIcon="Find"
+                    Text="{Binding ScrollProfileSearchQuery, Mode=TwoWay}"
+                    TextChanged="OnScrollProfileSearchTextChanged" />
 
                 <Grid Padding="18,16" Visibility="{Binding IsUserScrollProfilesEmpty, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <StackPanel Spacing="3">
