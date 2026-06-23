@@ -8,20 +8,16 @@
     <Border Style="{StaticResource SurfacePanelStyle}">
         <StackPanel Spacing="14">
             <StackPanel Spacing="3">
-                <TextBlock
-                    Style="{StaticResource SectionTitleStyle}"
-                    Text="Основной профиль" />
-                <TextBlock
-                    Style="{StaticResource CaptionTextStyle}"
-                    Text="Эти параметры используются везде, где не выбран отдельный профиль исключения." />
+                <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Основной профиль" />
+                <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Эти параметры используются везде, где не выбран отдельный профиль исключения." />
             </StackPanel>
 
             <profiles:ProfileSettingRow
                 Description="Сколько прокручивать за один шаг колеса."
+                FractionDigits="3"
                 Label="Сила прокрутки"
                 Maximum="6"
                 Minimum="0.2"
-                NumberFormatter="{StaticResource DecimalValueFormatter}"
                 SmallChange="0.05"
                 StepFrequency="0.05"
                 Value="{Binding ScrollMultiplier, Mode=TwoWay}" />
@@ -37,20 +33,20 @@
 
             <profiles:ProfileSettingRow
                 Description="Насколько мягко движется прокрутка."
+                FractionDigits="3"
                 Label="Плавность"
                 Maximum="1"
                 Minimum="0"
-                NumberFormatter="{StaticResource DecimalValueFormatter}"
                 SmallChange="0.025"
                 StepFrequency="0.025"
                 Value="{Binding Smoothness, Mode=TwoWay}" />
 
             <profiles:ProfileSettingRow
                 Description="Ускоряет прокрутку при быстрых движениях колеса."
+                FractionDigits="3"
                 Label="Ускорение"
                 Maximum="4"
                 Minimum="0.2"
-                NumberFormatter="{StaticResource DecimalValueFormatter}"
                 SmallChange="0.05"
                 StepFrequency="0.05"
                 Value="{Binding Acceleration, Mode=TwoWay}" />
@@ -63,29 +59,22 @@
 
                 <StackPanel Spacing="6">
                     <StackPanel Spacing="2">
-                        <TextBlock
-                            FontWeight="SemiBold"
-                            Text="Поведение прокрутки" />
-                        <TextBlock
-                            Style="{StaticResource CaptionTextStyle}"
-                            Text="Кривая движения во время одного шага." />
+                        <TextBlock FontWeight="SemiBold" Text="Поведение прокрутки" />
+                        <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Кривая движения во время одного шага." />
                     </StackPanel>
                     <ComboBox
+                        DisplayMemberPath="Name"
                         HorizontalAlignment="Stretch"
                         ItemsSource="{Binding EasingOptions}"
                         PlaceholderText="Мягкая"
                         SelectedValue="{Binding EasingType, Mode=TwoWay}"
-                        Style="{StaticResource SelectionComboBoxStyle}" />
+                        SelectedValuePath="Value" />
                 </StackPanel>
 
                 <StackPanel Grid.Column="1" Spacing="6">
                     <StackPanel Spacing="2">
-                        <TextBlock
-                            FontWeight="SemiBold"
-                            Text="Горизонтальная прокрутка" />
-                        <TextBlock
-                            Style="{StaticResource CaptionTextStyle}"
-                            Text="Разрешает горизонтальную прокрутку там, где приложение ее поддерживает." />
+                        <TextBlock FontWeight="SemiBold" Text="Горизонтальная прокрутка" />
+                        <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Разрешает горизонтальную прокрутку там, где приложение ее поддерживает." />
                     </StackPanel>
                     <ToggleSwitch
                         IsOn="{Binding EnableHorizontalScroll, Mode=TwoWay}"

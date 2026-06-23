@@ -5,53 +5,129 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:profiles="using:SmoothScrollModern.Features.Profiles.Controls">
 
-    <Border Style="{StaticResource SurfacePanelStyle}">
-        <StackPanel Spacing="14">
-            <StackPanel Spacing="3">
-                <TextBlock
-                    Style="{StaticResource SectionTitleStyle}"
-                    Text="Дополнительные профили" />
-                <TextBlock
-                    Style="{StaticResource CaptionTextStyle}"
-                    Text="Создайте отдельные варианты прокрутки и назначайте их исключениям." />
+    <StackPanel Spacing="16">
+        <Border Style="{StaticResource SurfacePanelStyle}">
+            <StackPanel Spacing="14">
+                <StackPanel Spacing="3">
+                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Создать профиль" />
+                    <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Новый профиль копирует текущие основные параметры. Потом его можно назначить исключению." />
+                </StackPanel>
+
+                <Grid ColumnSpacing="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox
+                        x:Name="NewScrollProfileNameBox"
+                        VerticalContentAlignment="Center"
+                        Header="Название профиля"
+                        KeyDown="OnNewScrollProfileNameKeyDown"
+                        PlaceholderText="Например: Браузер"
+                        Text="{Binding NewScrollProfileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button
+                        Grid.Column="1"
+                        VerticalAlignment="Bottom"
+                        Command="{Binding AddScrollProfileCommand}"
+                        Style="{StaticResource AccentButtonStyle}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <FontIcon
+                                Glyph="&#xE710;"
+                                Style="{StaticResource InlineButtonIconStyle}" />
+                            <TextBlock Text="Создать" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
             </StackPanel>
-            <TextBlock
-                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
-                Text="{Binding ScrollProfilesCountText}" />
+        </Border>
 
-            <Grid ColumnSpacing="10">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBox
-                    Header="Название профиля"
-                    VerticalContentAlignment="Center"
-                    PlaceholderText="Новый профиль"
-                    Text="{Binding NewScrollProfileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <Button
-                    Grid.Column="1"
-                    VerticalAlignment="Bottom"
-                    Command="{Binding AddScrollProfileCommand}"
-                    Style="{StaticResource AccentButtonStyle}">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <SymbolIcon Symbol="Add" />
-                        <TextBlock Text="Создать" />
+        <Border Style="{StaticResource SurfacePanelStyle}">
+            <StackPanel Spacing="14">
+                <Grid ColumnSpacing="16">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <StackPanel Spacing="3">
+                        <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Пользовательские профили" />
+                        <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Найдите профиль, раскройте строку и настройте параметры прокрутки." />
                     </StackPanel>
-                </Button>
-            </Grid>
+                    <Border
+                        Grid.Column="1"
+                        MinWidth="76"
+                        Padding="10,5"
+                        VerticalAlignment="Top"
+                        Background="{ThemeResource ControlFillColorDefaultBrush}"
+                        BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                        BorderThickness="1"
+                        CornerRadius="4">
+                        <TextBlock
+                            HorizontalAlignment="Center"
+                            Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                            Text="{Binding ScrollProfilesCountText}" />
+                    </Border>
+                </Grid>
 
-            <ListView
-                ItemContainerStyle="{StaticResource BorderlessListViewItemStyle}"
-                ItemsSource="{Binding UserScrollProfiles}"
-                SelectionMode="None"
-                Style="{StaticResource BorderlessListViewStyle}">
-                <ListView.ItemTemplate>
-                    <DataTemplate>
-                        <profiles:UserScrollProfileItem />
-                    </DataTemplate>
-                </ListView.ItemTemplate>
-            </ListView>
-        </StackPanel>
-    </Border>
+                <Border
+                    Padding="12"
+                    Background="{ThemeResource LayerFillColorDefaultBrush}"
+                    BorderBrush="{ThemeResource CardStrokeColorDefaultBrush}"
+                    BorderThickness="1"
+                    CornerRadius="6">
+                    <Grid ColumnSpacing="10">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*" />
+                            <ColumnDefinition Width="Auto" />
+                        </Grid.ColumnDefinitions>
+                        <AutoSuggestBox
+                            x:Name="ScrollProfileSearchBox"
+                            PlaceholderText="Поиск по названию профиля"
+                            QueryIcon="Find"
+                            Text="{Binding ScrollProfileSearchQuery, Mode=TwoWay}"
+                            TextChanged="OnScrollProfileSearchTextChanged" />
+                        <Button
+                            Grid.Column="1"
+                            Width="40"
+                            Height="32"
+                            VerticalAlignment="Center"
+                            Click="OnClearScrollProfileSearchClick"
+                            ToolTipService.ToolTip="Очистить поиск">
+                            <FontIcon
+                                Glyph="&#xE711;"
+                                Style="{StaticResource InlineButtonIconStyle}" />
+                        </Button>
+                    </Grid>
+                </Border>
+
+                <Grid Padding="18,16" Visibility="{Binding IsUserScrollProfilesEmpty, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel Spacing="3">
+                        <TextBlock FontWeight="SemiBold" Text="Профилей пока нет" />
+                        <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Создайте первый профиль выше, чтобы использовать разные настройки прокрутки для исключений." />
+                    </StackPanel>
+                </Grid>
+
+                <Grid Padding="18,16" Visibility="{Binding IsScrollProfileSearchEmpty, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel Spacing="3">
+                        <TextBlock FontWeight="SemiBold" Text="Ничего не найдено" />
+                        <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Измените запрос или очистите поиск, чтобы снова увидеть все профили." />
+                    </StackPanel>
+                </Grid>
+
+                <ListView
+                    MaxHeight="620"
+                    HorizontalContentAlignment="Stretch"
+                    ItemContainerStyle="{StaticResource BorderlessListViewItemStyle}"
+                    ItemsSource="{Binding FilteredUserScrollProfiles}"
+                    SelectionMode="None"
+                    Style="{StaticResource BorderlessListViewStyle}"
+                    Visibility="{Binding HasVisibleUserScrollProfiles, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <ListView.ItemTemplate>
+                        <DataTemplate>
+                            <profiles:UserScrollProfileItem />
+                        </DataTemplate>
+                    </ListView.ItemTemplate>
+                </ListView>
+            </StackPanel>
+        </Border>
+    </StackPanel>
 </UserControl>

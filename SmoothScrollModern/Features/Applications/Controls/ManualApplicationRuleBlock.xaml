@@ -22,6 +22,7 @@
                 </Grid.ColumnDefinitions>
                 <TextBox
                     Header="Процесс"
+                    KeyDown="OnManualProcessNameKeyDown"
                     VerticalContentAlignment="Center"
                     PlaceholderText="Например: chrome.exe"
                     Text="{Binding ManualProcessName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -31,7 +32,9 @@
                     Command="{Binding AddManualRuleCommand}"
                     Style="{StaticResource AccentButtonStyle}">
                     <StackPanel Orientation="Horizontal" Spacing="6">
-                        <SymbolIcon Symbol="Add" />
+                        <FontIcon
+                            Glyph="&#xE710;"
+                            Style="{StaticResource InlineButtonIconStyle}" />
                         <TextBlock Text="Добавить" />
                     </StackPanel>
                 </Button>
@@ -40,7 +43,9 @@
                     VerticalAlignment="Bottom"
                     Command="{Binding BrowseApplicationCommand}">
                     <StackPanel Orientation="Horizontal" Spacing="6">
-                        <SymbolIcon Symbol="OpenFile" />
+                        <FontIcon
+                            Glyph="&#xE8E5;"
+                            Style="{StaticResource InlineButtonIconStyle}" />
                         <TextBlock Text="Выбрать" />
                     </StackPanel>
                 </Button>

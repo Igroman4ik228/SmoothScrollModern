@@ -1,4 +1,5 @@
 using System.ComponentModel;
+using System.Globalization;
 using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
 using SmoothScrollModern.Scroll;
@@ -41,6 +42,10 @@ public sealed class ScrollProfile : INotifyPropertyChanged
     public bool IsGlobal { get; set; }
 
     [JsonIgnore]
+    public string ProfileSummaryText =>
+        $"{FormatDecimal(Scroll.ScrollMultiplier)}x · {Scroll.DurationMs} мс · плавность {FormatDecimal(Scroll.Smoothness)} · ускорение {FormatDecimal(Scroll.Acceleration)}";
+
+    [JsonIgnore]
     public double ProfileScrollMultiplier
     {
         get => Scroll.ScrollMultiplier;
@@ -54,6 +59,7 @@ public sealed class ScrollProfile : INotifyPropertyChanged
             Scroll.ScrollMultiplier = value;
             Scroll.Validate();
             OnPropertyChanged();
+            OnPropertyChanged(nameof(ProfileSummaryText));
         }
     }
 
@@ -71,6 +77,7 @@ public sealed class ScrollProfile : INotifyPropertyChanged
             Scroll.DurationMs = value;
             Scroll.Validate();
             OnPropertyChanged();
+            OnPropertyChanged(nameof(ProfileSummaryText));
         }
     }
 
@@ -88,6 +95,7 @@ public sealed class ScrollProfile : INotifyPropertyChanged
             Scroll.Smoothness = value;
             Scroll.Validate();
             OnPropertyChanged();
+            OnPropertyChanged(nameof(ProfileSummaryText));
         }
     }
 
@@ -105,6 +113,7 @@ public sealed class ScrollProfile : INotifyPropertyChanged
             Scroll.Acceleration = value;
             Scroll.Validate();
             OnPropertyChanged();
+            OnPropertyChanged(nameof(ProfileSummaryText));
         }
     }
 
@@ -178,5 +187,11 @@ public sealed class ScrollProfile : INotifyPropertyChanged
         OnPropertyChanged(nameof(ProfileAcceleration));
         OnPropertyChanged(nameof(ProfileEasingType));
         OnPropertyChanged(nameof(ProfileEnableHorizontalScroll));
+        OnPropertyChanged(nameof(ProfileSummaryText));
+    }
+
+    private static string FormatDecimal(double value)
+    {
+        return value.ToString("0.###", CultureInfo.CurrentCulture);
     }
 }

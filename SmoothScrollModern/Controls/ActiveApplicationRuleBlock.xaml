@@ -32,7 +32,9 @@
                     CommandParameter="{Binding CurrentApplicationRule}"
                     Visibility="{Binding HasCurrentApplicationRule, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal" Spacing="6">
-                        <SymbolIcon Symbol="Delete" />
+                        <FontIcon
+                            Glyph="&#xE74D;"
+                            Style="{StaticResource InlineButtonIconStyle}" />
                         <TextBlock Text="Удалить" />
                     </StackPanel>
                 </Button>
@@ -48,7 +50,9 @@
                 Style="{StaticResource AccentButtonStyle}"
                 Visibility="{Binding IsCurrentApplicationRuleMissing, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel Orientation="Horizontal" Spacing="6">
-                    <SymbolIcon Symbol="Add" />
+                    <FontIcon
+                        Glyph="&#xE710;"
+                        Style="{StaticResource InlineButtonIconStyle}" />
                     <TextBlock Text="Добавить исключение" />
                 </StackPanel>
             </Button>

@@ -7,56 +7,85 @@
 
     <StackPanel Spacing="28">
         <StackPanel Spacing="14">
-            <TextBlock
-                Style="{StaticResource SettingsSectionTitleStyle}"
-                Text="Персонализация" />
+            <TextBlock Style="{StaticResource SettingsSectionTitleStyle}" Text="Персонализация" />
             <StackPanel Spacing="4">
-                <toolkit:SettingsCard
-                    Description="Тема применяется сразу и может следовать настройкам Windows."
-                    Header="Тема">
-                    <toolkit:SettingsCard.HeaderIcon>
-                        <SymbolIcon Symbol="Edit" />
-                    </toolkit:SettingsCard.HeaderIcon>
+                <toolkit:SettingsCard Description="Тема применяется сразу и может следовать настройкам Windows." Header="Тема">
                     <ComboBox
                         Width="220"
+                        DisplayMemberPath="Name"
                         ItemsSource="{Binding ThemeOptions}"
                         PlaceholderText="Системная"
                         SelectedValue="{Binding Theme, Mode=TwoWay}"
-                        Style="{StaticResource SelectionComboBoxStyle}" />
+                        SelectedValuePath="Value" />
                 </toolkit:SettingsCard>
             </StackPanel>
         </StackPanel>
 
         <StackPanel Spacing="14">
-            <TextBlock
-                Style="{StaticResource SettingsSectionTitleStyle}"
-                Text="Конфигурация" />
-            <StackPanel Spacing="4">
-                <toolkit:SettingsCard Header="Экспорт">
+            <TextBlock Style="{StaticResource SettingsSectionTitleStyle}" Text="Конфигурация" />
+            <StackPanel Spacing="10">
+                <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Сохраните настройки в файл, восстановите их или верните значения по умолчанию." />
+                <StackPanel Orientation="Horizontal" Spacing="8">
                     <Button Command="{Binding ExportSettingsCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <SymbolIcon Symbol="Save" />
+                            <FontIcon Glyph="&#xE74E;" Style="{StaticResource InlineButtonIconStyle}" />
                             <TextBlock Text="Экспорт" />
                         </StackPanel>
                     </Button>
-                </toolkit:SettingsCard>
-                <toolkit:SettingsCard Header="Импорт">
                     <Button Command="{Binding ImportSettingsCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <SymbolIcon Symbol="OpenFile" />
+                            <FontIcon Glyph="&#xE8E5;" Style="{StaticResource InlineButtonIconStyle}" />
                             <TextBlock Text="Импорт" />
                         </StackPanel>
                     </Button>
-                </toolkit:SettingsCard>
-                <toolkit:SettingsCard Header="Сбросить настройки">
                     <Button Command="{Binding ResetDefaultsCommand}">
                         <StackPanel Orientation="Horizontal" Spacing="6">
-                            <SymbolIcon Symbol="Refresh" />
+                            <FontIcon Glyph="&#xE72C;" Style="{StaticResource InlineButtonIconStyle}" />
                             <TextBlock Text="Сбросить" />
                         </StackPanel>
                     </Button>
-                </toolkit:SettingsCard>
+                </StackPanel>
             </StackPanel>
+        </StackPanel>
+
+        <StackPanel
+            MaxWidth="520"
+            HorizontalAlignment="Center"
+            Spacing="8">
+            <Border
+                Width="48"
+                Height="48"
+                HorizontalAlignment="Center"
+                Background="{ThemeResource ControlFillColorDefaultBrush}"
+                BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                BorderThickness="1"
+                CornerRadius="10">
+                <FontIcon
+                    Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
+                    Glyph="&#xE946;"
+                    Style="{StaticResource InlineButtonIconStyle}" />
+            </Border>
+            <TextBlock
+                FontSize="18"
+                FontWeight="SemiBold"
+                Text="SmoothScroll"
+                TextAlignment="Center" />
+            <TextBlock
+                Style="{StaticResource CaptionTextStyle}"
+                Text="Плавная прокрутка для Windows с профилями и исключениями для приложений."
+                TextAlignment="Center" />
+            <TextBlock
+                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                Text="WinUI 3"
+                TextAlignment="Center" />
+            <HyperlinkButton
+                HorizontalAlignment="Center"
+                Content="Igroman4ik228/SmoothScrollModern"
+                NavigateUri="https://github.com/Igroman4ik228/SmoothScrollModern" />
+            <TextBlock
+                Foreground="{ThemeResource TextFillColorTertiaryBrush}"
+                Text="© Igroman4ik228"
+                TextAlignment="Center" />
         </StackPanel>
     </StackPanel>
 </UserControl>

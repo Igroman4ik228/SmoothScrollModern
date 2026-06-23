@@ -5,9 +5,7 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:SmoothScrollModern.Controls">
 
-    <Border
-        Margin="0,0,0,8"
-        Style="{StaticResource ListSurfacePanelStyle}">
+    <Border Margin="0,0,0,8" Style="{StaticResource ListSurfacePanelStyle}">
         <StackPanel Spacing="16">
             <Grid ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
@@ -15,22 +13,13 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Spacing="2">
-                    <TextBlock
-                        FontWeight="SemiBold"
-                        Text="{Binding DisplayNameText}" />
-                    <TextBlock
-                        Style="{StaticResource CaptionTextStyle}"
-                        Text="{Binding ProcessNameText}" />
-                    <TextBlock
-                        Style="{StaticResource CaptionTextStyle}"
-                        Text="{Binding ExecutablePathText}" />
+                    <TextBlock FontWeight="SemiBold" Text="{Binding DisplayNameText}" />
+                    <TextBlock Style="{StaticResource CaptionTextStyle}" Text="{Binding ProcessNameText}" />
+                    <TextBlock Style="{StaticResource CaptionTextStyle}" Text="{Binding ExecutablePathText}" />
                 </StackPanel>
-                <Button
-                    Grid.Column="1"
-                    Click="OnRemoveRuleClick">
+                <Button Grid.Column="1" Click="OnRemoveRuleClick">
                     <StackPanel Orientation="Horizontal" Spacing="6">
-                        <SymbolIcon Symbol="Delete" />
-                        <TextBlock Text="Удалить" />
+                        <FontIcon Glyph="&#xE74D;" Style="{StaticResource InlineButtonIconStyle}" />
                     </StackPanel>
                 </Button>
             </Grid>

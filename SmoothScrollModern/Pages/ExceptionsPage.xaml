@@ -15,7 +15,6 @@
             HorizontalAlignment="Stretch"
             Spacing="24">
             <controls:ActiveApplicationRuleBlock />
-            <applicationControls:AutomaticApplicationRulesBlock />
             <applicationControls:ManualApplicationRuleBlock />
             <applicationControls:ApplicationRulesListBlock />
         </StackPanel>

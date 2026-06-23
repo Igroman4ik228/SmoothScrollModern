@@ -25,6 +25,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     private ApplicationInfo _currentApplication = ApplicationInfo.Empty;
     private string _manualProcessName = string.Empty;
     private string _applicationSearchQuery = string.Empty;
+    private string _scrollProfileSearchQuery = string.Empty;
     private string _newScrollProfileName = string.Empty;
     private ApplicationRule? _selectedRule;
     private DateTimeOffset? _pausedUntil;
@@ -71,6 +72,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         FilteredApplicationRules = [];
         RefreshApplicationRulesFilter();
+        FilteredUserScrollProfiles = [];
+        RefreshScrollProfilesFilter();
 
         ToggleEnabledCommand = new RelayCommand(() => IsEnabled = !IsEnabled);
         DisableCurrentApplicationCommand = new RelayCommand(DisableCurrentApplication, CanDisableCurrentApplication);
@@ -112,6 +115,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public ScrollProfile GlobalScrollProfile { get; }
 
     public ObservableCollection<ScrollProfile> UserScrollProfiles { get; }
+
+    public ObservableCollection<ScrollProfile> FilteredUserScrollProfiles { get; }
 
     public ObservableCollection<ScrollProfile> ScrollProfileChoices { get; }
 
@@ -405,6 +410,19 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
+    public string ScrollProfileSearchQuery
+    {
+        get => _scrollProfileSearchQuery;
+        set
+        {
+            if (SetField(ref _scrollProfileSearchQuery, value))
+            {
+                RefreshScrollProfilesFilter();
+                OnPropertyChanged(nameof(ScrollProfilesCountText));
+            }
+        }
+    }
+
     public string NewScrollProfileName
     {
         get => _newScrollProfileName;
@@ -417,9 +435,15 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
-    public string ScrollProfilesCountText => UserScrollProfiles.Count == 0
-        ? "Дополнительных профилей нет"
-        : $"{UserScrollProfiles.Count} дополнительных";
+    public string ScrollProfilesCountText => string.IsNullOrWhiteSpace(ScrollProfileSearchQuery)
+        ? $"{UserScrollProfiles.Count} из {UserScrollProfiles.Count}"
+        : $"{FilteredUserScrollProfiles.Count} из {UserScrollProfiles.Count}";
+
+    public bool HasVisibleUserScrollProfiles => FilteredUserScrollProfiles.Count > 0;
+
+    public bool IsUserScrollProfilesEmpty => UserScrollProfiles.Count == 0;
+
+    public bool IsScrollProfileSearchEmpty => UserScrollProfiles.Count > 0 && FilteredUserScrollProfiles.Count == 0;
 
     public string ProfileCountText
     {
@@ -648,6 +672,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         AddScrollProfileToCollection(profile);
         NewScrollProfileName = string.Empty;
         RebuildScrollProfileChoices();
+        RefreshScrollProfilesFilter();
         SaveAndNotify(nameof(ScrollProfilesCountText));
     }
 
@@ -660,6 +685,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
         profile.PropertyChanged -= OnScrollProfilePropertyChanged;
         UserScrollProfiles.Remove(profile);
+        RefreshScrollProfilesFilter();
         foreach (var rule in ApplicationRules.Where(rule =>
                      string.Equals(rule.ScrollProfileId, profile.Id, StringComparison.OrdinalIgnoreCase)))
         {
@@ -809,6 +835,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     {
         profile.PropertyChanged += OnScrollProfilePropertyChanged;
         UserScrollProfiles.Add(profile);
+        RefreshScrollProfilesFilter();
     }
 
     private void ReplaceSettings(AppSettings settings)
@@ -834,6 +861,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         RebuildScrollProfileChoices();
         NormalizeApplicationRuleProfileReferences();
         RefreshApplicationRulesFilter();
+        RefreshScrollProfilesFilter();
         SyncStartup();
         ApplyTheme();
         OnPropertyChanged(string.Empty);
@@ -890,6 +918,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         if (e.PropertyName is nameof(ScrollProfile.Name) or nameof(ScrollProfile.Id))
         {
             RebuildScrollProfileChoices();
+            RefreshScrollProfilesFilter();
         }
 
         SaveAndNotify(nameof(ScrollProfilesCountText), nameof(IsCurrentApplicationBypassed));
@@ -969,6 +998,44 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         }
     }
 
+    private void RefreshScrollProfilesFilter()
+    {
+        var visibleProfiles = UserScrollProfiles
+            .Where(FilterScrollProfile)
+            .ToList();
+
+        var visibleSet = visibleProfiles.ToHashSet();
+
+        for (var index = FilteredUserScrollProfiles.Count - 1; index >= 0; index--)
+        {
+            if (!visibleSet.Contains(FilteredUserScrollProfiles[index]))
+            {
+                FilteredUserScrollProfiles.RemoveAt(index);
+            }
+        }
+
+        for (var targetIndex = 0; targetIndex < visibleProfiles.Count; targetIndex++)
+        {
+            var profile = visibleProfiles[targetIndex];
+            var currentIndex = FilteredUserScrollProfiles.IndexOf(profile);
+            if (currentIndex < 0)
+            {
+                FilteredUserScrollProfiles.Insert(targetIndex, profile);
+                continue;
+            }
+
+            if (currentIndex != targetIndex)
+            {
+                FilteredUserScrollProfiles.Move(currentIndex, targetIndex);
+            }
+        }
+
+        OnPropertyChanged(nameof(ScrollProfilesCountText));
+        OnPropertyChanged(nameof(HasVisibleUserScrollProfiles));
+        OnPropertyChanged(nameof(IsUserScrollProfilesEmpty));
+        OnPropertyChanged(nameof(IsScrollProfileSearchEmpty));
+    }
+
     private static bool RulePropertyAffectsSearch(string? propertyName)
     {
         return propertyName is nameof(ApplicationRule.DisplayName)
@@ -986,6 +1053,12 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         return ContainsSearchText(rule.DisplayName)
                || ContainsSearchText(rule.ProcessName)
                || ContainsSearchText(rule.ExecutablePath);
+    }
+
+    private bool FilterScrollProfile(ScrollProfile profile)
+    {
+        return string.IsNullOrWhiteSpace(ScrollProfileSearchQuery)
+               || ContainsSearchText(profile.Name);
     }
 
     private bool ContainsSearchText(string value)

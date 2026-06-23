@@ -14,6 +14,11 @@ public sealed class DesignMainViewModel
             FilteredApplicationRules.Add(rule);
         }
 
+        foreach (var profile in UserScrollProfiles)
+        {
+            FilteredUserScrollProfiles.Add(profile);
+        }
+
         ScrollProfileChoices.Add(GlobalScrollProfile);
         foreach (var profile in UserScrollProfiles)
         {
@@ -53,9 +58,17 @@ public sealed class DesignMainViewModel
 
     public string ProfileCountText { get; set; } = "4 правила";
 
+    public string ScrollProfileSearchQuery { get; set; } = string.Empty;
+
     public string NewScrollProfileName { get; set; } = "Рабочие исключения";
 
-    public string ScrollProfilesCountText { get; set; } = "2 дополнительных";
+    public string ScrollProfilesCountText { get; set; } = "2 из 2";
+
+    public bool HasVisibleUserScrollProfiles { get; set; } = true;
+
+    public bool IsUserScrollProfilesEmpty { get; set; }
+
+    public bool IsScrollProfileSearchEmpty { get; set; }
 
     public string CurrentApplicationText { get; set; } = "Visual Studio (devenv.exe)";
 
@@ -164,6 +177,8 @@ public sealed class DesignMainViewModel
             ProfileSmoothness = 0.35
         }
     ];
+
+    public ObservableCollection<ScrollProfile> FilteredUserScrollProfiles { get; } = [];
 
     public ObservableCollection<ScrollProfile> ScrollProfileChoices { get; } = [];
 

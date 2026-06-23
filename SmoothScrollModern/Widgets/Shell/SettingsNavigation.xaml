@@ -25,21 +25,30 @@
                 Content="Профили"
                 Tag="Profiles">
                 <NavigationViewItem.Icon>
-                    <SymbolIcon Symbol="Bullets" />
+                    <FontIcon
+                        FontFamily="Segoe MDL2 Assets"
+                        FontSize="16"
+                        Glyph="&#xE8FD;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
             <NavigationViewItem
                 Content="Исключения"
                 Tag="Exceptions">
                 <NavigationViewItem.Icon>
-                    <SymbolIcon Symbol="Cancel" />
+                    <FontIcon
+                        FontFamily="Segoe MDL2 Assets"
+                        FontSize="16"
+                        Glyph="&#xE711;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
             <NavigationViewItem
                 Content="Настройки"
                 Tag="Settings">
                 <NavigationViewItem.Icon>
-                    <SymbolIcon Symbol="Setting" />
+                    <FontIcon
+                        FontFamily="Segoe MDL2 Assets"
+                        FontSize="16"
+                        Glyph="&#xE713;" />
                 </NavigationViewItem.Icon>
             </NavigationViewItem>
         </NavigationView.MenuItems>

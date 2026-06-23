@@ -30,11 +30,13 @@
         <NumberBox
             x:Name="ValueBox"
             Grid.Column="1"
+            AcceptsExpression="False"
             VerticalAlignment="Center"
             Maximum="{Binding Maximum, ElementName=Root}"
             Minimum="{Binding Minimum, ElementName=Root}"
             SmallChange="{Binding SmallChange, ElementName=Root}"
             Style="{StaticResource CompactNumberBoxStyle}"
+            ValueChanged="OnValueBoxValueChanged"
             Value="{Binding Value, ElementName=Root, Mode=TwoWay}" />
 
         <Slider

@@ -45,12 +45,13 @@
                 FontWeight="SemiBold"
                 Text="Режим прокрутки" />
             <ComboBox
+                DisplayMemberPath="Name"
                 HorizontalAlignment="Stretch"
                 IsEnabled="{Binding IsRuleEnabled}"
                 Loaded="OnDeliveryModeComboBoxLoaded"
                 PlaceholderText="Плавный режим"
                 SelectedValue="{Binding DeliveryMode, Mode=TwoWay}"
-                Style="{StaticResource SelectionComboBoxStyle}" />
+                SelectedValuePath="Value" />
         </StackPanel>
 
         <StackPanel
