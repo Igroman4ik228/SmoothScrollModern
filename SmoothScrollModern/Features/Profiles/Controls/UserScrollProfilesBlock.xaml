@@ -1,0 +1,57 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="SmoothScrollModern.Features.Profiles.Controls.UserScrollProfilesBlock"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:profiles="using:SmoothScrollModern.Features.Profiles.Controls">
+
+    <Border Style="{StaticResource SurfacePanelStyle}">
+        <StackPanel Spacing="14">
+            <StackPanel Spacing="3">
+                <TextBlock
+                    Style="{StaticResource SectionTitleStyle}"
+                    Text="Дополнительные профили" />
+                <TextBlock
+                    Style="{StaticResource CaptionTextStyle}"
+                    Text="Создайте отдельные варианты прокрутки и назначайте их исключениям." />
+            </StackPanel>
+            <TextBlock
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="{Binding ScrollProfilesCountText}" />
+
+            <Grid ColumnSpacing="10">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <TextBox
+                    Header="Название профиля"
+                    VerticalContentAlignment="Center"
+                    PlaceholderText="Новый профиль"
+                    Text="{Binding NewScrollProfileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                <Button
+                    Grid.Column="1"
+                    VerticalAlignment="Bottom"
+                    Command="{Binding AddScrollProfileCommand}"
+                    Style="{StaticResource AccentButtonStyle}">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <SymbolIcon Symbol="Add" />
+                        <TextBlock Text="Создать" />
+                    </StackPanel>
+                </Button>
+            </Grid>
+
+            <ListView
+                ItemContainerStyle="{StaticResource BorderlessListViewItemStyle}"
+                ItemsSource="{Binding UserScrollProfiles}"
+                SelectionMode="None"
+                Style="{StaticResource BorderlessListViewStyle}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <profiles:UserScrollProfileItem />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackPanel>
+    </Border>
+</UserControl>

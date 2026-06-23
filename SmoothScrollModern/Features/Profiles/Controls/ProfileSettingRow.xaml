@@ -1,0 +1,50 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="SmoothScrollModern.Features.Profiles.Controls.ProfileSettingRow"
+    x:Name="Root"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Grid
+        Padding="0,8,0,10"
+        ColumnSpacing="18"
+        RowSpacing="8">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto" />
+            <RowDefinition Height="Auto" />
+        </Grid.RowDefinitions>
+        <Grid.ColumnDefinitions>
+            <ColumnDefinition Width="*" />
+            <ColumnDefinition Width="124" />
+        </Grid.ColumnDefinitions>
+
+        <StackPanel Spacing="2">
+            <TextBlock
+                FontWeight="SemiBold"
+                Text="{Binding Label, ElementName=Root}" />
+            <TextBlock
+                Style="{StaticResource CaptionTextStyle}"
+                Text="{Binding Description, ElementName=Root}" />
+        </StackPanel>
+
+        <NumberBox
+            x:Name="ValueBox"
+            Grid.Column="1"
+            VerticalAlignment="Center"
+            Maximum="{Binding Maximum, ElementName=Root}"
+            Minimum="{Binding Minimum, ElementName=Root}"
+            SmallChange="{Binding SmallChange, ElementName=Root}"
+            Style="{StaticResource CompactNumberBoxStyle}"
+            Value="{Binding Value, ElementName=Root, Mode=TwoWay}" />
+
+        <Slider
+            Grid.Row="1"
+            Grid.ColumnSpan="2"
+            MinHeight="32"
+            Maximum="{Binding Maximum, ElementName=Root}"
+            Minimum="{Binding Minimum, ElementName=Root}"
+            StepFrequency="{Binding StepFrequency, ElementName=Root}"
+            Style="{StaticResource ProfileSliderStyle}"
+            Value="{Binding Value, ElementName=Root, Mode=TwoWay}" />
+    </Grid>
+</UserControl>

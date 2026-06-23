@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="SmoothScrollModern.Pages.ApplicationSettingsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:settingsControls="using:SmoothScrollModern.Features.Settings.Controls">
+
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Disabled"
+        HorizontalScrollMode="Disabled"
+        VerticalScrollBarVisibility="Auto">
+        <StackPanel
+            Margin="32,16,32,32"
+            HorizontalAlignment="Stretch"
+            Spacing="24">
+            <settingsControls:SmoothScrollToggleBlock />
+            <settingsControls:StartupWindowSettingsBlock />
+            <settingsControls:ApplicationPreferencesBlock />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

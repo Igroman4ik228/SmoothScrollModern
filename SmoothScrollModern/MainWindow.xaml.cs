@@ -1,29 +1,21 @@
-using System.ComponentModel;
-using Microsoft.UI.Input;
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
-using SmoothScrollModern.Scroll;
-using SmoothScrollModern.Settings;
 using SmoothScrollModern.ViewModels;
+using System.ComponentModel;
+using Windows.UI;
 using WinUIEx;
+using Colors = Microsoft.UI.Colors;
 
 namespace SmoothScrollModern;
 
-public sealed partial class MainWindow : Window
+public sealed partial class MainWindow : WindowEx
 {
-    private const double InitialWindowWidth = 1120;
-    private const double InitialWindowHeight = 760;
-    private const double MinimumWindowWidth = 820;
-    private const double MinimumWindowHeight = 560;
-
     private readonly Dictionary<ScrollViewer, double> _scrollTargets = [];
     private readonly Action<CancelEventArgs> _closingHandler;
     private readonly MainViewModel _viewModel;
-    private readonly WindowManager _windowManager;
-    private bool _isPlacementApplied;
 
     public MainWindow(MainViewModel viewModel, Action<CancelEventArgs> closingHandler)
     {
@@ -34,10 +26,8 @@ public sealed partial class MainWindow : Window
         ContentRoot.DataContext = viewModel;
         ContentRoot.AddHandler(UIElement.PointerWheelChangedEvent, new PointerEventHandler(OnPointerWheelChanged), true);
 
-        _windowManager = WindowManager.Get(this);
-        _windowManager.MinWidth = MinimumWindowWidth;
-        _windowManager.MinHeight = MinimumWindowHeight;
-        _windowManager.AppWindow.Closing += OnAppWindowClosing;
+        ConfigureTitleBar();
+        AppWindow.Closing += OnAppWindowClosing;
 
         viewModel.ThemeChanged += ApplyTheme;
         ApplyTheme(viewModel.Theme);
@@ -50,19 +40,44 @@ public sealed partial class MainWindow : Window
 
     public void ShowWindow()
     {
-        ApplyInitialPlacement();
         WindowExtensions.Show(this);
     }
 
-    private void ApplyInitialPlacement()
+    private void ConfigureTitleBar()
     {
-        if (_isPlacementApplied)
+        ExtendsContentIntoTitleBar = true;
+        SetTitleBar(AppTitleBar);
+
+        var titleBar = AppWindow.TitleBar;
+        titleBar.ExtendsContentIntoTitleBar = true;
+        titleBar.ButtonBackgroundColor = Colors.Transparent;
+        titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
+        titleBar.ButtonHoverBackgroundColor = Color.FromArgb(24, 0, 0, 0);
+        titleBar.ButtonPressedBackgroundColor = Color.FromArgb(36, 0, 0, 0);
+
+        UpdateCaptionButtonInset(titleBar.RightInset);
+        AppWindow.Changed += (_, args) =>
         {
-            return;
+            if (args.DidPresenterChange || args.DidSizeChange)
+            {
+                UpdateCaptionButtonInset(titleBar.RightInset);
+            }
+        };
+    }
+
+    private void UpdateCaptionButtonInset(double rightInset)
+    {
+        if (double.IsNaN(rightInset) || double.IsInfinity(rightInset) || rightInset < 0)
+        {
+            rightInset = 0;
         }
 
-        this.CenterOnScreen(InitialWindowWidth, InitialWindowHeight);
-        _isPlacementApplied = true;
+        CaptionButtonInsetColumn.Width = new GridLength(rightInset);
+    }
+
+    private void OnNavigationPaneToggleClick(object sender, RoutedEventArgs e)
+    {
+        ShellNavigation.TogglePane();
     }
 
     private void OnAppWindowClosing(AppWindow sender, AppWindowClosingEventArgs args)
@@ -80,23 +95,6 @@ public sealed partial class MainWindow : Window
             "Dark" => ElementTheme.Dark,
             _ => ElementTheme.Default
         };
-    }
-
-    private void OnRemoveScrollProfileClick(object sender, RoutedEventArgs e)
-    {
-        if (sender is FrameworkElement { DataContext: ScrollProfile profile }
-            && _viewModel.RemoveScrollProfileCommand.CanExecute(profile))
-        {
-            _viewModel.RemoveScrollProfileCommand.Execute(profile);
-        }
-    }
-
-    private void OnEasingComboBoxLoaded(object sender, RoutedEventArgs e)
-    {
-        if (sender is ComboBox comboBox)
-        {
-            comboBox.ItemsSource = _viewModel.EasingOptions;
-        }
     }
 
     private void OnPointerWheelChanged(object sender, PointerRoutedEventArgs e)

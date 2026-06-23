@@ -1,0 +1,42 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="SmoothScrollModern.Features.Applications.Controls.ApplicationRulesListBlock"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:controls="using:SmoothScrollModern.Controls">
+
+    <Border Style="{StaticResource SurfacePanelStyle}">
+        <StackPanel Spacing="14">
+            <StackPanel Spacing="3">
+                <TextBlock
+                    Style="{StaticResource SectionTitleStyle}"
+                    Text="Правила исключений" />
+                <TextBlock
+                    Style="{StaticResource CaptionTextStyle}"
+                    Text="Найдите исключение, отключите его или назначьте отдельный профиль прокрутки." />
+            </StackPanel>
+            <TextBlock
+                Foreground="{ThemeResource TextFillColorSecondaryBrush}"
+                Text="{Binding ProfileCountText}" />
+
+            <AutoSuggestBox
+                PlaceholderText="Поиск по названию, процессу или пути"
+                QueryIcon="Find"
+                Text="{Binding ApplicationSearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+
+            <ListView
+                MaxHeight="620"
+                HorizontalContentAlignment="Stretch"
+                ItemContainerStyle="{StaticResource BorderlessListViewItemStyle}"
+                ItemsSource="{Binding FilteredApplicationRules}"
+                SelectionMode="None"
+                Style="{StaticResource BorderlessListViewStyle}">
+                <ListView.ItemTemplate>
+                    <DataTemplate>
+                        <controls:ApplicationRuleItem />
+                    </DataTemplate>
+                </ListView.ItemTemplate>
+            </ListView>
+        </StackPanel>
+    </Border>
+</UserControl>

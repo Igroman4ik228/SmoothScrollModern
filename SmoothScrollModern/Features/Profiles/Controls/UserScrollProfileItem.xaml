@@ -1,0 +1,109 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="SmoothScrollModern.Features.Profiles.Controls.UserScrollProfileItem"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:profiles="using:SmoothScrollModern.Features.Profiles.Controls">
+
+    <Border
+        Margin="0,0,0,8"
+        Style="{StaticResource ListSurfacePanelStyle}">
+        <Expander IsExpanded="False">
+            <Expander.Header>
+                <Grid ColumnSpacing="10">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="Auto" />
+                    </Grid.ColumnDefinitions>
+                    <TextBox
+                        MinWidth="260"
+                        VerticalContentAlignment="Center"
+                        PlaceholderText="Например: Браузер"
+                        Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
+                    <Button
+                        Grid.Column="1"
+                        Click="OnRemoveScrollProfileClick">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <SymbolIcon Symbol="Delete" />
+                            <TextBlock Text="Удалить" />
+                        </StackPanel>
+                    </Button>
+                </Grid>
+            </Expander.Header>
+            <StackPanel Spacing="14">
+                <profiles:ProfileSettingRow
+                    Description="Сколько прокручивать за один шаг колеса."
+                    Label="Сила прокрутки"
+                    Maximum="6"
+                    Minimum="0.2"
+                    NumberFormatter="{StaticResource DecimalValueFormatter}"
+                    SmallChange="0.05"
+                    StepFrequency="0.05"
+                    Value="{Binding ProfileScrollMultiplier, Mode=TwoWay}" />
+
+                <profiles:ProfileSettingRow
+                    Description="Как долго длится один шаг прокрутки."
+                    Label="Время прокрутки, мс"
+                    Maximum="900"
+                    Minimum="30"
+                    SmallChange="10"
+                    StepFrequency="10"
+                    Value="{Binding ProfileDurationMs, Mode=TwoWay}" />
+
+                <profiles:ProfileSettingRow
+                    Description="Насколько мягко движется прокрутка."
+                    Label="Плавность"
+                    Maximum="1"
+                    Minimum="0"
+                    NumberFormatter="{StaticResource DecimalValueFormatter}"
+                    SmallChange="0.025"
+                    StepFrequency="0.025"
+                    Value="{Binding ProfileSmoothness, Mode=TwoWay}" />
+
+                <profiles:ProfileSettingRow
+                    Description="Ускоряет прокрутку при быстрых движениях колеса."
+                    Label="Ускорение"
+                    Maximum="4"
+                    Minimum="0.2"
+                    NumberFormatter="{StaticResource DecimalValueFormatter}"
+                    SmallChange="0.05"
+                    StepFrequency="0.05"
+                    Value="{Binding ProfileAcceleration, Mode=TwoWay}" />
+
+                <Grid ColumnSpacing="18">
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*" />
+                        <ColumnDefinition Width="*" />
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Spacing="6">
+                        <StackPanel Spacing="2">
+                            <TextBlock
+                                FontWeight="SemiBold"
+                                Text="Поведение прокрутки" />
+                            <TextBlock
+                                Style="{StaticResource CaptionTextStyle}"
+                                Text="Как менять скорость во время одного шага." />
+                        </StackPanel>
+                        <ComboBox
+                            HorizontalAlignment="Stretch"
+                            Loaded="OnEasingComboBoxLoaded"
+                            PlaceholderText="Мягкая"
+                            SelectedValue="{Binding ProfileEasingType, Mode=TwoWay}"
+                            Style="{StaticResource SelectionComboBoxStyle}" />
+                    </StackPanel>
+
+                    <StackPanel Grid.Column="1" Spacing="6">
+                        <TextBlock
+                            FontWeight="SemiBold"
+                            Text="Горизонтальная прокрутка" />
+                        <ToggleSwitch
+                            IsOn="{Binding ProfileEnableHorizontalScroll, Mode=TwoWay}"
+                            OffContent="Откл."
+                            OnContent="Вкл." />
+                    </StackPanel>
+                </Grid>
+            </StackPanel>
+        </Expander>
+    </Border>
+</UserControl>

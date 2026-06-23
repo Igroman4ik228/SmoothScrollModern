@@ -31,8 +31,8 @@ public sealed class TrayService : ITrayService
         var contextMenu = new Forms.ContextMenuStrip();
         contextMenu.Items.Add(new Forms.ToolStripMenuItem("Открыть настройки", null, (_, _) => ShowRequested?.Invoke()));
         contextMenu.Items.Add(_toggleItem);
-        contextMenu.Items.Add(new Forms.ToolStripMenuItem("Отключить для текущего приложения", null, (_, _) => DisableForCurrentApplicationRequested?.Invoke()));
-        contextMenu.Items.Add(new Forms.ToolStripMenuItem($"Пауза на {Constants.TrayPauseMinutes} минут", null, (_, _) => PauseRequested?.Invoke()));
+        contextMenu.Items.Add(new Forms.ToolStripMenuItem("Добавить исключение для открытого окна", null, (_, _) => DisableForCurrentApplicationRequested?.Invoke()));
+        contextMenu.Items.Add(new Forms.ToolStripMenuItem($"Приостановить на {Constants.TrayPauseMinutes} минут", null, (_, _) => PauseRequested?.Invoke()));
         contextMenu.Items.Add(new Forms.ToolStripSeparator());
         contextMenu.Items.Add(new Forms.ToolStripMenuItem("Выход", null, (_, _) => ExitRequested?.Invoke()));
 
@@ -53,7 +53,7 @@ public sealed class TrayService : ITrayService
             return;
         }
 
-        var state = isPaused ? "пауза" : isEnabled ? "включён" : "выключен";
+        var state = isPaused ? "пауза" : isEnabled ? "прокрутка включена" : "прокрутка выключена";
         _notifyIcon.Text = $"{Constants.ApplicationName}: {state}";
 
         if (_toggleItem is not null)

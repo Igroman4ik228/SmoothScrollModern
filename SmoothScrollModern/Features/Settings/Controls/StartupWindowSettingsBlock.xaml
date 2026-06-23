@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="SmoothScrollModern.Features.Settings.Controls.StartupWindowSettingsBlock"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.Controls">
+
+    <StackPanel Spacing="14">
+        <TextBlock
+            Style="{StaticResource SettingsSectionTitleStyle}"
+            Text="Запуск и окно" />
+        <StackPanel Spacing="4">
+            <toolkit:SettingsCard
+                Description="SmoothScroll будет запускаться после входа в Windows."
+                Header="Запускать вместе с Windows">
+                <ToggleSwitch
+                    IsOn="{Binding StartWithWindows, Mode=TwoWay}"
+                    OffContent="Откл."
+                    OnContent="Вкл." />
+            </toolkit:SettingsCard>
+            <toolkit:SettingsCard
+                Description="После запуска окно останется скрытым в области уведомлений."
+                Header="Запускать свернутым">
+                <ToggleSwitch
+                    IsOn="{Binding StartMinimizedToTray, Mode=TwoWay}"
+                    OffContent="Откл."
+                    OnContent="Вкл." />
+            </toolkit:SettingsCard>
+            <toolkit:SettingsCard
+                Description="Кнопка закрытия будет скрывать окно, а не завершать SmoothScroll."
+                Header="Закрывать в трей">
+                <ToggleSwitch
+                    IsOn="{Binding CloseToTray, Mode=TwoWay}"
+                    OffContent="Откл."
+                    OnContent="Вкл." />
+            </toolkit:SettingsCard>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

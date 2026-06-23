@@ -70,7 +70,7 @@ public sealed class AppBootstrapper : IDisposable
         catch (Exception ex)
         {
             System.Windows.Forms.MessageBox.Show(
-                $"Не удалось включить перехват прокрутки. Обычная прокрутка продолжит работать.\n\n{ex.Message}",
+                $"Не удалось включить плавную прокрутку. Обычная прокрутка продолжит работать.\n\n{ex.Message}",
                 Constants.ApplicationName,
                 System.Windows.Forms.MessageBoxButtons.OK,
                 System.Windows.Forms.MessageBoxIcon.Warning);

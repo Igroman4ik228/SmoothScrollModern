@@ -1,0 +1,62 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="SmoothScrollModern.Features.Settings.Controls.ApplicationPreferencesBlock"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.Controls">
+
+    <StackPanel Spacing="28">
+        <StackPanel Spacing="14">
+            <TextBlock
+                Style="{StaticResource SettingsSectionTitleStyle}"
+                Text="Персонализация" />
+            <StackPanel Spacing="4">
+                <toolkit:SettingsCard
+                    Description="Тема применяется сразу и может следовать настройкам Windows."
+                    Header="Тема">
+                    <toolkit:SettingsCard.HeaderIcon>
+                        <SymbolIcon Symbol="Edit" />
+                    </toolkit:SettingsCard.HeaderIcon>
+                    <ComboBox
+                        Width="220"
+                        ItemsSource="{Binding ThemeOptions}"
+                        PlaceholderText="Системная"
+                        SelectedValue="{Binding Theme, Mode=TwoWay}"
+                        Style="{StaticResource SelectionComboBoxStyle}" />
+                </toolkit:SettingsCard>
+            </StackPanel>
+        </StackPanel>
+
+        <StackPanel Spacing="14">
+            <TextBlock
+                Style="{StaticResource SettingsSectionTitleStyle}"
+                Text="Конфигурация" />
+            <StackPanel Spacing="4">
+                <toolkit:SettingsCard Header="Экспорт">
+                    <Button Command="{Binding ExportSettingsCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <SymbolIcon Symbol="Save" />
+                            <TextBlock Text="Экспорт" />
+                        </StackPanel>
+                    </Button>
+                </toolkit:SettingsCard>
+                <toolkit:SettingsCard Header="Импорт">
+                    <Button Command="{Binding ImportSettingsCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <SymbolIcon Symbol="OpenFile" />
+                            <TextBlock Text="Импорт" />
+                        </StackPanel>
+                    </Button>
+                </toolkit:SettingsCard>
+                <toolkit:SettingsCard Header="Сбросить настройки">
+                    <Button Command="{Binding ResetDefaultsCommand}">
+                        <StackPanel Orientation="Horizontal" Spacing="6">
+                            <SymbolIcon Symbol="Refresh" />
+                            <TextBlock Text="Сбросить" />
+                        </StackPanel>
+                    </Button>
+                </toolkit:SettingsCard>
+            </StackPanel>
+        </StackPanel>
+    </StackPanel>
+</UserControl>

@@ -5,32 +5,37 @@
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:SmoothScrollModern.Controls">
 
-    <Grid
-        Padding="0,16,0,18"
-        BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
-        BorderThickness="0,1,0,0"
-        RowSpacing="14">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
-
-        <controls:ApplicationRuleHeader
-            Detail="{Binding ExecutablePathText}"
-            Subtitle="{Binding ProcessNameText}"
-            Title="{Binding DisplayNameText}">
-            <controls:ApplicationRuleHeader.ActionContent>
+    <Border
+        Margin="0,0,0,8"
+        Style="{StaticResource ListSurfacePanelStyle}">
+        <StackPanel Spacing="16">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
+                <StackPanel Spacing="2">
+                    <TextBlock
+                        FontWeight="SemiBold"
+                        Text="{Binding DisplayNameText}" />
+                    <TextBlock
+                        Style="{StaticResource CaptionTextStyle}"
+                        Text="{Binding ProcessNameText}" />
+                    <TextBlock
+                        Style="{StaticResource CaptionTextStyle}"
+                        Text="{Binding ExecutablePathText}" />
+                </StackPanel>
                 <Button
-                    MinWidth="92"
+                    Grid.Column="1"
                     Click="OnRemoveRuleClick">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <SymbolIcon Symbol="Delete" />
                         <TextBlock Text="Удалить" />
                     </StackPanel>
                 </Button>
-            </controls:ApplicationRuleHeader.ActionContent>
-        </controls:ApplicationRuleHeader>
+            </Grid>
 
-        <controls:ApplicationRuleSettings Grid.Row="1" />
-    </Grid>
+            <controls:ApplicationRuleSettings />
+        </StackPanel>
+    </Border>
 </UserControl>

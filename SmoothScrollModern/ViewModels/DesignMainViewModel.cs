@@ -53,9 +53,9 @@ public sealed class DesignMainViewModel
 
     public string ProfileCountText { get; set; } = "4 правила";
 
-    public string NewScrollProfileName { get; set; } = "Рабочие приложения";
+    public string NewScrollProfileName { get; set; } = "Рабочие исключения";
 
-    public string ScrollProfilesCountText { get; set; } = "2 пользовательских";
+    public string ScrollProfilesCountText { get; set; } = "2 дополнительных";
 
     public string CurrentApplicationText { get; set; } = "Visual Studio (devenv.exe)";
 
@@ -77,21 +77,21 @@ public sealed class DesignMainViewModel
 
     public IReadOnlyList<SelectionOption<EasingType>> EasingOptions { get; } =
     [
-        new(EasingType.Linear, "Линейная"),
-        new(EasingType.EaseOutCubic, "Мягкая"),
-        new(EasingType.EaseOutQuart, "Очень мягкая"),
-        new(EasingType.EaseOutQuint, "Максимально мягкая")
+        new(EasingType.Linear, "Ровно"),
+        new(EasingType.EaseOutCubic, "Мягко"),
+        new(EasingType.EaseOutQuart, "Очень мягко"),
+        new(EasingType.EaseOutQuint, "Максимально мягко")
     ];
 
     public IReadOnlyList<SelectionOption<ScrollDeliveryMode>> DeliveryModeOptions { get; } =
     [
-        new(ScrollDeliveryMode.FineDelta, "Плавный режим"),
-        new(ScrollDeliveryMode.WheelStep, "Режим совместимости")
+        new(ScrollDeliveryMode.FineDelta, "Плавно"),
+        new(ScrollDeliveryMode.WheelStep, "Как обычно")
     ];
 
     public IReadOnlyList<SelectionOption<string>> ThemeOptions { get; } =
     [
-        new("System", "Системная"),
+        new("System", "Как в Windows"),
         new("Light", "Светлая"),
         new("Dark", "Темная")
     ];
@@ -141,7 +141,7 @@ public sealed class DesignMainViewModel
     public ScrollProfile GlobalScrollProfile { get; } = new()
     {
         Id = string.Empty,
-        Name = "Глобальный профиль",
+        Name = "Основной профиль",
         IsGlobal = true
     };
 
@@ -150,7 +150,7 @@ public sealed class DesignMainViewModel
         new()
         {
             Id = "work",
-            Name = "Рабочие приложения",
+            Name = "Рабочие исключения",
             ProfileScrollMultiplier = 1.1,
             ProfileDurationMs = 110,
             ProfileSmoothness = 0.55

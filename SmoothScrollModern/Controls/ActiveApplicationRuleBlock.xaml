@@ -1,29 +1,33 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <UserControl
     x:Class="SmoothScrollModern.Controls.ActiveApplicationRuleBlock"
+    x:Name="Root"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:controls="using:SmoothScrollModern.Controls">
 
-    <Grid
-        Padding="0,0,0,18"
-        BorderBrush="{ThemeResource DividerStrokeColorDefaultBrush}"
-        BorderThickness="0,0,0,1"
-        RowSpacing="12">
-        <Grid.RowDefinitions>
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-            <RowDefinition Height="Auto" />
-        </Grid.RowDefinitions>
+    <Border Style="{StaticResource SurfacePanelStyle}">
+        <StackPanel Spacing="16">
+            <Grid ColumnSpacing="12">
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
+                </Grid.ColumnDefinitions>
 
-        <controls:ApplicationRuleHeader
-            Detail="{Binding CurrentWindowTitle}"
-            Label="Текущее окно"
-            Subtitle=""
-            Title="{Binding CurrentApplicationText}">
-            <controls:ApplicationRuleHeader.ActionContent>
+                <StackPanel Spacing="3">
+                    <TextBlock
+                        Style="{StaticResource SectionTitleStyle}"
+                        Text="Активное приложение" />
+                    <TextBlock
+                        FontWeight="SemiBold"
+                        Text="{Binding CurrentApplicationText}" />
+                    <TextBlock
+                        Style="{StaticResource CaptionTextStyle}"
+                        Text="{Binding CurrentWindowTitle}" />
+                </StackPanel>
+
                 <Button
-                    MinWidth="92"
+                    Grid.Column="1"
                     Command="{Binding RemoveRuleCommand}"
                     CommandParameter="{Binding CurrentApplicationRule}"
                     Visibility="{Binding HasCurrentApplicationRule, Converter={StaticResource BooleanToVisibilityConverter}}">
@@ -32,26 +36,22 @@
                         <TextBlock Text="Удалить" />
                     </StackPanel>
                 </Button>
-            </controls:ApplicationRuleHeader.ActionContent>
-        </controls:ApplicationRuleHeader>
+            </Grid>
 
-        <Grid
-            Grid.Row="1"
-            Visibility="{Binding HasCurrentApplicationRule, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <controls:ApplicationRuleSettings DataContext="{Binding CurrentApplicationRule}" />
-        </Grid>
+            <controls:ApplicationRuleSettings
+                DataContext="{Binding CurrentApplicationRule}"
+                Visibility="{Binding DataContext.HasCurrentApplicationRule, ElementName=Root, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-        <Button
-            Grid.Row="2"
-            HorizontalAlignment="Left"
-            MinWidth="190"
-            Command="{Binding DisableCurrentApplicationCommand}"
-            Style="{StaticResource AccentButtonStyle}"
-            Visibility="{Binding IsCurrentApplicationRuleMissing, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <StackPanel Orientation="Horizontal" Spacing="6">
-                <SymbolIcon Symbol="Add" />
-                <TextBlock Text="Исключить текущее приложение" />
-            </StackPanel>
-        </Button>
-    </Grid>
+            <Button
+                HorizontalAlignment="Left"
+                Command="{Binding DisableCurrentApplicationCommand}"
+                Style="{StaticResource AccentButtonStyle}"
+                Visibility="{Binding IsCurrentApplicationRuleMissing, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <SymbolIcon Symbol="Add" />
+                    <TextBlock Text="Добавить исключение" />
+                </StackPanel>
+            </Button>
+        </StackPanel>
+    </Border>
 </UserControl>

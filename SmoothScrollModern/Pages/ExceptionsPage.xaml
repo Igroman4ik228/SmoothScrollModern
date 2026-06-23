@@ -1,0 +1,23 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="SmoothScrollModern.Pages.ExceptionsPage"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:applicationControls="using:SmoothScrollModern.Features.Applications.Controls"
+    xmlns:controls="using:SmoothScrollModern.Controls">
+
+    <ScrollViewer
+        HorizontalScrollBarVisibility="Disabled"
+        HorizontalScrollMode="Disabled"
+        VerticalScrollBarVisibility="Auto">
+        <StackPanel
+            Margin="32,16,32,32"
+            HorizontalAlignment="Stretch"
+            Spacing="24">
+            <controls:ActiveApplicationRuleBlock />
+            <applicationControls:AutomaticApplicationRulesBlock />
+            <applicationControls:ManualApplicationRuleBlock />
+            <applicationControls:ApplicationRulesListBlock />
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

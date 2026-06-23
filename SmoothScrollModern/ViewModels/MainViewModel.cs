@@ -48,7 +48,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         GlobalScrollProfile = new ScrollProfile
         {
             Id = string.Empty,
-            Name = "Глобальный профиль",
+            Name = "Основной профиль",
             Scroll = Settings.Scroll,
             IsGlobal = true
         };
@@ -117,21 +117,21 @@ public sealed class MainViewModel : ObservableObject, IDisposable
 
     public IReadOnlyList<SelectionOption<EasingType>> EasingOptions { get; } =
     [
-        new(EasingType.Linear, "Линейная"),
-        new(EasingType.EaseOutCubic, "Мягкая"),
-        new(EasingType.EaseOutQuart, "Очень мягкая"),
-        new(EasingType.EaseOutQuint, "Максимально мягкая")
+        new(EasingType.Linear, "Ровно"),
+        new(EasingType.EaseOutCubic, "Мягко"),
+        new(EasingType.EaseOutQuart, "Очень мягко"),
+        new(EasingType.EaseOutQuint, "Максимально мягко")
     ];
 
     public IReadOnlyList<SelectionOption<ScrollDeliveryMode>> DeliveryModeOptions { get; } =
     [
-        new(ScrollDeliveryMode.FineDelta, "Плавный режим"),
-        new(ScrollDeliveryMode.WheelStep, "Режим совместимости")
+        new(ScrollDeliveryMode.FineDelta, "Плавно"),
+        new(ScrollDeliveryMode.WheelStep, "Как обычно")
     ];
 
     public IReadOnlyList<SelectionOption<string>> ThemeOptions { get; } =
     [
-        new("System", "Системная"),
+        new("System", "Как в Windows"),
         new("Light", "Светлая"),
         new("Dark", "Темная")
     ];
@@ -418,8 +418,8 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
 
     public string ScrollProfilesCountText => UserScrollProfiles.Count == 0
-        ? "Пользовательских профилей нет"
-        : $"{UserScrollProfiles.Count} пользовательских";
+        ? "Дополнительных профилей нет"
+        : $"{UserScrollProfiles.Count} дополнительных";
 
     public string ProfileCountText
     {
@@ -446,7 +446,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     }
 
     public string CurrentApplicationText => _currentApplication == ApplicationInfo.Empty
-        ? "Текущее приложение не определено"
+        ? "Приложение не определено"
         : $"{GetApplicationDisplayName(_currentApplication)} ({GetApplicationProcessName(_currentApplication)})";
 
     public string CurrentWindowTitle => string.IsNullOrWhiteSpace(_currentApplication.WindowTitle)
@@ -599,7 +599,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         using var dialog = new Forms.OpenFileDialog
         {
             Title = "Выберите приложение",
-            Filter = "Приложения (*.exe)|*.exe|Все файлы (*.*)|*.*",
+            Filter = "EXE-файлы (*.exe)|*.exe|Все файлы (*.*)|*.*",
             CheckFileExists = true,
             Multiselect = false
         };
