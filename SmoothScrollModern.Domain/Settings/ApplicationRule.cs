@@ -1,10 +1,10 @@
 using System.Text.Json.Serialization;
-using CommunityToolkit.Mvvm.ComponentModel;
+using SmoothScrollModern.Common;
 using SmoothScrollModern.Scroll;
 
 namespace SmoothScrollModern.Settings;
 
-public sealed class ApplicationRule : ObservableObject
+public sealed class ApplicationRule : ObservableEntity
 {
     private const string UnknownProcessName = "unknown.exe";
     private const string UnknownDisplayName = "Неизвестное приложение";

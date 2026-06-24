@@ -10,4 +10,7 @@
     <Platform Solution="*|x86" Project="x86" />
     <Deploy />
   </Project>
+  <Project Path="SmoothScrollModern.Domain/SmoothScrollModern.Domain.csproj" />
+  <Project Path="SmoothScrollModern.Application/SmoothScrollModern.Application.csproj" />
+  <Project Path="SmoothScrollModern.Infrastructure/SmoothScrollModern.Infrastructure.csproj" />
 </Solution>

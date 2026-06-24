@@ -1,6 +1,7 @@
 using System.ComponentModel;
 using Microsoft.UI.Xaml;
 using SmoothScrollModern.Applications;
+using SmoothScrollModern.Core;
 using SmoothScrollModern.Input;
 using SmoothScrollModern.Scroll;
 using SmoothScrollModern.Settings;
@@ -8,40 +9,34 @@ using SmoothScrollModern.Startup;
 using SmoothScrollModern.Tray;
 using SmoothScrollModern.Widgets.Shell.ViewModels;
 
-namespace SmoothScrollModern.Core;
+namespace SmoothScrollModern.Composition;
 
 public sealed class AppBootstrapper : IDisposable
 {
     private readonly ISettingsService _settingsService;
-    private readonly IInputInjectionService _inputInjectionService;
     private readonly ISmoothScrollEngine _smoothScrollEngine;
     private readonly IMouseHookService _mouseHookService;
     private readonly ITrayService _trayService;
     private bool _isExitRequested;
     private bool _disposed;
 
-    public AppBootstrapper()
+    public AppBootstrapper(
+        AppSettings settings,
+        ISettingsService settingsService,
+        ISmoothScrollEngine smoothScrollEngine,
+        IMouseHookService mouseHookService,
+        ITrayService trayService,
+        MainViewModel mainViewModel,
+        MainWindow mainWindow)
     {
-        _settingsService = new JsonSettingsService();
-        Settings = _settingsService.Load();
-
-        var activeWindowService = new ActiveWindowService();
-        var applicationRulesService = new ApplicationRulesService();
-        var startupService = new WindowsStartupService();
-
-        _inputInjectionService = new InputInjectionService();
-        _smoothScrollEngine = new SmoothScrollEngine(_inputInjectionService);
-        _mouseHookService = new MouseHookService();
-        _trayService = new TrayService();
-
-        MainViewModel = new MainViewModel(
-            Settings,
-            _settingsService,
-            activeWindowService,
-            applicationRulesService,
-            startupService);
-
-        MainWindow = new MainWindow(MainViewModel, HandleMainWindowClosing);
+        Settings = settings;
+        _settingsService = settingsService;
+        _smoothScrollEngine = smoothScrollEngine;
+        _mouseHookService = mouseHookService;
+        _trayService = trayService;
+        MainViewModel = mainViewModel;
+        MainWindow = mainWindow;
+        MainWindow.ClosingRequested += HandleMainWindowClosing;
     }
 
     public AppSettings Settings { get; }
@@ -115,6 +110,7 @@ public sealed class AppBootstrapper : IDisposable
         }
 
         _mouseHookService.MouseWheel -= OnMouseWheel;
+        MainWindow.ClosingRequested -= HandleMainWindowClosing;
         _mouseHookService.Dispose();
         _smoothScrollEngine.Dispose();
         MainViewModel.Dispose();

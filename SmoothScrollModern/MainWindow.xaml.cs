@@ -14,13 +14,11 @@ namespace SmoothScrollModern;
 public sealed partial class MainWindow : WindowEx
 {
     private readonly Dictionary<ScrollViewer, double> _scrollTargets = [];
-    private readonly Action<CancelEventArgs> _closingHandler;
     private readonly MainViewModel _viewModel;
 
-    public MainWindow(MainViewModel viewModel, Action<CancelEventArgs> closingHandler)
+    public MainWindow(MainViewModel viewModel)
     {
         _viewModel = viewModel;
-        _closingHandler = closingHandler;
 
         InitializeComponent();
         ContentRoot.DataContext = viewModel;
@@ -32,6 +30,8 @@ public sealed partial class MainWindow : WindowEx
         viewModel.ThemeChanged += ApplyTheme;
         ApplyTheme(viewModel.Theme);
     }
+
+    public event Action<CancelEventArgs>? ClosingRequested;
 
     public void HideWindow()
     {
@@ -83,7 +83,7 @@ public sealed partial class MainWindow : WindowEx
     private void OnAppWindowClosing(AppWindow sender, AppWindowClosingEventArgs args)
     {
         var cancelEventArgs = new CancelEventArgs();
-        _closingHandler(cancelEventArgs);
+        ClosingRequested?.Invoke(cancelEventArgs);
         args.Cancel = cancelEventArgs.Cancel;
     }
 

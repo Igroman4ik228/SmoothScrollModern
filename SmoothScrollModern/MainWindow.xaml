@@ -44,8 +44,8 @@
             <Button
                 Width="44"
                 Height="40"
-                AutomationProperties.Name="Свернуть или развернуть навигацию"
                 VerticalAlignment="Center"
+                AutomationProperties.Name="Свернуть или развернуть навигацию"
                 Click="OnNavigationPaneToggleClick"
                 ToolTipService.ToolTip="Свернуть или развернуть навигацию">
                 <FontIcon

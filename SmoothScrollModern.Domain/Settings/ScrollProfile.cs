@@ -1,11 +1,11 @@
 using System.Globalization;
 using System.Text.Json.Serialization;
-using CommunityToolkit.Mvvm.ComponentModel;
+using SmoothScrollModern.Common;
 using SmoothScrollModern.Scroll;
 
 namespace SmoothScrollModern.Settings;
 
-public sealed class ScrollProfile : ObservableObject
+public sealed class ScrollProfile : ObservableEntity
 {
     private string _id = Guid.NewGuid().ToString("N");
     private string _name = "Новый профиль";
