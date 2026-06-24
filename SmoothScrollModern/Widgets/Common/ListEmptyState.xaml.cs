@@ -1,7 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
-namespace SmoothScrollModern.Controls;
+namespace SmoothScrollModern.Widgets.Common;
 
 public sealed partial class ListEmptyState : UserControl
 {

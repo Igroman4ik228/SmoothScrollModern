@@ -24,9 +24,12 @@
                     Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 <Button
                     Grid.Column="1"
+                    Width="40"
+                    Height="32"
+                    MinWidth="40"
+                    Padding="0"
                     AutomationProperties.Name="Удалить профиль прокрутки"
                     Click="OnRemoveScrollProfileClick"
-                    Style="{StaticResource CompactIconButtonStyle}"
                     VerticalAlignment="Bottom"
                     ToolTipService.ToolTip="Удалить профиль">
                     <FontIcon Glyph="&#xE74D;" Style="{StaticResource InlineButtonIconStyle}" />

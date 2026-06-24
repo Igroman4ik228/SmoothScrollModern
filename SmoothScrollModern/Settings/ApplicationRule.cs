@@ -1,11 +1,10 @@
-using System.ComponentModel;
-using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
+using CommunityToolkit.Mvvm.ComponentModel;
 using SmoothScrollModern.Scroll;
 
 namespace SmoothScrollModern.Settings;
 
-public sealed class ApplicationRule : INotifyPropertyChanged
+public sealed class ApplicationRule : ObservableObject
 {
     private const string UnknownProcessName = "unknown.exe";
     private const string UnknownDisplayName = "Неизвестное приложение";
@@ -21,14 +20,12 @@ public sealed class ApplicationRule : INotifyPropertyChanged
     private bool _isRuleEnabled = true;
     private bool _useCustomScrollSettings;
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     public string ProcessName
     {
         get => _processName;
         set
         {
-            if (SetField(ref _processName, NormalizeProcessName(value)))
+            if (SetProperty(ref _processName, NormalizeProcessName(value)))
             {
                 OnPropertyChanged(nameof(ProcessNameText));
                 OnPropertyChanged(nameof(DisplayNameText));
@@ -41,7 +38,7 @@ public sealed class ApplicationRule : INotifyPropertyChanged
         get => _executablePath;
         set
         {
-            if (SetField(ref _executablePath, NormalizeExecutablePath(value)))
+            if (SetProperty(ref _executablePath, NormalizeExecutablePath(value)))
             {
                 OnPropertyChanged(nameof(ExecutablePathText));
                 OnPropertyChanged(nameof(HasExecutablePath));
@@ -54,7 +51,7 @@ public sealed class ApplicationRule : INotifyPropertyChanged
         get => _displayName;
         set
         {
-            if (SetField(ref _displayName, value?.Trim() ?? string.Empty))
+            if (SetProperty(ref _displayName, value?.Trim() ?? string.Empty))
             {
                 OnPropertyChanged(nameof(DisplayNameText));
             }
@@ -64,37 +61,37 @@ public sealed class ApplicationRule : INotifyPropertyChanged
     public string ScrollProfileId
     {
         get => _scrollProfileId;
-        set => SetField(ref _scrollProfileId, value?.Trim() ?? string.Empty);
+        set => SetProperty(ref _scrollProfileId, value?.Trim() ?? string.Empty);
     }
 
     public bool IsSmoothScrollDisabled
     {
         get => _isSmoothScrollDisabled;
-        set => SetField(ref _isSmoothScrollDisabled, value);
+        set => SetProperty(ref _isSmoothScrollDisabled, value);
     }
 
     public bool IsUserRule
     {
         get => _isUserRule;
-        set => SetField(ref _isUserRule, value);
+        set => SetProperty(ref _isUserRule, value);
     }
 
     public bool IsRuleEnabled
     {
         get => _isRuleEnabled;
-        set => SetField(ref _isRuleEnabled, value);
+        set => SetProperty(ref _isRuleEnabled, value);
     }
 
     public bool UseCustomScrollSettings
     {
         get => _useCustomScrollSettings;
-        set => SetField(ref _useCustomScrollSettings, value);
+        set => SetProperty(ref _useCustomScrollSettings, value);
     }
 
     public ScrollDeliveryMode DeliveryMode
     {
         get => _deliveryMode;
-        set => SetField(ref _deliveryMode, value);
+        set => SetProperty(ref _deliveryMode, value);
     }
 
     public ScrollSettings Scroll
@@ -102,10 +99,12 @@ public sealed class ApplicationRule : INotifyPropertyChanged
         get => _scroll;
         set
         {
-            _scroll = value ?? new ScrollSettings();
-            _scroll.Validate();
-            OnPropertyChanged();
-            OnScrollPropertiesChanged();
+            var scroll = value ?? new ScrollSettings();
+            scroll.Validate();
+            if (SetProperty(ref _scroll, scroll))
+            {
+                OnScrollPropertiesChanged();
+            }
         }
     }
 
@@ -259,23 +258,6 @@ public sealed class ApplicationRule : INotifyPropertyChanged
     public static string NormalizeExecutablePath(string executablePath)
     {
         return executablePath?.Trim() ?? string.Empty;
-    }
-
-    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value))
-        {
-            return false;
-        }
-
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
-    }
-
-    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     private void OnScrollPropertiesChanged()

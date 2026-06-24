@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <UserControl
-    x:Class="SmoothScrollModern.Controls.ApplicationRuleItem"
+    x:Class="SmoothScrollModern.Features.Applications.Controls.ApplicationRuleItem"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="using:SmoothScrollModern.Controls">
+    xmlns:controls="using:SmoothScrollModern.Features.Applications.Controls">
 
     <Border Margin="0,0,0,8" Style="{StaticResource ListSurfacePanelStyle}">
         <StackPanel Spacing="16">
@@ -18,9 +18,13 @@
                     ProcessName="{Binding ProcessNameText}" />
                 <Button
                     Grid.Column="1"
+                    Width="40"
+                    Height="32"
+                    MinWidth="40"
+                    Padding="0"
                     AutomationProperties.Name="Удалить правило исключения"
                     Click="OnRemoveRuleClick"
-                    Style="{StaticResource CompactIconButtonStyle}"
+                    VerticalAlignment="Top"
                     ToolTipService.ToolTip="Удалить правило">
                     <FontIcon
                         Glyph="&#xE74D;"

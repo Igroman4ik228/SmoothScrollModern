@@ -1,5 +1,5 @@
 using Microsoft.UI.Xaml.Controls;
-using SmoothScrollModern.ViewModels;
+using SmoothScrollModern.Features.Profiles.ViewModels;
 using Windows.System;
 
 namespace SmoothScrollModern.Features.Profiles.Controls;
@@ -14,7 +14,7 @@ public sealed partial class UserScrollProfilesBlock : UserControl
     private void OnNewScrollProfileNameKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
     {
         if (e.Key != VirtualKey.Enter
-            || DataContext is not MainViewModel viewModel
+            || DataContext is not ProfilesViewModel viewModel
             || !viewModel.AddScrollProfileCommand.CanExecute(null))
         {
             return;
@@ -23,5 +23,4 @@ public sealed partial class UserScrollProfilesBlock : UserControl
         viewModel.AddScrollProfileCommand.Execute(null);
         e.Handled = true;
     }
-
 }

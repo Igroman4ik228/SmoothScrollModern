@@ -1,5 +1,5 @@
 using Microsoft.UI.Xaml.Controls;
-using SmoothScrollModern.ViewModels;
+using SmoothScrollModern.Features.Settings.ViewModels;
 
 namespace SmoothScrollModern.Features.Settings.Controls;
 
@@ -12,7 +12,7 @@ public sealed partial class ApplicationPreferencesBlock : UserControl
 
     private async void OnResetDefaultsClick(object sender, Microsoft.UI.Xaml.RoutedEventArgs e)
     {
-        if (DataContext is not MainViewModel viewModel
+        if (DataContext is not ApplicationSettingsViewModel viewModel
             || !viewModel.ResetDefaultsCommand.CanExecute(null))
         {
             return;

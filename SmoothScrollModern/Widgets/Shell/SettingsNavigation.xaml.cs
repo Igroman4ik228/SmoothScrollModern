@@ -1,6 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using SmoothScrollModern.Pages;
+using SmoothScrollModern.Widgets.Shell.ViewModels;
 
 namespace SmoothScrollModern.Widgets.Shell;
 
@@ -38,6 +39,14 @@ public sealed partial class SettingsNavigation : UserControl
 
     private void OnDataContextChanged(FrameworkElement sender, DataContextChangedEventArgs args)
     {
+        if (args.NewValue is MainViewModel viewModel)
+        {
+            _profilesPage.DataContext = viewModel.Profiles;
+            _exceptionsPage.DataContext = viewModel.Applications;
+            _settingsPage.DataContext = viewModel.ApplicationSettings;
+            return;
+        }
+
         _profilesPage.DataContext = args.NewValue;
         _exceptionsPage.DataContext = args.NewValue;
         _settingsPage.DataContext = args.NewValue;

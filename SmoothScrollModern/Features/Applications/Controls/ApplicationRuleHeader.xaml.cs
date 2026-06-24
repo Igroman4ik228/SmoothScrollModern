@@ -1,7 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 
-namespace SmoothScrollModern.Controls;
+namespace SmoothScrollModern.Features.Applications.Controls;
 
 public sealed partial class ApplicationRuleHeader : UserControl
 {

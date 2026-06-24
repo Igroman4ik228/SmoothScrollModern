@@ -1,5 +1,5 @@
 using Microsoft.UI.Xaml.Controls;
-using SmoothScrollModern.ViewModels;
+using SmoothScrollModern.Features.Applications.ViewModels;
 using Windows.System;
 
 namespace SmoothScrollModern.Features.Applications.Controls;
@@ -14,7 +14,7 @@ public sealed partial class ManualApplicationRuleBlock : UserControl
     private void OnManualProcessNameKeyDown(object sender, Microsoft.UI.Xaml.Input.KeyRoutedEventArgs e)
     {
         if (e.Key != VirtualKey.Enter
-            || DataContext is not MainViewModel viewModel
+            || DataContext is not ApplicationRulesViewModel viewModel
             || !viewModel.AddManualRuleCommand.CanExecute(null))
         {
             return;

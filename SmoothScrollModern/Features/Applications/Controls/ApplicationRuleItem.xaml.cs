@@ -1,10 +1,10 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Media;
+using SmoothScrollModern.Features.Applications.ViewModels;
 using SmoothScrollModern.Settings;
-using SmoothScrollModern.ViewModels;
+using SmoothScrollModern.Widgets.Common;
 
-namespace SmoothScrollModern.Controls;
+namespace SmoothScrollModern.Features.Applications.Controls;
 
 public sealed partial class ApplicationRuleItem : UserControl
 {
@@ -20,23 +20,10 @@ public sealed partial class ApplicationRuleItem : UserControl
             return;
         }
 
-        var viewModel = FindMainViewModel();
+        var viewModel = VisualTreeDataContext.FindAncestor<ApplicationRulesViewModel>(this);
         if (viewModel?.RemoveRuleCommand.CanExecute(rule) == true)
         {
             viewModel.RemoveRuleCommand.Execute(rule);
         }
-    }
-
-    private MainViewModel? FindMainViewModel()
-    {
-        for (DependencyObject? current = this; current is not null; current = VisualTreeHelper.GetParent(current))
-        {
-            if (current is FrameworkElement { DataContext: MainViewModel viewModel })
-            {
-                return viewModel;
-            }
-        }
-
-        return null;
     }
 }

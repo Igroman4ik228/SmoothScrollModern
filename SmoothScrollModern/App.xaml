@@ -4,15 +4,15 @@
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
     xmlns:local="using:SmoothScrollModern"
-    xmlns:vm="using:SmoothScrollModern.ViewModels">
+    xmlns:presentation="using:SmoothScrollModern.Core.Presentation">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
                 <XamlControlsResources xmlns="using:Microsoft.UI.Xaml.Controls" />
             </ResourceDictionary.MergedDictionaries>
 
-            <vm:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
-            <vm:BooleanToOpacityConverter x:Key="BooleanToOpacityConverter" />
+            <presentation:BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter" />
+            <presentation:BooleanToOpacityConverter x:Key="BooleanToOpacityConverter" />
 
             <Style x:Key="SectionTitleStyle" TargetType="TextBlock">
                 <Setter Property="FontSize" Value="20" />
@@ -77,14 +77,6 @@
                 <Setter Property="FontSize" Value="14" />
                 <Setter Property="HorizontalAlignment" Value="Center" />
                 <Setter Property="VerticalAlignment" Value="Center" />
-            </Style>
-
-            <Style x:Key="CompactIconButtonStyle" TargetType="Button">
-                <Setter Property="Width" Value="40" />
-                <Setter Property="Height" Value="32" />
-                <Setter Property="MinWidth" Value="40" />
-                <Setter Property="Padding" Value="0" />
-                <Setter Property="VerticalAlignment" Value="Top" />
             </Style>
 
         </ResourceDictionary>

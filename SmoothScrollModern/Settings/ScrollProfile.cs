@@ -1,29 +1,26 @@
-using System.ComponentModel;
 using System.Globalization;
-using System.Runtime.CompilerServices;
 using System.Text.Json.Serialization;
+using CommunityToolkit.Mvvm.ComponentModel;
 using SmoothScrollModern.Scroll;
 
 namespace SmoothScrollModern.Settings;
 
-public sealed class ScrollProfile : INotifyPropertyChanged
+public sealed class ScrollProfile : ObservableObject
 {
     private string _id = Guid.NewGuid().ToString("N");
     private string _name = "Новый профиль";
     private ScrollSettings _scroll = new();
 
-    public event PropertyChangedEventHandler? PropertyChanged;
-
     public string Id
     {
         get => _id;
-        set => SetField(ref _id, value?.Trim() ?? string.Empty);
+        set => SetProperty(ref _id, value?.Trim() ?? string.Empty);
     }
 
     public string Name
     {
         get => _name;
-        set => SetField(ref _name, string.IsNullOrWhiteSpace(value) ? "Новый профиль" : value.Trim());
+        set => SetProperty(ref _name, string.IsNullOrWhiteSpace(value) ? "Новый профиль" : value.Trim());
     }
 
     public ScrollSettings Scroll
@@ -31,10 +28,12 @@ public sealed class ScrollProfile : INotifyPropertyChanged
         get => _scroll;
         set
         {
-            _scroll = value ?? new ScrollSettings();
-            _scroll.Validate();
-            OnPropertyChanged();
-            OnScrollPropertiesChanged();
+            var scroll = value ?? new ScrollSettings();
+            scroll.Validate();
+            if (SetProperty(ref _scroll, scroll))
+            {
+                OnScrollPropertiesChanged();
+            }
         }
     }
 
@@ -160,23 +159,6 @@ public sealed class ScrollProfile : INotifyPropertyChanged
         Name = string.IsNullOrWhiteSpace(Name) ? "Новый профиль" : Name;
         Scroll ??= new ScrollSettings();
         Scroll.Validate();
-    }
-
-    private bool SetField<T>(ref T field, T value, [CallerMemberName] string? propertyName = null)
-    {
-        if (EqualityComparer<T>.Default.Equals(field, value))
-        {
-            return false;
-        }
-
-        field = value;
-        OnPropertyChanged(propertyName);
-        return true;
-    }
-
-    private void OnPropertyChanged([CallerMemberName] string? propertyName = null)
-    {
-        PropertyChanged?.Invoke(this, new PropertyChangedEventArgs(propertyName));
     }
 
     private void OnScrollPropertiesChanged()

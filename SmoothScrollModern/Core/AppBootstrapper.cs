@@ -6,7 +6,7 @@ using SmoothScrollModern.Scroll;
 using SmoothScrollModern.Settings;
 using SmoothScrollModern.Startup;
 using SmoothScrollModern.Tray;
-using SmoothScrollModern.ViewModels;
+using SmoothScrollModern.Widgets.Shell.ViewModels;
 
 namespace SmoothScrollModern.Core;
 
@@ -54,7 +54,7 @@ public sealed class AppBootstrapper : IDisposable
     {
         _trayService.Initialize();
         _trayService.ShowRequested += ShowMainWindow;
-        _trayService.ToggleEnabledRequested += () => MainViewModel.IsEnabled = !MainViewModel.IsEnabled;
+        _trayService.ToggleEnabledRequested += () => MainViewModel.ApplicationSettings.IsEnabled = !MainViewModel.IsEnabled;
         _trayService.DisableForCurrentApplicationRequested += MainViewModel.DisableCurrentApplication;
         _trayService.PauseRequested += () => MainViewModel.PauseFor(TimeSpan.FromMinutes(Constants.TrayPauseMinutes));
         _trayService.ExitRequested += ExitApplication;
@@ -90,7 +90,7 @@ public sealed class AppBootstrapper : IDisposable
         }
 
         args.Cancel = true;
-        if (Settings.Tray.CloseToTray)
+        if (MainViewModel.Settings.Tray.CloseToTray)
         {
             MainWindow.HideWindow();
             return;

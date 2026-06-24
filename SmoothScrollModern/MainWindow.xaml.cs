@@ -3,7 +3,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Microsoft.UI.Xaml.Input;
 using Microsoft.UI.Xaml.Media;
-using SmoothScrollModern.ViewModels;
+using SmoothScrollModern.Widgets.Shell.ViewModels;
 using System.ComponentModel;
 using Windows.UI;
 using WinUIEx;

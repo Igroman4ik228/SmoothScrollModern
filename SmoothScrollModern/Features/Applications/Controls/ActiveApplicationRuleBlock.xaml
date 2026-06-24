@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <UserControl
-    x:Class="SmoothScrollModern.Controls.ActiveApplicationRuleBlock"
-    x:Name="Root"
+    x:Class="SmoothScrollModern.Features.Applications.Controls.ActiveApplicationRuleBlock"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="using:SmoothScrollModern.Controls">
+    xmlns:controls="using:SmoothScrollModern.Features.Applications.Controls"
+    x:Name="Root">
 
     <Border Style="{StaticResource SurfacePanelStyle}">
         <StackPanel Spacing="16">
@@ -31,18 +31,13 @@
                     AutomationProperties.Name="Удалить правило для активного приложения"
                     Command="{Binding RemoveRuleCommand}"
                     CommandParameter="{Binding CurrentApplicationRule}"
-                    Style="{StaticResource CompactIconButtonStyle}"
                     ToolTipService.ToolTip="Удалить правило"
                     Visibility="{Binding HasCurrentApplicationRule, Converter={StaticResource BooleanToVisibilityConverter}}">
-                    <FontIcon
-                        Glyph="&#xE74D;"
-                        Style="{StaticResource InlineButtonIconStyle}" />
+                    <FontIcon Glyph="&#xE74D;" Style="{StaticResource InlineButtonIconStyle}" />
                 </Button>
             </Grid>
 
-            <controls:ApplicationRuleSettings
-                DataContext="{Binding CurrentApplicationRule}"
-                Visibility="{Binding DataContext.HasCurrentApplicationRule, ElementName=Root, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <controls:ApplicationRuleSettings DataContext="{Binding CurrentApplicationRule}" Visibility="{Binding DataContext.HasCurrentApplicationRule, ElementName=Root, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
             <Button
                 HorizontalAlignment="Left"
@@ -52,9 +47,7 @@
                 ToolTipService.ToolTip="Создать правило для текущего активного приложения"
                 Visibility="{Binding IsCurrentApplicationRuleMissing, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel Orientation="Horizontal" Spacing="6">
-                    <FontIcon
-                        Glyph="&#xE710;"
-                        Style="{StaticResource InlineButtonIconStyle}" />
+                    <FontIcon Glyph="&#xE710;" Style="{StaticResource InlineButtonIconStyle}" />
                     <TextBlock Text="Добавить исключение" />
                 </StackPanel>
             </Button>

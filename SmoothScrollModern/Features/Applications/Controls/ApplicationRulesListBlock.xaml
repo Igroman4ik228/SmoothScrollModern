@@ -3,7 +3,8 @@
     x:Class="SmoothScrollModern.Features.Applications.Controls.ApplicationRulesListBlock"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="using:SmoothScrollModern.Controls">
+    xmlns:applications="using:SmoothScrollModern.Features.Applications.Controls"
+    xmlns:common="using:SmoothScrollModern.Widgets.Common">
 
     <Border Style="{StaticResource SurfacePanelStyle}">
         <StackPanel Spacing="14">
@@ -42,12 +43,12 @@
                 QueryIcon="Find"
                 Text="{Binding ApplicationSearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
-            <controls:ListEmptyState
+            <common:ListEmptyState
                 Description="Добавьте текущее приложение, укажите процесс вручную или выберите exe-файл, чтобы настроить исключение."
                 Title="Список правил пуст"
                 Visibility="{Binding IsApplicationRulesEmpty, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
-            <controls:ListEmptyState
+            <common:ListEmptyState
                 Description="Проверьте название приложения, имя процесса или путь к файлу и попробуйте другой запрос."
                 Title="Правила не найдены"
                 Visibility="{Binding IsApplicationRuleSearchEmpty, Converter={StaticResource BooleanToVisibilityConverter}}" />
@@ -62,7 +63,7 @@
                 Visibility="{Binding HasVisibleApplicationRules, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <ListView.ItemTemplate>
                     <DataTemplate>
-                        <controls:ApplicationRuleItem />
+                        <applications:ApplicationRuleItem />
                     </DataTemplate>
                 </ListView.ItemTemplate>
             </ListView>
