@@ -13,6 +13,7 @@
                 Header="Включить плавную прокрутку"
                 HorizontalContentAlignment="Stretch">
                 <ToggleSwitch
+                    AutomationProperties.Name="Включить плавную прокрутку"
                     MinWidth="96"
                     VerticalAlignment="Center"
                     IsOn="{Binding IsEnabled, Mode=TwoWay}"
@@ -24,6 +25,7 @@
                 Header="Полноэкранный режим"
                 HorizontalContentAlignment="Stretch">
                 <ToggleSwitch
+                    AutomationProperties.Name="Полноэкранный режим"
                     MinWidth="96"
                     VerticalAlignment="Center"
                     IsOn="{Binding AutoDetectExcludedApps, Mode=TwoWay}"

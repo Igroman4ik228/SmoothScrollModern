@@ -7,8 +7,8 @@
     HorizontalAlignment="Stretch">
 
     <Border
-        HorizontalAlignment="Stretch"
         Margin="0,0,0,8"
+        HorizontalAlignment="Stretch"
         Style="{StaticResource ListSurfacePanelStyle}">
         <StackPanel Spacing="16">
             <Grid ColumnSpacing="12">
@@ -17,20 +17,19 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBox
-                    Header="Название профиля"
+                    AutomationProperties.Name="Название профиля"
                     VerticalContentAlignment="Center"
+                    Header="Название профиля"
                     PlaceholderText="Например: Браузер"
                     Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 <Button
                     Grid.Column="1"
-                    Width="40"
-                    Height="32"
-                    VerticalAlignment="Bottom"
+                    AutomationProperties.Name="Удалить профиль прокрутки"
                     Click="OnRemoveScrollProfileClick"
+                    Style="{StaticResource CompactIconButtonStyle}"
+                    VerticalAlignment="Bottom"
                     ToolTipService.ToolTip="Удалить профиль">
-                    <FontIcon
-                        Glyph="&#xE74D;"
-                        Style="{StaticResource InlineButtonIconStyle}" />
+                    <FontIcon Glyph="&#xE74D;" Style="{StaticResource InlineButtonIconStyle}" />
                 </Button>
             </Grid>
 
@@ -87,16 +86,13 @@
 
                 <StackPanel Spacing="6">
                     <StackPanel Spacing="2">
-                        <TextBlock
-                            FontWeight="SemiBold"
-                            Text="Поведение прокрутки" />
-                        <TextBlock
-                            Style="{StaticResource CaptionTextStyle}"
-                            Text="Как менять скорость во время одного шага." />
+                        <TextBlock FontWeight="SemiBold" Text="Поведение прокрутки" />
+                        <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Как менять скорость во время одного шага." />
                     </StackPanel>
                     <ComboBox
-                        DisplayMemberPath="Name"
+                        AutomationProperties.Name="Поведение прокрутки"
                         HorizontalAlignment="Stretch"
+                        DisplayMemberPath="Name"
                         Loaded="OnEasingComboBoxLoaded"
                         PlaceholderText="Мягкая"
                         SelectedValue="{Binding ProfileEasingType, Mode=TwoWay}"
@@ -105,11 +101,10 @@
 
                 <StackPanel Grid.Column="1" Spacing="6">
                     <StackPanel Spacing="2">
-                        <TextBlock
-                            FontWeight="SemiBold"
-                            Text="Горизонтальная прокрутка" />
+                        <TextBlock FontWeight="SemiBold" Text="Горизонтальная прокрутка" />
                     </StackPanel>
                     <ToggleSwitch
+                        AutomationProperties.Name="Горизонтальная прокрутка"
                         IsOn="{Binding ProfileEnableHorizontalScroll, Mode=TwoWay}"
                         OffContent="Откл."
                         OnContent="Вкл." />

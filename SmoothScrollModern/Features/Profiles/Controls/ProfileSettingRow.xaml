@@ -31,6 +31,7 @@
             x:Name="ValueBox"
             Grid.Column="1"
             AcceptsExpression="False"
+            AutomationProperties.Name="{Binding Label, ElementName=Root}"
             VerticalAlignment="Center"
             Maximum="{Binding Maximum, ElementName=Root}"
             Minimum="{Binding Minimum, ElementName=Root}"
@@ -42,6 +43,7 @@
         <Slider
             Grid.Row="1"
             Grid.ColumnSpan="2"
+            AutomationProperties.Name="{Binding Label, ElementName=Root}"
             MinHeight="32"
             Maximum="{Binding Maximum, ElementName=Root}"
             Minimum="{Binding Minimum, ElementName=Root}"

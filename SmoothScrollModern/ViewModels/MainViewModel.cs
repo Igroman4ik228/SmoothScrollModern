@@ -607,6 +607,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
         OnPropertyChanged(nameof(IsPaused));
         OnPropertyChanged(nameof(StatusText));
         (DisableCurrentApplicationCommand as RelayCommand)?.RaiseCanExecuteChanged();
+        (RemoveRuleCommand as RelayCommand)?.RaiseCanExecuteChanged();
         (RemoveSelectedRuleCommand as RelayCommand)?.RaiseCanExecuteChanged();
         StateChanged?.Invoke();
     }
@@ -1291,6 +1292,7 @@ public sealed class MainViewModel : ObservableObject, IDisposable
             nameof(IsCurrentApplicationExcluded),
             nameof(IsCurrentApplicationNotExcluded),
             nameof(IsCurrentApplicationBypassed));
+        (RemoveRuleCommand as RelayCommand)?.RaiseCanExecuteChanged();
     }
 
     private void QueueSave()

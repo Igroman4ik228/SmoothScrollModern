@@ -16,10 +16,15 @@
                     DisplayName="{Binding DisplayNameText}"
                     ExecutablePath="{Binding ExecutablePathText}"
                     ProcessName="{Binding ProcessNameText}" />
-                <Button Grid.Column="1" Click="OnRemoveRuleClick">
-                    <StackPanel Orientation="Horizontal" Spacing="6">
-                        <FontIcon Glyph="&#xE74D;" Style="{StaticResource InlineButtonIconStyle}" />
-                    </StackPanel>
+                <Button
+                    Grid.Column="1"
+                    AutomationProperties.Name="Удалить правило исключения"
+                    Click="OnRemoveRuleClick"
+                    Style="{StaticResource CompactIconButtonStyle}"
+                    ToolTipService.ToolTip="Удалить правило">
+                    <FontIcon
+                        Glyph="&#xE74D;"
+                        Style="{StaticResource InlineButtonIconStyle}" />
                 </Button>
             </Grid>
 

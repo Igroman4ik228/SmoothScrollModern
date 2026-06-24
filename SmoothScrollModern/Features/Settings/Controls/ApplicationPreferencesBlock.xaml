@@ -11,6 +11,7 @@
             <StackPanel Spacing="4">
                 <toolkit:SettingsCard Description="Тема применяется сразу и может следовать настройкам Windows." Header="Тема">
                     <ComboBox
+                        AutomationProperties.Name="Тема приложения"
                         Width="220"
                         DisplayMemberPath="Name"
                         ItemsSource="{Binding ThemeOptions}"
@@ -26,19 +27,28 @@
             <StackPanel Spacing="10">
                 <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Сохраните настройки в файл, восстановите их или верните значения по умолчанию." />
                 <StackPanel Orientation="Horizontal" Spacing="8">
-                    <Button Command="{Binding ExportSettingsCommand}">
+                    <Button
+                        AutomationProperties.Name="Экспортировать настройки"
+                        Command="{Binding ExportSettingsCommand}"
+                        ToolTipService.ToolTip="Сохранить настройки в JSON-файл">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon Glyph="&#xE74E;" Style="{StaticResource InlineButtonIconStyle}" />
                             <TextBlock Text="Экспорт" />
                         </StackPanel>
                     </Button>
-                    <Button Command="{Binding ImportSettingsCommand}">
+                    <Button
+                        AutomationProperties.Name="Импортировать настройки"
+                        Command="{Binding ImportSettingsCommand}"
+                        ToolTipService.ToolTip="Загрузить настройки из JSON-файла">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon Glyph="&#xE8E5;" Style="{StaticResource InlineButtonIconStyle}" />
                             <TextBlock Text="Импорт" />
                         </StackPanel>
                     </Button>
-                    <Button Command="{Binding ResetDefaultsCommand}">
+                    <Button
+                        AutomationProperties.Name="Сбросить настройки"
+                        Click="OnResetDefaultsClick"
+                        ToolTipService.ToolTip="Вернуть настройки по умолчанию">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon Glyph="&#xE72C;" Style="{StaticResource InlineButtonIconStyle}" />
                             <TextBlock Text="Сбросить" />
@@ -79,6 +89,7 @@
                 Text="© Igroman4ik228"
                 TextAlignment="Center" />
             <HyperlinkButton
+                AutomationProperties.Name="Открыть репозиторий SmoothScroll на GitHub"
                 HorizontalAlignment="Center"
                 Content="GitHub"
                 NavigateUri="https://github.com/Igroman4ik228/SmoothScrollModern" />

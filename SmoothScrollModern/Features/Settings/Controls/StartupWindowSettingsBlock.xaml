@@ -14,6 +14,7 @@
                 Description="SmoothScroll будет запускаться после входа в Windows."
                 Header="Запускать вместе с Windows">
                 <ToggleSwitch
+                    AutomationProperties.Name="Запускать вместе с Windows"
                     IsOn="{Binding StartWithWindows, Mode=TwoWay}"
                     OffContent="Откл."
                     OnContent="Вкл." />
@@ -22,6 +23,7 @@
                 Description="После запуска окно останется скрытым в области уведомлений."
                 Header="Запускать свернутым">
                 <ToggleSwitch
+                    AutomationProperties.Name="Запускать свернутым"
                     IsOn="{Binding StartMinimizedToTray, Mode=TwoWay}"
                     OffContent="Откл."
                     OnContent="Вкл." />
@@ -30,6 +32,7 @@
                 Description="Кнопка закрытия будет скрывать окно, а не завершать SmoothScroll."
                 Header="Закрывать в трей">
                 <ToggleSwitch
+                    AutomationProperties.Name="Закрывать в трей"
                     IsOn="{Binding CloseToTray, Mode=TwoWay}"
                     OffContent="Откл."
                     OnContent="Вкл." />

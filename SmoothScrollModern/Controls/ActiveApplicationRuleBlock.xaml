@@ -11,6 +11,7 @@
             <Grid ColumnSpacing="12">
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*" />
+                    <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
 
                 <StackPanel Spacing="6">
@@ -24,6 +25,19 @@
                         ExecutablePath="{Binding CurrentApplicationExecutablePathText}"
                         ProcessName="{Binding CurrentApplicationProcessNameText}" />
                 </StackPanel>
+
+                <Button
+                    Grid.Column="1"
+                    AutomationProperties.Name="Удалить правило для активного приложения"
+                    Command="{Binding RemoveRuleCommand}"
+                    CommandParameter="{Binding CurrentApplicationRule}"
+                    Style="{StaticResource CompactIconButtonStyle}"
+                    ToolTipService.ToolTip="Удалить правило"
+                    Visibility="{Binding HasCurrentApplicationRule, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <FontIcon
+                        Glyph="&#xE74D;"
+                        Style="{StaticResource InlineButtonIconStyle}" />
+                </Button>
             </Grid>
 
             <controls:ApplicationRuleSettings
@@ -32,8 +46,10 @@
 
             <Button
                 HorizontalAlignment="Left"
+                AutomationProperties.Name="Добавить активное приложение в исключения"
                 Command="{Binding DisableCurrentApplicationCommand}"
                 Style="{StaticResource AccentButtonStyle}"
+                ToolTipService.ToolTip="Создать правило для текущего активного приложения"
                 Visibility="{Binding IsCurrentApplicationRuleMissing, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <FontIcon

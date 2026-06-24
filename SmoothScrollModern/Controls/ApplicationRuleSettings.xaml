@@ -15,16 +15,24 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Spacing="6">
-            <TextBlock FontWeight="SemiBold" Text="Активировать правило" />
+            <StackPanel Spacing="2">
+                <TextBlock FontWeight="SemiBold" Text="Использовать правило" />
+                <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Если выключить, приложение будет использовать общие настройки." />
+            </StackPanel>
             <ToggleSwitch
+                AutomationProperties.Name="Использовать правило"
                 IsOn="{Binding IsRuleEnabled, Mode=TwoWay}"
                 OffContent="Откл."
                 OnContent="Вкл." />
         </StackPanel>
 
         <StackPanel Grid.Column="1" Spacing="6">
-            <TextBlock FontWeight="SemiBold" Text="Отключить плавную прокрутку" />
+            <StackPanel Spacing="2">
+                <TextBlock FontWeight="SemiBold" Text="Отключить плавную прокрутку" />
+                <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Полностью пропускает приложение через обычную прокрутку Windows." />
+            </StackPanel>
             <ToggleSwitch
+                AutomationProperties.Name="Отключить плавную прокрутку"
                 IsEnabled="{Binding IsRuleEnabled}"
                 IsOn="{Binding IsSmoothScrollDisabled, Mode=TwoWay}"
                 OffContent="Откл."
@@ -37,6 +45,7 @@
             Spacing="6">
             <TextBlock FontWeight="SemiBold" Text="Режим прокрутки" />
             <ComboBox
+                AutomationProperties.Name="Режим прокрутки"
                 HorizontalAlignment="Stretch"
                 DisplayMemberPath="Name"
                 IsEnabled="{Binding IsRuleEnabled}"
@@ -53,6 +62,7 @@
             Spacing="6">
             <TextBlock FontWeight="SemiBold" Text="Профиль прокрутки" />
             <ComboBox
+                AutomationProperties.Name="Профиль прокрутки"
                 HorizontalAlignment="Stretch"
                 DisplayMemberPath="Name"
                 IsEnabled="{Binding IsRuleEnabled}"

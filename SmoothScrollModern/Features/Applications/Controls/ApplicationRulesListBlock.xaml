@@ -37,6 +37,7 @@
             </Grid>
 
             <AutoSuggestBox
+                AutomationProperties.Name="Поиск правил исключений"
                 PlaceholderText="Поиск по названию, процессу или пути"
                 QueryIcon="Find"
                 Text="{Binding ApplicationSearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />

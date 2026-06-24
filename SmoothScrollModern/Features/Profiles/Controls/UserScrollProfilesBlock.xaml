@@ -21,6 +21,7 @@
                     </Grid.ColumnDefinitions>
                     <TextBox
                         x:Name="NewScrollProfileNameBox"
+                        AutomationProperties.Name="Название нового профиля"
                         VerticalContentAlignment="Center"
                         Header="Название профиля"
                         KeyDown="OnNewScrollProfileNameKeyDown"
@@ -28,9 +29,11 @@
                         Text="{Binding NewScrollProfileName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                     <Button
                         Grid.Column="1"
+                        AutomationProperties.Name="Создать профиль прокрутки"
                         VerticalAlignment="Bottom"
                         Command="{Binding AddScrollProfileCommand}"
-                        Style="{StaticResource AccentButtonStyle}">
+                        Style="{StaticResource AccentButtonStyle}"
+                        ToolTipService.ToolTip="Создать профиль с текущими основными параметрами">
                         <StackPanel Orientation="Horizontal" Spacing="6">
                             <FontIcon Glyph="&#xE710;" Style="{StaticResource InlineButtonIconStyle}" />
                             <TextBlock Text="Создать" />
@@ -69,6 +72,7 @@
 
                 <AutoSuggestBox
                     x:Name="ScrollProfileSearchBox"
+                    AutomationProperties.Name="Поиск пользовательских профилей"
                     PlaceholderText="Поиск по названию профиля"
                     QueryIcon="Find"
                     Text="{Binding ScrollProfileSearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
