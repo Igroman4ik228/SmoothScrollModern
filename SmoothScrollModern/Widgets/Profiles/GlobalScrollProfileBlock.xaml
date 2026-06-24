@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <UserControl
-    x:Class="SmoothScrollModern.Features.Profiles.Controls.GlobalScrollProfileBlock"
+    x:Class="SmoothScrollModern.Widgets.Profiles.GlobalScrollProfileBlock"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:profiles="using:SmoothScrollModern.Features.Profiles.Controls">
+    xmlns:sharedControls="using:SmoothScrollModern.Shared.Controls">
 
     <Border Style="{StaticResource SurfacePanelStyle}">
         <StackPanel Spacing="14">
@@ -12,7 +12,7 @@
                 <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Эти параметры используются везде, где не выбран отдельный профиль исключения." />
             </StackPanel>
 
-            <profiles:ProfileSettingRow
+            <sharedControls:ProfileSettingRow
                 Description="Сколько прокручивать за один шаг колеса."
                 FractionDigits="3"
                 Label="Сила прокрутки"
@@ -22,7 +22,7 @@
                 StepFrequency="0.05"
                 Value="{Binding ScrollMultiplier, Mode=TwoWay}" />
 
-            <profiles:ProfileSettingRow
+            <sharedControls:ProfileSettingRow
                 Description="Как долго длится один шаг прокрутки."
                 Label="Время прокрутки, мс"
                 Maximum="900"
@@ -31,7 +31,7 @@
                 StepFrequency="10"
                 Value="{Binding DurationMs, Mode=TwoWay}" />
 
-            <profiles:ProfileSettingRow
+            <sharedControls:ProfileSettingRow
                 Description="Насколько мягко движется прокрутка."
                 FractionDigits="3"
                 Label="Плавность"
@@ -41,7 +41,7 @@
                 StepFrequency="0.025"
                 Value="{Binding Smoothness, Mode=TwoWay}" />
 
-            <profiles:ProfileSettingRow
+            <sharedControls:ProfileSettingRow
                 Description="Ускоряет прокрутку при быстрых движениях колеса."
                 FractionDigits="3"
                 Label="Ускорение"

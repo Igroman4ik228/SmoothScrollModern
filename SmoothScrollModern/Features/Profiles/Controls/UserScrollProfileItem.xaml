@@ -3,7 +3,7 @@
     x:Class="SmoothScrollModern.Features.Profiles.Controls.UserScrollProfileItem"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:profiles="using:SmoothScrollModern.Features.Profiles.Controls"
+    xmlns:sharedControls="using:SmoothScrollModern.Shared.Controls"
     HorizontalAlignment="Stretch">
 
     <Border
@@ -17,8 +17,8 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <TextBox
-                    AutomationProperties.Name="Название профиля"
                     VerticalContentAlignment="Center"
+                    AutomationProperties.Name="Название профиля"
                     Header="Название профиля"
                     PlaceholderText="Например: Браузер"
                     Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
@@ -28,9 +28,9 @@
                     Height="32"
                     MinWidth="40"
                     Padding="0"
+                    VerticalAlignment="Bottom"
                     AutomationProperties.Name="Удалить профиль прокрутки"
                     Click="OnRemoveScrollProfileClick"
-                    VerticalAlignment="Bottom"
                     ToolTipService.ToolTip="Удалить профиль">
                     <FontIcon Glyph="&#xE74D;" Style="{StaticResource InlineButtonIconStyle}" />
                 </Button>
@@ -42,7 +42,7 @@
                 Text="{Binding ProfileSummaryText}"
                 TextTrimming="CharacterEllipsis" />
 
-            <profiles:ProfileSettingRow
+            <sharedControls:ProfileSettingRow
                 Description="Сколько прокручивать за один шаг колеса."
                 FractionDigits="3"
                 Label="Сила прокрутки"
@@ -52,7 +52,7 @@
                 StepFrequency="0.05"
                 Value="{Binding ProfileScrollMultiplier, Mode=TwoWay}" />
 
-            <profiles:ProfileSettingRow
+            <sharedControls:ProfileSettingRow
                 Description="Как долго длится один шаг прокрутки."
                 Label="Время прокрутки, мс"
                 Maximum="900"
@@ -61,7 +61,7 @@
                 StepFrequency="10"
                 Value="{Binding ProfileDurationMs, Mode=TwoWay}" />
 
-            <profiles:ProfileSettingRow
+            <sharedControls:ProfileSettingRow
                 Description="Насколько мягко движется прокрутка."
                 FractionDigits="3"
                 Label="Плавность"
@@ -71,7 +71,7 @@
                 StepFrequency="0.025"
                 Value="{Binding ProfileSmoothness, Mode=TwoWay}" />
 
-            <profiles:ProfileSettingRow
+            <sharedControls:ProfileSettingRow
                 Description="Ускоряет прокрутку при быстрых движениях колеса."
                 FractionDigits="3"
                 Label="Ускорение"
@@ -93,8 +93,8 @@
                         <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Как менять скорость во время одного шага." />
                     </StackPanel>
                     <ComboBox
-                        AutomationProperties.Name="Поведение прокрутки"
                         HorizontalAlignment="Stretch"
+                        AutomationProperties.Name="Поведение прокрутки"
                         DisplayMemberPath="Name"
                         Loaded="OnEasingComboBoxLoaded"
                         PlaceholderText="Мягкая"

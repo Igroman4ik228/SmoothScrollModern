@@ -6,7 +6,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using SmoothScrollModern.Applications;
-using SmoothScrollModern.Core.Presentation;
+using SmoothScrollModern.Shared.Presentation;
 using SmoothScrollModern.Features.Profiles.ViewModels;
 using SmoothScrollModern.Scroll;
 using SmoothScrollModern.Settings;
@@ -181,12 +181,17 @@ public sealed class ApplicationRulesViewModel : ObservableObject
     public void RefreshCurrentApplication()
     {
         var activeApplication = _activeWindowService.GetActiveApplication();
+        var previousApplication = _currentApplication;
         if (!IsOwnApplication(activeApplication))
         {
             _currentApplication = activeApplication;
         }
 
-        RefreshFilter();
+        if (_currentApplication == previousApplication)
+        {
+            return;
+        }
+
         NotifyCurrentApplicationState();
         DisableCurrentApplicationCommand.NotifyCanExecuteChanged();
         RemoveRuleCommand.NotifyCanExecuteChanged();

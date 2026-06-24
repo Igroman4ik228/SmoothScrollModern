@@ -3,7 +3,7 @@
     x:Class="SmoothScrollModern.Pages.ExceptionsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:applicationControls="using:SmoothScrollModern.Features.Applications.Controls">
+    xmlns:applicationWidgets="using:SmoothScrollModern.Widgets.Applications">
 
     <ScrollViewer
         HorizontalScrollBarVisibility="Disabled"
@@ -13,9 +13,9 @@
             Margin="32,16,32,32"
             HorizontalAlignment="Stretch"
             Spacing="24">
-            <applicationControls:ActiveApplicationRuleBlock />
-            <applicationControls:ManualApplicationRuleBlock />
-            <applicationControls:ApplicationRulesListBlock />
+            <applicationWidgets:ActiveApplicationRuleBlock />
+            <applicationWidgets:ManualApplicationRuleBlock />
+            <applicationWidgets:ApplicationRulesListBlock />
         </StackPanel>
     </ScrollViewer>
 </UserControl>

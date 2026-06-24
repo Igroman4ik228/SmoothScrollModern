@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <UserControl
-    x:Class="SmoothScrollModern.Widgets.Common.ListEmptyState"
-    x:Name="Root"
+    x:Class="SmoothScrollModern.Shared.Controls.ListEmptyState"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Name="Root">
 
     <Grid
         MinHeight="180"

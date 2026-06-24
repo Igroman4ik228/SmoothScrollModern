@@ -1,7 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using SmoothScrollModern.Features.Applications.ViewModels;
-using SmoothScrollModern.Widgets.Common;
+using SmoothScrollModern.Shared.Controls;
 
 namespace SmoothScrollModern.Features.Applications.Controls;
 

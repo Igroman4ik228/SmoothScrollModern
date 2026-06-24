@@ -2,7 +2,7 @@ using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
 using Windows.Globalization.NumberFormatting;
 
-namespace SmoothScrollModern.Features.Profiles.Controls;
+namespace SmoothScrollModern.Shared.Controls;
 
 public sealed partial class ProfileSettingRow : UserControl
 {

@@ -1,6 +1,6 @@
 using System.Collections.ObjectModel;
 
-namespace SmoothScrollModern.Core.Presentation;
+namespace SmoothScrollModern.Shared.Presentation;
 
 public static class CollectionSync
 {

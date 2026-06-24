@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <UserControl
-    x:Class="SmoothScrollModern.Features.Profiles.Controls.ProfileSettingRow"
-    x:Name="Root"
+    x:Class="SmoothScrollModern.Shared.Controls.ProfileSettingRow"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
-    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    x:Name="Root">
 
     <Grid
         Padding="0,8,0,10"
@@ -19,20 +19,16 @@
         </Grid.ColumnDefinitions>
 
         <StackPanel Spacing="2">
-            <TextBlock
-                FontWeight="SemiBold"
-                Text="{Binding Label, ElementName=Root}" />
-            <TextBlock
-                Style="{StaticResource CaptionTextStyle}"
-                Text="{Binding Description, ElementName=Root}" />
+            <TextBlock FontWeight="SemiBold" Text="{Binding Label, ElementName=Root}" />
+            <TextBlock Style="{StaticResource CaptionTextStyle}" Text="{Binding Description, ElementName=Root}" />
         </StackPanel>
 
         <NumberBox
             x:Name="ValueBox"
             Grid.Column="1"
+            VerticalAlignment="Center"
             AcceptsExpression="False"
             AutomationProperties.Name="{Binding Label, ElementName=Root}"
-            VerticalAlignment="Center"
             Maximum="{Binding Maximum, ElementName=Root}"
             Minimum="{Binding Minimum, ElementName=Root}"
             SmallChange="{Binding SmallChange, ElementName=Root}"
@@ -43,8 +39,8 @@
         <Slider
             Grid.Row="1"
             Grid.ColumnSpan="2"
-            AutomationProperties.Name="{Binding Label, ElementName=Root}"
             MinHeight="32"
+            AutomationProperties.Name="{Binding Label, ElementName=Root}"
             Maximum="{Binding Maximum, ElementName=Root}"
             Minimum="{Binding Minimum, ElementName=Root}"
             SmallChange="{Binding StepFrequency, ElementName=Root}"

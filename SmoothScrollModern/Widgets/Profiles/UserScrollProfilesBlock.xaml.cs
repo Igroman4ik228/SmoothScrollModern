@@ -2,7 +2,7 @@ using Microsoft.UI.Xaml.Controls;
 using SmoothScrollModern.Features.Profiles.ViewModels;
 using Windows.System;
 
-namespace SmoothScrollModern.Features.Profiles.Controls;
+namespace SmoothScrollModern.Widgets.Profiles;
 
 public sealed partial class UserScrollProfilesBlock : UserControl
 {

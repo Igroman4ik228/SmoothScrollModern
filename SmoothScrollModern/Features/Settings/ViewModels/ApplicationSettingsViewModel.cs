@@ -1,6 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using SmoothScrollModern.Core.Presentation;
+using SmoothScrollModern.Shared.Presentation;
 using SmoothScrollModern.Settings;
 using SmoothScrollModern.Startup;
 using Forms = System.Windows.Forms;

@@ -2,7 +2,7 @@ using Microsoft.UI.Xaml.Controls;
 using SmoothScrollModern.Features.Applications.ViewModels;
 using Windows.System;
 
-namespace SmoothScrollModern.Features.Applications.Controls;
+namespace SmoothScrollModern.Widgets.Applications;
 
 public sealed partial class ManualApplicationRuleBlock : UserControl
 {

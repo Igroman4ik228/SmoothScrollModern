@@ -3,7 +3,7 @@ using System.ComponentModel;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
-using SmoothScrollModern.Core.Presentation;
+using SmoothScrollModern.Shared.Presentation;
 using SmoothScrollModern.Scroll;
 using SmoothScrollModern.Settings;
 

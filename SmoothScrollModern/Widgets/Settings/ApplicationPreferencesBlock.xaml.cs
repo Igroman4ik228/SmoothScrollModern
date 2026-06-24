@@ -1,7 +1,7 @@
 using Microsoft.UI.Xaml.Controls;
 using SmoothScrollModern.Features.Settings.ViewModels;
 
-namespace SmoothScrollModern.Features.Settings.Controls;
+namespace SmoothScrollModern.Widgets.Settings;
 
 public sealed partial class ApplicationPreferencesBlock : UserControl
 {

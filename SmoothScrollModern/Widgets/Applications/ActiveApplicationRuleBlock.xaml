@@ -1,9 +1,9 @@
 <?xml version="1.0" encoding="utf-8" ?>
 <UserControl
-    x:Class="SmoothScrollModern.Features.Applications.Controls.ActiveApplicationRuleBlock"
+    x:Class="SmoothScrollModern.Widgets.Applications.ActiveApplicationRuleBlock"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:controls="using:SmoothScrollModern.Features.Applications.Controls"
+    xmlns:applicationControls="using:SmoothScrollModern.Features.Applications.Controls"
     x:Name="Root">
 
     <Border Style="{StaticResource SurfacePanelStyle}">
@@ -20,7 +20,7 @@
                         FontWeight="SemiBold"
                         Foreground="{ThemeResource AccentTextFillColorPrimaryBrush}"
                         Text="Активное приложение" />
-                    <controls:ApplicationRuleHeader
+                    <applicationControls:ApplicationRuleHeader
                         DisplayName="{Binding CurrentApplicationDisplayNameText}"
                         ExecutablePath="{Binding CurrentApplicationExecutablePathText}"
                         ProcessName="{Binding CurrentApplicationProcessNameText}" />
@@ -37,7 +37,7 @@
                 </Button>
             </Grid>
 
-            <controls:ApplicationRuleSettings DataContext="{Binding CurrentApplicationRule}" Visibility="{Binding DataContext.HasCurrentApplicationRule, ElementName=Root, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <applicationControls:ApplicationRuleSettings DataContext="{Binding CurrentApplicationRule}" Visibility="{Binding DataContext.HasCurrentApplicationRule, ElementName=Root, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
             <Button
                 HorizontalAlignment="Left"

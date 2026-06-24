@@ -3,7 +3,7 @@
     x:Class="SmoothScrollModern.Pages.ProfilesPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:profiles="using:SmoothScrollModern.Features.Profiles.Controls">
+    xmlns:profileWidgets="using:SmoothScrollModern.Widgets.Profiles">
 
     <ScrollViewer
         HorizontalScrollBarVisibility="Disabled"
@@ -13,8 +13,8 @@
             Margin="32,16,32,32"
             HorizontalAlignment="Stretch"
             Spacing="24">
-            <profiles:GlobalScrollProfileBlock />
-            <profiles:UserScrollProfilesBlock />
+            <profileWidgets:GlobalScrollProfileBlock />
+            <profileWidgets:UserScrollProfilesBlock />
         </StackPanel>
     </ScrollViewer>
 </UserControl>

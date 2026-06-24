@@ -1,7 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Media;
 
-namespace SmoothScrollModern.Widgets.Common;
+namespace SmoothScrollModern.Shared.Controls;
 
 public static class VisualTreeDataContext
 {

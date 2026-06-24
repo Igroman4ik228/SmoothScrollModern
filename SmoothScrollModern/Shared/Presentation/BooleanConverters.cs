@@ -1,7 +1,7 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Data;
 
-namespace SmoothScrollModern.Core.Presentation;
+namespace SmoothScrollModern.Shared.Presentation;
 
 public sealed class BooleanToVisibilityConverter : IValueConverter
 {

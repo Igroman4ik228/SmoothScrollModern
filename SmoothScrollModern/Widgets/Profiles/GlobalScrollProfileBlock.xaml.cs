@@ -1,6 +1,6 @@
 using Microsoft.UI.Xaml.Controls;
 
-namespace SmoothScrollModern.Features.Profiles.Controls;
+namespace SmoothScrollModern.Widgets.Profiles;
 
 public sealed partial class GlobalScrollProfileBlock : UserControl
 {
