@@ -3,9 +3,13 @@
     x:Class="SmoothScrollModern.Features.Applications.Controls.ApplicationRuleSettings"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    x:Name="Root">
+    x:Name="Root"
+    HorizontalAlignment="Stretch">
 
-    <Grid ColumnSpacing="20" RowSpacing="16">
+    <Grid
+        HorizontalAlignment="Stretch"
+        ColumnSpacing="20"
+        RowSpacing="16">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto" />
             <RowDefinition Height="Auto" />
@@ -15,7 +19,43 @@
             <ColumnDefinition Width="*" />
         </Grid.ColumnDefinitions>
 
-        <StackPanel Spacing="6">
+        <StackPanel
+            Grid.Row="0"
+            Opacity="{Binding IsRuleEnabled, Converter={StaticResource BooleanToOpacityConverter}}"
+            Spacing="6">
+            <TextBlock FontWeight="SemiBold" Text="Режим прокрутки" />
+            <ComboBox
+                HorizontalAlignment="Stretch"
+                AutomationProperties.Name="Режим прокрутки"
+                DisplayMemberPath="Name"
+                IsEnabled="{Binding IsRuleEnabled}"
+                ItemsSource="{Binding DeliveryModeOptions, ElementName=Root}"
+                PlaceholderText="Плавный режим"
+                SelectedValue="{Binding DeliveryMode, Mode=TwoWay}"
+                SelectedValuePath="Value" />
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="0"
+            Grid.Column="1"
+            Opacity="{Binding IsRuleEnabled, Converter={StaticResource BooleanToOpacityConverter}}"
+            Spacing="6">
+            <TextBlock FontWeight="SemiBold" Text="Профиль прокрутки" />
+            <ComboBox
+                HorizontalAlignment="Stretch"
+                AutomationProperties.Name="Профиль прокрутки"
+                DisplayMemberPath="Name"
+                IsEnabled="{Binding IsRuleEnabled}"
+                ItemsSource="{Binding ScrollProfileChoices, ElementName=Root}"
+                PlaceholderText="Основной профиль"
+                SelectedValue="{Binding ScrollProfileId, Mode=TwoWay}"
+                SelectedValuePath="Id" />
+        </StackPanel>
+
+        <StackPanel
+            Grid.Row="1"
+            Grid.ColumnSpan="2"
+            Spacing="6">
             <StackPanel Spacing="2">
                 <TextBlock FontWeight="SemiBold" Text="Отключить плавную прокрутку" />
                 <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Полностью пропускает приложение через обычную прокрутку Windows." />
@@ -26,39 +66,6 @@
                 IsOn="{Binding IsSmoothScrollDisabled, Mode=TwoWay}"
                 OffContent="Откл."
                 OnContent="Вкл." />
-        </StackPanel>
-
-        <StackPanel
-            Grid.Row="1"
-            Opacity="{Binding IsRuleEnabled, Converter={StaticResource BooleanToOpacityConverter}}"
-            Spacing="6">
-            <TextBlock FontWeight="SemiBold" Text="Режим прокрутки" />
-            <ComboBox
-                AutomationProperties.Name="Режим прокрутки"
-                HorizontalAlignment="Stretch"
-                DisplayMemberPath="Name"
-                IsEnabled="{Binding IsRuleEnabled}"
-                ItemsSource="{Binding DeliveryModeOptions, ElementName=Root}"
-                PlaceholderText="Плавный режим"
-                SelectedValue="{Binding DeliveryMode, Mode=TwoWay}"
-                SelectedValuePath="Value" />
-        </StackPanel>
-
-        <StackPanel
-            Grid.Row="1"
-            Grid.Column="1"
-            Opacity="{Binding IsRuleEnabled, Converter={StaticResource BooleanToOpacityConverter}}"
-            Spacing="6">
-            <TextBlock FontWeight="SemiBold" Text="Профиль прокрутки" />
-            <ComboBox
-                AutomationProperties.Name="Профиль прокрутки"
-                HorizontalAlignment="Stretch"
-                DisplayMemberPath="Name"
-                IsEnabled="{Binding IsRuleEnabled}"
-                ItemsSource="{Binding ScrollProfileChoices, ElementName=Root}"
-                PlaceholderText="Основной профиль"
-                SelectedValue="{Binding ScrollProfileId, Mode=TwoWay}"
-                SelectedValuePath="Id" />
         </StackPanel>
     </Grid>
 </UserControl>

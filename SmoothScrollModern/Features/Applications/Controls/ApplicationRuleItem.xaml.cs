@@ -51,7 +51,8 @@ public sealed partial class ApplicationRuleItem : UserControl
 
         var ruleSettings = new ApplicationRuleSettings
         {
-            DataContext = DataContext
+            DataContext = DataContext,
+            HorizontalAlignment = HorizontalAlignment.Stretch
         };
 
         if (VisualTreeDataContext.FindAncestor<ApplicationRulesViewModel>(this) is not { } viewModel)
