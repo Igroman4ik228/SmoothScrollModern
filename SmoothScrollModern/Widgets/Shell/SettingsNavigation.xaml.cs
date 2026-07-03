@@ -12,6 +12,8 @@ public sealed partial class SettingsNavigation : UserControl
     private ApplicationSettingsPage? _settingsPage;
     private MainViewModel? _viewModel;
     private object? _fallbackDataContext;
+    private string? _currentPageTag;
+    private bool _pagesPreloaded;
 
     public SettingsNavigation()
     {
@@ -19,8 +21,13 @@ public sealed partial class SettingsNavigation : UserControl
         DataContextChanged += OnDataContextChanged;
         Loaded += (_, _) =>
         {
-            RootNavigation.SelectedItem ??= ProfilesItem;
+            if (RootNavigation.SelectedItem is null)
+            {
+                RootNavigation.SelectedItem = ProfilesItem;
+            }
+
             NavigateTo("Profiles");
+            PreloadPages();
         };
     }
 
@@ -51,32 +58,40 @@ public sealed partial class SettingsNavigation : UserControl
 
     private void NavigateTo(string tag)
     {
-        PageHost.Content = tag switch
+        if (string.Equals(_currentPageTag, tag, StringComparison.Ordinal))
+        {
+            return;
+        }
+
+        UserControl page = tag switch
         {
             "Exceptions" => GetExceptionsPage(),
             "Settings" => GetSettingsPage(),
             _ => GetProfilesPage()
         };
+
+        PageHost.Content = page;
+        _currentPageTag = tag;
     }
 
     private ProfilesPage GetProfilesPage()
     {
         _profilesPage ??= new ProfilesPage();
-        _profilesPage.DataContext = _viewModel?.Profiles ?? _fallbackDataContext;
+        SetPageDataContext(_profilesPage, _viewModel?.Profiles ?? _fallbackDataContext);
         return _profilesPage;
     }
 
     private ExceptionsPage GetExceptionsPage()
     {
         _exceptionsPage ??= new ExceptionsPage();
-        _exceptionsPage.DataContext = _viewModel?.Applications ?? _fallbackDataContext;
+        SetPageDataContext(_exceptionsPage, _viewModel?.Applications ?? _fallbackDataContext);
         return _exceptionsPage;
     }
 
     private ApplicationSettingsPage GetSettingsPage()
     {
         _settingsPage ??= new ApplicationSettingsPage();
-        _settingsPage.DataContext = _viewModel?.ApplicationSettings ?? _fallbackDataContext;
+        SetPageDataContext(_settingsPage, _viewModel?.ApplicationSettings ?? _fallbackDataContext);
         return _settingsPage;
     }
 
@@ -84,18 +99,41 @@ public sealed partial class SettingsNavigation : UserControl
     {
         if (_profilesPage is not null)
         {
-            _profilesPage.DataContext = _viewModel?.Profiles ?? _fallbackDataContext;
+            SetPageDataContext(_profilesPage, _viewModel?.Profiles ?? _fallbackDataContext);
         }
 
         if (_exceptionsPage is not null)
         {
-            _exceptionsPage.DataContext = _viewModel?.Applications ?? _fallbackDataContext;
+            SetPageDataContext(_exceptionsPage, _viewModel?.Applications ?? _fallbackDataContext);
         }
 
         if (_settingsPage is not null)
         {
-            _settingsPage.DataContext = _viewModel?.ApplicationSettings ?? _fallbackDataContext;
+            SetPageDataContext(_settingsPage, _viewModel?.ApplicationSettings ?? _fallbackDataContext);
         }
+    }
+
+    private static void SetPageDataContext(FrameworkElement page, object? dataContext)
+    {
+        if (!ReferenceEquals(page.DataContext, dataContext))
+        {
+            page.DataContext = dataContext;
+        }
+    }
+
+    private void PreloadPages()
+    {
+        if (_pagesPreloaded)
+        {
+            return;
+        }
+
+        _pagesPreloaded = true;
+        DispatcherQueue.TryEnqueue(() =>
+        {
+            _ = GetExceptionsPage();
+            _ = GetSettingsPage();
+        });
     }
 
     public void TogglePane()

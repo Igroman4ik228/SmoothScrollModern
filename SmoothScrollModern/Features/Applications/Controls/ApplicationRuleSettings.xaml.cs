@@ -1,30 +1,36 @@
 using Microsoft.UI.Xaml;
 using Microsoft.UI.Xaml.Controls;
-using SmoothScrollModern.Features.Applications.ViewModels;
-using SmoothScrollModern.Shared.Controls;
 
 namespace SmoothScrollModern.Features.Applications.Controls;
 
 public sealed partial class ApplicationRuleSettings : UserControl
 {
+    public static readonly DependencyProperty DeliveryModeOptionsProperty = DependencyProperty.Register(
+        nameof(DeliveryModeOptions),
+        typeof(object),
+        typeof(ApplicationRuleSettings),
+        new PropertyMetadata(null));
+
+    public static readonly DependencyProperty ScrollProfileChoicesProperty = DependencyProperty.Register(
+        nameof(ScrollProfileChoices),
+        typeof(object),
+        typeof(ApplicationRuleSettings),
+        new PropertyMetadata(null));
+
     public ApplicationRuleSettings()
     {
         InitializeComponent();
     }
 
-    private void OnDeliveryModeComboBoxLoaded(object sender, RoutedEventArgs e)
+    public object? DeliveryModeOptions
     {
-        if (sender is ComboBox comboBox && VisualTreeDataContext.FindAncestor<ApplicationRulesViewModel>(this) is { } viewModel)
-        {
-            comboBox.ItemsSource = viewModel.DeliveryModeOptions;
-        }
+        get => GetValue(DeliveryModeOptionsProperty);
+        set => SetValue(DeliveryModeOptionsProperty, value);
     }
 
-    private void OnRuleProfileComboBoxLoaded(object sender, RoutedEventArgs e)
+    public object? ScrollProfileChoices
     {
-        if (sender is ComboBox comboBox && VisualTreeDataContext.FindAncestor<ApplicationRulesViewModel>(this) is { } viewModel)
-        {
-            comboBox.ItemsSource = viewModel.ScrollProfileChoices;
-        }
+        get => GetValue(ScrollProfileChoicesProperty);
+        set => SetValue(ScrollProfileChoicesProperty, value);
     }
 }

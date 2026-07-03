@@ -137,7 +137,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     private void OnActiveApplicationTimerTick(DispatcherQueueTimer sender, object args)
     {
         ApplicationSettings.RefreshPauseState();
-        Applications.RefreshCurrentApplication();
+        _ = Applications.RefreshCurrentApplicationAsync();
         OnPropertyChanged(nameof(IsPaused));
     }
 

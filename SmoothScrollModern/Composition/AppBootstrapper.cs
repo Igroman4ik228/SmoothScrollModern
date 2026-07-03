@@ -1,19 +1,16 @@
-using System.ComponentModel;
 using Microsoft.UI.Xaml;
-using SmoothScrollModern.Applications;
 using SmoothScrollModern.Core;
 using SmoothScrollModern.Input;
 using SmoothScrollModern.Scroll;
 using SmoothScrollModern.Settings;
-using SmoothScrollModern.Startup;
 using SmoothScrollModern.Tray;
 using SmoothScrollModern.Widgets.Shell.ViewModels;
+using System.ComponentModel;
 
 namespace SmoothScrollModern.Composition;
 
 public sealed class AppBootstrapper : IDisposable
 {
-    private readonly ISettingsService _settingsService;
     private readonly ISmoothScrollEngine _smoothScrollEngine;
     private readonly IMouseHookService _mouseHookService;
     private readonly ITrayService _trayService;
@@ -22,7 +19,6 @@ public sealed class AppBootstrapper : IDisposable
 
     public AppBootstrapper(
         AppSettings settings,
-        ISettingsService settingsService,
         ISmoothScrollEngine smoothScrollEngine,
         IMouseHookService mouseHookService,
         ITrayService trayService,
@@ -30,7 +26,6 @@ public sealed class AppBootstrapper : IDisposable
         MainWindow mainWindow)
     {
         Settings = settings;
-        _settingsService = settingsService;
         _smoothScrollEngine = smoothScrollEngine;
         _mouseHookService = mouseHookService;
         _trayService = trayService;

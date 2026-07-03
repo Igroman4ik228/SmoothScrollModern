@@ -3,116 +3,48 @@
     x:Class="SmoothScrollModern.Features.Profiles.Controls.UserScrollProfileItem"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:sharedControls="using:SmoothScrollModern.Shared.Controls"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.Controls"
+    x:Name="Root"
     HorizontalAlignment="Stretch">
 
-    <Border
-        Margin="0,0,0,8"
+    <toolkit:SettingsExpander
         HorizontalAlignment="Stretch"
-        Style="{StaticResource ListSurfacePanelStyle}">
-        <StackPanel Spacing="16">
-            <Grid ColumnSpacing="12">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="Auto" />
-                </Grid.ColumnDefinitions>
-                <TextBox
-                    VerticalContentAlignment="Center"
-                    AutomationProperties.Name="Название профиля"
-                    Header="Название профиля"
-                    PlaceholderText="Например: Браузер"
-                    Text="{Binding Name, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
-                <Button
-                    Grid.Column="1"
-                    Width="40"
-                    Height="32"
-                    MinWidth="40"
-                    Padding="0"
-                    VerticalAlignment="Bottom"
-                    AutomationProperties.Name="Удалить профиль прокрутки"
-                    Click="OnRemoveScrollProfileClick"
-                    ToolTipService.ToolTip="Удалить профиль">
-                    <FontIcon Glyph="&#xE74D;" Style="{StaticResource InlineButtonIconStyle}" />
-                </Button>
-            </Grid>
+        Margin="0,0,0,8"
+        Expanded="OnProfileExpanderExpanded"
+        IsExpanded="{Binding AreSettingsVisible, ElementName=Root, Mode=TwoWay}">
+        <toolkit:SettingsExpander.Header>
+            <StackPanel Spacing="3">
+                <TextBlock
+                    FontWeight="SemiBold"
+                    Text="{Binding Name}"
+                    TextTrimming="CharacterEllipsis" />
+                <TextBlock
+                    Style="{StaticResource CaptionTextStyle}"
+                    Text="{Binding ProfileSummaryText}"
+                    TextTrimming="CharacterEllipsis" />
+            </StackPanel>
+        </toolkit:SettingsExpander.Header>
 
-            <TextBlock
-                Margin="0,-8,0,0"
-                Style="{StaticResource CaptionTextStyle}"
-                Text="{Binding ProfileSummaryText}"
-                TextTrimming="CharacterEllipsis" />
+        <toolkit:SettingsExpander.Content>
+            <Button
+                Width="40"
+                Height="32"
+                MinWidth="40"
+                Padding="0"
+                AutomationProperties.Name="Удалить профиль прокрутки"
+                Click="OnRemoveScrollProfileClick"
+                ToolTipService.ToolTip="Удалить профиль">
+                <FontIcon Glyph="&#xE74D;" Style="{StaticResource InlineButtonIconStyle}" />
+            </Button>
+        </toolkit:SettingsExpander.Content>
 
-            <sharedControls:ProfileSettingRow
-                Description="Сколько прокручивать за один шаг колеса."
-                FractionDigits="3"
-                Label="Сила прокрутки"
-                Maximum="6"
-                Minimum="0.2"
-                SmallChange="0.05"
-                StepFrequency="0.05"
-                Value="{Binding ProfileScrollMultiplier, Mode=TwoWay}" />
-
-            <sharedControls:ProfileSettingRow
-                Description="Как долго длится один шаг прокрутки."
-                Label="Время прокрутки, мс"
-                Maximum="900"
-                Minimum="30"
-                SmallChange="10"
-                StepFrequency="10"
-                Value="{Binding ProfileDurationMs, Mode=TwoWay}" />
-
-            <sharedControls:ProfileSettingRow
-                Description="Насколько мягко движется прокрутка."
-                FractionDigits="3"
-                Label="Плавность"
-                Maximum="1"
-                Minimum="0"
-                SmallChange="0.025"
-                StepFrequency="0.025"
-                Value="{Binding ProfileSmoothness, Mode=TwoWay}" />
-
-            <sharedControls:ProfileSettingRow
-                Description="Ускоряет прокрутку при быстрых движениях колеса."
-                FractionDigits="3"
-                Label="Ускорение"
-                Maximum="4"
-                Minimum="0.2"
-                SmallChange="0.05"
-                StepFrequency="0.05"
-                Value="{Binding ProfileAcceleration, Mode=TwoWay}" />
-
-            <Grid ColumnSpacing="18">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Spacing="6">
-                    <StackPanel Spacing="2">
-                        <TextBlock FontWeight="SemiBold" Text="Поведение прокрутки" />
-                        <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Как менять скорость во время одного шага." />
-                    </StackPanel>
-                    <ComboBox
-                        HorizontalAlignment="Stretch"
-                        AutomationProperties.Name="Поведение прокрутки"
-                        DisplayMemberPath="Name"
-                        Loaded="OnEasingComboBoxLoaded"
-                        PlaceholderText="Мягкая"
-                        SelectedValue="{Binding ProfileEasingType, Mode=TwoWay}"
-                        SelectedValuePath="Value" />
-                </StackPanel>
-
-                <StackPanel Grid.Column="1" Spacing="6">
-                    <StackPanel Spacing="2">
-                        <TextBlock FontWeight="SemiBold" Text="Горизонтальная прокрутка" />
-                    </StackPanel>
-                    <ToggleSwitch
-                        AutomationProperties.Name="Горизонтальная прокрутка"
-                        IsOn="{Binding ProfileEnableHorizontalScroll, Mode=TwoWay}"
-                        OffContent="Откл."
-                        OnContent="Вкл." />
-                </StackPanel>
-            </Grid>
-        </StackPanel>
-    </Border>
+        <toolkit:SettingsExpander.ItemsHeader>
+            <ContentControl
+                x:Name="ProfileSettingsHost"
+                Margin="0,4,0,0"
+                Padding="20,16"
+                HorizontalAlignment="Stretch"
+                HorizontalContentAlignment="Stretch" />
+        </toolkit:SettingsExpander.ItemsHeader>
+    </toolkit:SettingsExpander>
 </UserControl>

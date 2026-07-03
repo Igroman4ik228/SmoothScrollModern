@@ -7,6 +7,9 @@ namespace SmoothScrollModern.Applications;
 public sealed class ActiveWindowService : IActiveWindowService
 {
     private const int WindowTextCapacity = 512;
+    private static readonly TimeSpan ProcessInfoCacheDuration = TimeSpan.FromSeconds(10);
+    private readonly Dictionary<int, CachedProcessInfo> _processInfoCache = [];
+    private readonly object _processInfoCacheGate = new();
 
     public ApplicationInfo GetActiveApplication()
     {
@@ -28,32 +31,56 @@ public sealed class ActiveWindowService : IActiveWindowService
         }
 
         var processId = unchecked((int)processIdRaw);
-        var processName = string.Empty;
-        var executablePath = string.Empty;
-        var displayName = string.Empty;
-
-        try
-        {
-            using var process = Process.GetProcessById(processId);
-            processName = $"{process.ProcessName}.exe".ToLowerInvariant();
-            executablePath = TryGetExecutablePath(process) ?? string.Empty;
-            displayName = TryGetDisplayName(process) ?? processName;
-        }
-        catch (Exception)
-        {
-            processName = $"pid:{processId}";
-            displayName = processName;
-        }
+        var processInfo = GetProcessInfo(processId);
 
         var title = GetWindowTitle(hwnd);
         return new ApplicationInfo(
             hwnd,
             processId,
-            processName,
-            executablePath,
-            string.IsNullOrWhiteSpace(displayName) ? processName : displayName,
+            processInfo.ProcessName,
+            processInfo.ExecutablePath,
+            string.IsNullOrWhiteSpace(processInfo.DisplayName) ? processInfo.ProcessName : processInfo.DisplayName,
             string.IsNullOrWhiteSpace(title) ? "Без заголовка окна" : title,
             IsFullscreen(hwnd));
+    }
+
+    private CachedProcessInfo GetProcessInfo(int processId)
+    {
+        var now = DateTimeOffset.UtcNow;
+        lock (_processInfoCacheGate)
+        {
+            if (_processInfoCache.TryGetValue(processId, out var cached)
+                && now - cached.CachedAt <= ProcessInfoCacheDuration)
+            {
+                return cached;
+            }
+        }
+
+        var processInfo = ReadProcessInfo(processId, now);
+        lock (_processInfoCacheGate)
+        {
+            _processInfoCache[processId] = processInfo;
+            PruneProcessInfoCache(now);
+        }
+
+        return processInfo;
+    }
+
+    private static CachedProcessInfo ReadProcessInfo(int processId, DateTimeOffset cachedAt)
+    {
+        try
+        {
+            using var process = Process.GetProcessById(processId);
+            var processName = $"{process.ProcessName}.exe".ToLowerInvariant();
+            var executablePath = TryGetExecutablePath(process) ?? string.Empty;
+            var displayName = TryGetDisplayName(executablePath) ?? processName;
+            return new CachedProcessInfo(processName, executablePath, displayName, cachedAt);
+        }
+        catch (Exception)
+        {
+            var processName = $"pid:{processId}";
+            return new CachedProcessInfo(processName, string.Empty, processName, cachedAt);
+        }
     }
 
     private static string? TryGetExecutablePath(Process process)
@@ -68,16 +95,37 @@ public sealed class ActiveWindowService : IActiveWindowService
         }
     }
 
-    private static string? TryGetDisplayName(Process process)
+    private static string? TryGetDisplayName(string executablePath)
     {
+        if (string.IsNullOrWhiteSpace(executablePath))
+        {
+            return null;
+        }
+
         try
         {
-            var fileName = process.MainModule?.FileVersionInfo.FileDescription;
-            return string.IsNullOrWhiteSpace(fileName) ? null : fileName;
+            var description = FileVersionInfo.GetVersionInfo(executablePath).FileDescription;
+            return string.IsNullOrWhiteSpace(description) ? null : description;
         }
         catch (Exception)
         {
             return null;
+        }
+    }
+
+    private void PruneProcessInfoCache(DateTimeOffset now)
+    {
+        if (_processInfoCache.Count <= 128)
+        {
+            return;
+        }
+
+        foreach (var processId in _processInfoCache
+                     .Where(item => now - item.Value.CachedAt > ProcessInfoCacheDuration)
+                     .Select(item => item.Key)
+                     .ToList())
+        {
+            _processInfoCache.Remove(processId);
         }
     }
 
@@ -114,4 +162,10 @@ public sealed class ActiveWindowService : IActiveWindowService
                && Math.Abs(windowRect.Width - monitorInfo.RcMonitor.Width) <= tolerance
                && Math.Abs(windowRect.Height - monitorInfo.RcMonitor.Height) <= tolerance;
     }
+
+    private sealed record CachedProcessInfo(
+        string ProcessName,
+        string ExecutablePath,
+        string DisplayName,
+        DateTimeOffset CachedAt);
 }

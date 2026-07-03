@@ -22,16 +22,20 @@ public sealed class ApplicationRulesViewModel : ObservableObject
     private readonly IActiveWindowService _activeWindowService;
     private readonly IApplicationRulesService _applicationRulesService;
     private readonly ProfilesViewModel _profilesViewModel;
+    private readonly DispatcherQueue _dispatcherQueue;
     private readonly DispatcherQueueTimer _searchTimer;
     private readonly Action _requestSave;
     private readonly Action _stateChanged;
     private readonly List<ApplicationRule> _filteredMatches = [];
     private AppSettings _settings;
     private ApplicationInfo _currentApplication = ApplicationInfo.Empty;
+    private ApplicationRule? _currentApplicationRule;
     private string _manualProcessName = string.Empty;
     private string _searchQuery = string.Empty;
     private string _appliedSearchQuery = string.Empty;
     private int _pageIndex;
+    private int _currentApplicationRefreshId;
+    private bool _disposed;
 
     public ApplicationRulesViewModel(
         AppSettings settings,
@@ -46,6 +50,7 @@ public sealed class ApplicationRulesViewModel : ObservableObject
         _activeWindowService = activeWindowService;
         _applicationRulesService = applicationRulesService;
         _profilesViewModel = profilesViewModel;
+        _dispatcherQueue = dispatcherQueue;
         _requestSave = requestSave;
         _stateChanged = stateChanged;
 
@@ -67,7 +72,7 @@ public sealed class ApplicationRulesViewModel : ObservableObject
 
         _profilesViewModel.NormalizeApplicationRuleProfileReferences(ApplicationRules);
         RefreshFilter();
-        RefreshCurrentApplication();
+        _ = RefreshCurrentApplicationAsync();
     }
 
     public IReadOnlyList<SelectionOption<ScrollDeliveryMode>> DeliveryModeOptions { get; } =
@@ -155,7 +160,7 @@ public sealed class ApplicationRulesViewModel : ObservableObject
         ? string.Empty
         : _currentApplication.ExecutablePath;
 
-    public ApplicationRule? CurrentApplicationRule => FindCurrentApplicationRule();
+    public ApplicationRule? CurrentApplicationRule => _currentApplicationRule;
 
     public bool HasCurrentApplicationRule => CurrentApplicationRule is not null;
 
@@ -174,20 +179,65 @@ public sealed class ApplicationRulesViewModel : ObservableObject
 
         _profilesViewModel.NormalizeApplicationRuleProfileReferences(ApplicationRules);
         RefreshFilter(resetPage: true);
-        RefreshCurrentApplication();
+        _ = RefreshCurrentApplicationAsync();
         OnPropertyChanged(string.Empty);
+    }
+
+    public async Task RefreshCurrentApplicationAsync()
+    {
+        var refreshId = Interlocked.Increment(ref _currentApplicationRefreshId);
+        var activeApplication = await GetActiveApplicationAsync().ConfigureAwait(false);
+        await RunOnDispatcherAsync(() =>
+        {
+            if (_disposed || refreshId != _currentApplicationRefreshId)
+            {
+                return;
+            }
+
+            ApplyCurrentApplication(activeApplication);
+        }).ConfigureAwait(false);
     }
 
     public void RefreshCurrentApplication()
     {
-        var activeApplication = _activeWindowService.GetActiveApplication();
+        _ = RefreshCurrentApplicationAsync();
+    }
+
+    public async void DisableCurrentApplication()
+    {
+        var activeApplication = await GetActiveApplicationAsync().ConfigureAwait(false);
+        await RunOnDispatcherAsync(() =>
+        {
+            ApplyCurrentApplication(activeApplication);
+            if (!CanDisableCurrentApplication())
+            {
+                return;
+            }
+
+            var rule = _applicationRulesService.AddOrUpdateRule(_settings, _currentApplication);
+            AddRuleToCollection(rule);
+            SaveAndNotifyCurrentApplicationRuleState();
+        }).ConfigureAwait(false);
+    }
+
+    private void ApplyCurrentApplication(ApplicationInfo activeApplication)
+    {
+        if (_disposed)
+        {
+            return;
+        }
+
         var previousApplication = _currentApplication;
+        var previousRule = _currentApplicationRule;
         if (!IsOwnApplication(activeApplication))
         {
             _currentApplication = activeApplication;
         }
 
-        if (_currentApplication == previousApplication)
+        RefreshCurrentApplicationRule();
+
+        if (IsSameCurrentApplicationState(_currentApplication, previousApplication)
+            && ReferenceEquals(_currentApplicationRule, previousRule))
         {
             return;
         }
@@ -196,19 +246,6 @@ public sealed class ApplicationRulesViewModel : ObservableObject
         DisableCurrentApplicationCommand.NotifyCanExecuteChanged();
         RemoveRuleCommand.NotifyCanExecuteChanged();
         _stateChanged();
-    }
-
-    public void DisableCurrentApplication()
-    {
-        RefreshCurrentApplication();
-        if (!CanDisableCurrentApplication())
-        {
-            return;
-        }
-
-        var rule = _applicationRulesService.AddOrUpdateRule(_settings, _currentApplication);
-        AddRuleToCollection(rule);
-        SaveAndNotifyCurrentApplicationRuleState();
     }
 
     public bool TryGetScrollProfile(bool isEnabled, bool isPaused, out ScrollSettings scrollSettings, out ScrollDeliveryMode deliveryMode)
@@ -262,6 +299,8 @@ public sealed class ApplicationRulesViewModel : ObservableObject
 
     public void Dispose()
     {
+        _disposed = true;
+        Interlocked.Increment(ref _currentApplicationRefreshId);
         _searchTimer.Stop();
         _searchTimer.Tick -= OnSearchTimerTick;
         UnsubscribeRules();
@@ -351,6 +390,11 @@ public sealed class ApplicationRulesViewModel : ObservableObject
             OnPropertyChanged(nameof(ProfileCountText));
         }
 
+        if (RulePropertyAffectsCurrentApplication(e.PropertyName))
+        {
+            RefreshCurrentApplicationRule();
+        }
+
         SaveAndNotifyCurrentApplicationRuleState();
     }
 
@@ -365,6 +409,39 @@ public sealed class ApplicationRulesViewModel : ObservableObject
         sender.Stop();
         _appliedSearchQuery = ApplicationSearchQuery;
         RefreshFilter(resetPage: true);
+    }
+
+    private Task<ApplicationInfo> GetActiveApplicationAsync()
+    {
+        return Task.Run(_activeWindowService.GetActiveApplication);
+    }
+
+    private Task RunOnDispatcherAsync(Action action)
+    {
+        if (_dispatcherQueue.HasThreadAccess)
+        {
+            action();
+            return Task.CompletedTask;
+        }
+
+        var completion = new TaskCompletionSource(TaskCreationOptions.RunContinuationsAsynchronously);
+        if (!_dispatcherQueue.TryEnqueue(() =>
+            {
+                try
+                {
+                    action();
+                    completion.SetResult();
+                }
+                catch (Exception ex)
+                {
+                    completion.SetException(ex);
+                }
+            }))
+        {
+            completion.SetResult();
+        }
+
+        return completion.Task;
     }
 
     private void RefreshFilter(bool resetPage = false)
@@ -420,14 +497,14 @@ public sealed class ApplicationRulesViewModel : ObservableObject
         }
     }
 
-    private ApplicationRule? FindCurrentApplicationRule()
-    {
-        return FindApplicationRule(_currentApplication);
-    }
-
     private ApplicationRule? FindApplicationRule(ApplicationInfo application)
     {
         return _settings.ApplicationRules.FirstOrDefault(rule => ApplicationRulesService.Matches(rule, application));
+    }
+
+    private void RefreshCurrentApplicationRule()
+    {
+        _currentApplicationRule = FindApplicationRule(_currentApplication);
     }
 
     private void NotifyCurrentApplicationState()
@@ -451,6 +528,7 @@ public sealed class ApplicationRulesViewModel : ObservableObject
 
     private void SaveAndNotifyCurrentApplicationRuleState()
     {
+        RefreshCurrentApplicationRule();
         SaveAndNotify(
             nameof(CurrentApplicationRule),
             nameof(HasCurrentApplicationRule),
@@ -465,9 +543,25 @@ public sealed class ApplicationRulesViewModel : ObservableObject
             or nameof(ApplicationRule.ExecutablePath);
     }
 
+    private static bool RulePropertyAffectsCurrentApplication(string? propertyName)
+    {
+        return propertyName is nameof(ApplicationRule.ProcessName)
+            or nameof(ApplicationRule.ExecutablePath);
+    }
+
     private static bool IsOwnApplication(ApplicationInfo application)
     {
         return string.Equals(application.ProcessName, CurrentProcessName, StringComparison.OrdinalIgnoreCase);
+    }
+
+    private static bool IsSameCurrentApplicationState(ApplicationInfo left, ApplicationInfo right)
+    {
+        return left.WindowHandle == right.WindowHandle
+               && left.ProcessId == right.ProcessId
+               && left.IsFullscreen == right.IsFullscreen
+               && string.Equals(left.ProcessName, right.ProcessName, StringComparison.Ordinal)
+               && string.Equals(left.ExecutablePath, right.ExecutablePath, StringComparison.Ordinal)
+               && string.Equals(left.DisplayName, right.DisplayName, StringComparison.Ordinal);
     }
 
     private static int CoercePageIndex(int pageIndex, int pageCount)

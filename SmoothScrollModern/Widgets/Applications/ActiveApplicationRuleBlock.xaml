@@ -37,7 +37,11 @@
                 </Button>
             </Grid>
 
-            <applicationControls:ApplicationRuleSettings DataContext="{Binding CurrentApplicationRule}" Visibility="{Binding DataContext.HasCurrentApplicationRule, ElementName=Root, Converter={StaticResource BooleanToVisibilityConverter}}" />
+            <applicationControls:ApplicationRuleSettings
+                DataContext="{Binding CurrentApplicationRule}"
+                DeliveryModeOptions="{Binding DataContext.DeliveryModeOptions, ElementName=Root}"
+                ScrollProfileChoices="{Binding DataContext.ScrollProfileChoices, ElementName=Root}"
+                Visibility="{Binding DataContext.HasCurrentApplicationRule, ElementName=Root, Converter={StaticResource BooleanToVisibilityConverter}}" />
 
             <Button
                 HorizontalAlignment="Left"
