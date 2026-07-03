@@ -50,32 +50,15 @@ public sealed partial class MainWindow : WindowEx
 
         var titleBar = AppWindow.TitleBar;
         titleBar.ExtendsContentIntoTitleBar = true;
+        titleBar.PreferredHeightOption = TitleBarHeightOption.Tall;
+
         titleBar.ButtonBackgroundColor = Colors.Transparent;
         titleBar.ButtonInactiveBackgroundColor = Colors.Transparent;
         titleBar.ButtonHoverBackgroundColor = Color.FromArgb(24, 0, 0, 0);
         titleBar.ButtonPressedBackgroundColor = Color.FromArgb(36, 0, 0, 0);
-
-        UpdateCaptionButtonInset(titleBar.RightInset);
-        AppWindow.Changed += (_, args) =>
-        {
-            if (args.DidPresenterChange || args.DidSizeChange)
-            {
-                UpdateCaptionButtonInset(titleBar.RightInset);
-            }
-        };
     }
 
-    private void UpdateCaptionButtonInset(double rightInset)
-    {
-        if (double.IsNaN(rightInset) || double.IsInfinity(rightInset) || rightInset < 0)
-        {
-            rightInset = 0;
-        }
-
-        CaptionButtonInsetColumn.Width = new GridLength(rightInset);
-    }
-
-    private void OnNavigationPaneToggleClick(object sender, RoutedEventArgs e)
+    private void OnTitleBarPaneToggleRequested(Microsoft.UI.Xaml.Controls.TitleBar sender, object args)
     {
         ShellNavigation.TogglePane();
     }

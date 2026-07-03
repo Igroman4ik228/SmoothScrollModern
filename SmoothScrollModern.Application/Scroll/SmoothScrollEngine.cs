@@ -26,13 +26,23 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
     private double _remainingHorizontalDelta;
     private double _verticalOutputRemainder;
     private double _horizontalOutputRemainder;
+    private IntPtr _targetWindowHandle;
+    private int _targetScreenX;
+    private int _targetScreenY;
 
     public SmoothScrollEngine(IInputInjectionService inputInjectionService)
     {
         _inputInjectionService = inputInjectionService;
     }
 
-    public void EnqueueWheel(int delta, bool horizontal, ScrollSettings settings, ScrollDeliveryMode deliveryMode)
+    public void EnqueueWheel(
+        int delta,
+        bool horizontal,
+        ScrollSettings settings,
+        ScrollDeliveryMode deliveryMode,
+        IntPtr targetWindowHandle,
+        int screenX,
+        int screenY)
     {
         if (horizontal && !settings.EnableHorizontalScroll)
         {
@@ -44,11 +54,15 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
 
         lock (_gate)
         {
-            if (_deliveryMode != deliveryMode)
+            if (_deliveryMode != deliveryMode || _targetWindowHandle != targetWindowHandle)
             {
                 ResetPendingDeltas();
                 _deliveryMode = deliveryMode;
             }
+
+            _targetWindowHandle = targetWindowHandle;
+            _targetScreenX = screenX;
+            _targetScreenY = screenY;
 
             var isBurst = _isAnimating
                           && now - _lastInputAt <= TimeSpan.FromMilliseconds(Math.Max(80, settings.DurationMs));
@@ -117,6 +131,9 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
 
                 int verticalDelta;
                 int horizontalDelta;
+                IntPtr targetWindowHandle;
+                int targetScreenX;
+                int targetScreenY;
                 var isComplete = false;
 
                 lock (_gate)
@@ -129,6 +146,9 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
 
                     verticalDelta = ConsumeOutputDelta(ref _verticalOutputRemainder, verticalStep, _options.DeliveryMode);
                     horizontalDelta = ConsumeOutputDelta(ref _horizontalOutputRemainder, horizontalStep, _options.DeliveryMode);
+                    targetWindowHandle = _targetWindowHandle;
+                    targetScreenX = _targetScreenX;
+                    targetScreenY = _targetScreenY;
 
                     if (_burstLevel > 0)
                     {
@@ -144,8 +164,8 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
                     }
                 }
 
-                SendDelta(verticalDelta, horizontal: false);
-                SendDelta(horizontalDelta, horizontal: true);
+                SendDelta(verticalDelta, horizontal: false, targetWindowHandle, targetScreenX, targetScreenY);
+                SendDelta(horizontalDelta, horizontal: true, targetWindowHandle, targetScreenX, targetScreenY);
 
                 if (isComplete)
                 {
@@ -229,11 +249,11 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
         return delta;
     }
 
-    private void SendDelta(int delta, bool horizontal)
+    private void SendDelta(int delta, bool horizontal, IntPtr targetWindowHandle, int screenX, int screenY)
     {
         if (delta != 0)
         {
-            _inputInjectionService.SendWheel(delta, horizontal);
+            _inputInjectionService.SendWheel(delta, horizontal, targetWindowHandle, screenX, screenY);
         }
     }
 
@@ -256,6 +276,9 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
         _horizontalOutputRemainder = 0;
         _verticalOutputRemainder = 0;
         _burstLevel = 0;
+        _targetWindowHandle = IntPtr.Zero;
+        _targetScreenX = 0;
+        _targetScreenY = 0;
     }
 
     private readonly record struct ScrollAnimationOptions(

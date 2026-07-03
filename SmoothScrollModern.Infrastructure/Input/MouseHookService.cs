@@ -76,13 +76,13 @@ public sealed class MouseHookService : IMouseHookService
         }
 
         var message = wParam.ToInt32();
-        if (message is not NativeConstants.WM_MOUSEWHEEL and not NativeConstants.WM_MOUSEHWHEEL)
+        var hookStruct = Marshal.PtrToStructure<MSLLHOOKSTRUCT>(lParam);
+        if ((hookStruct.Flags & (NativeConstants.LLMHF_INJECTED | NativeConstants.LLMHF_LOWER_IL_INJECTED)) != 0)
         {
             return NativeMethods.CallNextHookEx(_hookHandle, nCode, wParam, lParam);
         }
 
-        var hookStruct = Marshal.PtrToStructure<MSLLHOOKSTRUCT>(lParam);
-        if ((hookStruct.Flags & (NativeConstants.LLMHF_INJECTED | NativeConstants.LLMHF_LOWER_IL_INJECTED)) != 0)
+        if (message is not NativeConstants.WM_MOUSEWHEEL and not NativeConstants.WM_MOUSEHWHEEL)
         {
             return NativeMethods.CallNextHookEx(_hookHandle, nCode, wParam, lParam);
         }
@@ -93,10 +93,14 @@ public sealed class MouseHookService : IMouseHookService
             return NativeMethods.CallNextHookEx(_hookHandle, nCode, wParam, lParam);
         }
 
+        var targetWindowHandle = NativeMethods.WindowFromPoint(hookStruct.Pt);
         var handled = MouseWheel?.Invoke(new MouseWheelEvent(
             delta,
             message == NativeConstants.WM_MOUSEHWHEEL,
-            hookStruct.Time)) ?? false;
+            hookStruct.Time,
+            targetWindowHandle,
+            hookStruct.Pt.X,
+            hookStruct.Pt.Y)) ?? false;
 
         return handled ? new IntPtr(1) : NativeMethods.CallNextHookEx(_hookHandle, nCode, wParam, lParam);
     }

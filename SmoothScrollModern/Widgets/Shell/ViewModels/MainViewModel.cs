@@ -10,7 +10,7 @@ using SmoothScrollModern.Startup;
 
 namespace SmoothScrollModern.Widgets.Shell.ViewModels;
 
-public sealed class MainViewModel : ObservableObject, IDisposable
+public sealed partial class MainViewModel : ObservableObject, IDisposable
 {
     private readonly ISettingsService _settingsService;
     private readonly DispatcherQueueTimer _activeApplicationTimer;
@@ -89,6 +89,11 @@ public sealed class MainViewModel : ObservableObject, IDisposable
     public bool TryGetScrollProfile(out ScrollSettings scrollSettings, out ScrollDeliveryMode deliveryMode)
     {
         return Applications.TryGetScrollProfile(IsEnabled, IsPaused, out scrollSettings, out deliveryMode);
+    }
+
+    public bool TryGetScrollProfile(IntPtr targetWindowHandle, out ScrollSettings scrollSettings, out ScrollDeliveryMode deliveryMode)
+    {
+        return Applications.TryGetScrollProfile(IsEnabled, IsPaused, targetWindowHandle, out scrollSettings, out deliveryMode);
     }
 
     public void Save()

@@ -120,7 +120,7 @@ public sealed class AppBootstrapper : IDisposable
 
     private bool OnMouseWheel(MouseWheelEvent mouseWheelEvent)
     {
-        if (!MainViewModel.TryGetScrollProfile(out var scrollSettings, out var deliveryMode))
+        if (!MainViewModel.TryGetScrollProfile(mouseWheelEvent.TargetWindowHandle, out var scrollSettings, out var deliveryMode))
         {
             _smoothScrollEngine.Stop();
             return false;
@@ -130,7 +130,10 @@ public sealed class AppBootstrapper : IDisposable
             mouseWheelEvent.Delta,
             mouseWheelEvent.IsHorizontal,
             scrollSettings,
-            deliveryMode);
+            deliveryMode,
+            mouseWheelEvent.TargetWindowHandle,
+            mouseWheelEvent.ScreenX,
+            mouseWheelEvent.ScreenY);
 
         return true;
     }

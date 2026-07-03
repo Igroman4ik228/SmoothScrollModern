@@ -213,6 +213,16 @@ public sealed class ApplicationRulesViewModel : ObservableObject
 
     public bool TryGetScrollProfile(bool isEnabled, bool isPaused, out ScrollSettings scrollSettings, out ScrollDeliveryMode deliveryMode)
     {
+        return TryGetScrollProfile(isEnabled, isPaused, IntPtr.Zero, out scrollSettings, out deliveryMode);
+    }
+
+    public bool TryGetScrollProfile(
+        bool isEnabled,
+        bool isPaused,
+        IntPtr targetWindowHandle,
+        out ScrollSettings scrollSettings,
+        out ScrollDeliveryMode deliveryMode)
+    {
         scrollSettings = _settings.Scroll;
         deliveryMode = ScrollDeliveryMode.FineDelta;
 
@@ -221,15 +231,17 @@ public sealed class ApplicationRulesViewModel : ObservableObject
             return false;
         }
 
-        var activeApplication = _activeWindowService.GetActiveApplication();
-        if (IsOwnApplication(activeApplication))
+        var targetApplication = targetWindowHandle == IntPtr.Zero
+            ? _activeWindowService.GetActiveApplication()
+            : _activeWindowService.GetApplicationFromWindow(targetWindowHandle);
+        if (IsOwnApplication(targetApplication))
         {
             return false;
         }
 
-        var rule = FindApplicationRule(activeApplication);
+        var rule = FindApplicationRule(targetApplication);
         if (rule is { IsRuleEnabled: true, IsSmoothScrollDisabled: true }
-            || _applicationRulesService.ShouldBypass(activeApplication, _settings))
+            || _applicationRulesService.ShouldBypass(targetApplication, _settings))
         {
             return false;
         }

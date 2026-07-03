@@ -12,8 +12,6 @@
     Height="760"
     MinWidth="820"
     MinHeight="560"
-    MaxWidth="1600"
-    MaxHeight="1000"
     PersistenceId="MainWindow"
     mc:Ignorable="d">
 
@@ -23,55 +21,26 @@
 
     <Grid x:Name="ContentRoot" Background="Transparent">
         <Grid.RowDefinitions>
-            <RowDefinition Height="48" />
+            <RowDefinition Height="Auto" />
             <RowDefinition Height="*" />
         </Grid.RowDefinitions>
 
-        <Grid
+        <TitleBar
             x:Name="AppTitleBar"
+            Title="SmoothScroll"
             Grid.Row="0"
-            MinHeight="48"
-            Padding="4,0,0,0"
-            Background="Transparent"
-            ColumnSpacing="8">
-            <Grid.ColumnDefinitions>
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="Auto" />
-                <ColumnDefinition Width="*" />
-                <ColumnDefinition x:Name="CaptionButtonInsetColumn" Width="138" />
-            </Grid.ColumnDefinitions>
-
-            <Button
-                Width="44"
-                Height="40"
-                VerticalAlignment="Center"
-                AutomationProperties.Name="Свернуть или развернуть навигацию"
-                Click="OnNavigationPaneToggleClick"
-                ToolTipService.ToolTip="Свернуть или развернуть навигацию">
-                <FontIcon
-                    FontFamily="Segoe MDL2 Assets"
-                    FontSize="16"
-                    Glyph="&#xE700;" />
-            </Button>
-
-            <StackPanel
-                Grid.Column="1"
-                VerticalAlignment="Center"
-                Orientation="Horizontal"
-                Spacing="10">
-                <Image
-                    Width="24"
-                    Height="24"
-                    Source="ms-appx:///Assets/Square44x44Logo.scale-200.png"
-                    Stretch="UniformToFill" />
-                <TextBlock
-                    VerticalAlignment="Center"
-                    FontSize="13"
-                    FontWeight="SemiBold"
-                    Text="SmoothScroll"
-                    TextTrimming="CharacterEllipsis" />
-            </StackPanel>
-        </Grid>
+            IsBackButtonVisible="False"
+            IsPaneToggleButtonVisible="True"
+            PaneToggleRequested="OnTitleBarPaneToggleRequested">
+            <TitleBar.Resources>
+                <HorizontalAlignment x:Key="TitleBarContentHorizontalAlignment">Stretch</HorizontalAlignment>
+                <x:Double x:Key="TitleBarCompactHeight">48</x:Double>
+                <x:Double x:Key="TitleBarExpandedHeight">48</x:Double>
+            </TitleBar.Resources>
+            <TitleBar.IconSource>
+                <ImageIconSource ImageSource="ms-appx:///Assets/Square44x44Logo.scale-200.png" />
+            </TitleBar.IconSource>
+        </TitleBar>
 
         <shell:SettingsNavigation x:Name="ShellNavigation" Grid.Row="1" />
     </Grid>

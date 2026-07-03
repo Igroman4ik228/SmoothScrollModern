@@ -5,6 +5,12 @@ namespace SmoothScrollModern.Native;
 [StructLayout(LayoutKind.Sequential)]
 internal readonly struct POINT
 {
+    public POINT(int x, int y)
+    {
+        X = x;
+        Y = y;
+    }
+
     public readonly int X;
     public readonly int Y;
 }

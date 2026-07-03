@@ -24,6 +24,19 @@ internal static partial class NativeMethods
     internal static partial IntPtr GetForegroundWindow();
 
     [LibraryImport("user32.dll")]
+    internal static partial IntPtr WindowFromPoint(POINT point);
+
+    [LibraryImport("user32.dll")]
+    internal static partial IntPtr GetAncestor(IntPtr hwnd, uint gaFlags);
+
+    [LibraryImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool GetCursorPos(out POINT lpPoint);
+
+    [LibraryImport("user32.dll")]
+    internal static partial short GetKeyState(int nVirtKey);
+
+    [LibraryImport("user32.dll")]
     internal static partial uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
     [DllImport("user32.dll", EntryPoint = "GetWindowTextW", CharSet = CharSet.Unicode)]
@@ -40,4 +53,7 @@ internal static partial class NativeMethods
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool GetMonitorInfoW(IntPtr hMonitor, ref MONITORINFO lpmi);
 
+    [LibraryImport("user32.dll", SetLastError = true)]
+    [return: MarshalAs(UnmanagedType.Bool)]
+    internal static partial bool PostMessageW(IntPtr hWnd, uint msg, nuint wParam, nint lParam);
 }

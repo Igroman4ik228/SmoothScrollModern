@@ -7,9 +7,15 @@ namespace SmoothScrollModern.Applications;
 public sealed class ActiveWindowService : IActiveWindowService
 {
     private const int WindowTextCapacity = 512;
+
     public ApplicationInfo GetActiveApplication()
     {
         var hwnd = NativeMethods.GetForegroundWindow();
+        return GetApplicationFromWindow(hwnd);
+    }
+
+    public ApplicationInfo GetApplicationFromWindow(IntPtr hwnd)
+    {
         if (hwnd == IntPtr.Zero)
         {
             return ApplicationInfo.Empty;
