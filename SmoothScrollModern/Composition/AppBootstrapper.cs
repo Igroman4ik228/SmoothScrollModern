@@ -6,28 +6,30 @@ using SmoothScrollModern.Settings;
 using SmoothScrollModern.Tray;
 using SmoothScrollModern.Widgets.Shell.ViewModels;
 using System.ComponentModel;
+using Windows.System;
 
 namespace SmoothScrollModern.Composition;
 
 public sealed class AppBootstrapper : IDisposable
 {
     private readonly ISmoothScrollEngine _smoothScrollEngine;
-    private readonly IMouseHookService _mouseHookService;
+    private readonly IGlobalInputHookService _inputHookService;
     private readonly ITrayService _trayService;
+    private bool _inputHookWarningShown;
     private bool _isExitRequested;
     private bool _disposed;
 
     public AppBootstrapper(
         AppSettings settings,
         ISmoothScrollEngine smoothScrollEngine,
-        IMouseHookService mouseHookService,
+        IGlobalInputHookService inputHookService,
         ITrayService trayService,
         MainViewModel mainViewModel,
         MainWindow mainWindow)
     {
         Settings = settings;
         _smoothScrollEngine = smoothScrollEngine;
-        _mouseHookService = mouseHookService;
+        _inputHookService = inputHookService;
         _trayService = trayService;
         MainViewModel = mainViewModel;
         MainWindow = mainWindow;
@@ -40,6 +42,8 @@ public sealed class AppBootstrapper : IDisposable
 
     public MainWindow MainWindow { get; }
 
+    public IGlobalInputHookService InputHookService => _inputHookService;
+
     public void Run()
     {
         _trayService.Initialize();
@@ -49,22 +53,12 @@ public sealed class AppBootstrapper : IDisposable
         _trayService.PauseRequested += () => MainViewModel.PauseFor(TimeSpan.FromMinutes(Constants.TrayPauseMinutes));
         _trayService.ExitRequested += ExitApplication;
         MainViewModel.StateChanged += UpdateTrayState;
-        _mouseHookService.MouseWheel += OnMouseWheel;
+        _inputHookService.MouseWheel += OnMouseWheel;
+        _inputHookService.KeyDown += OnKeyDown;
 
         _trayService.UpdateState(MainViewModel.IsEnabled, MainViewModel.IsPaused);
 
-        try
-        {
-            _mouseHookService.Start();
-        }
-        catch (Exception ex)
-        {
-            System.Windows.Forms.MessageBox.Show(
-                $"Не удалось включить плавную прокрутку. Обычная прокрутка продолжит работать.\n\n{ex.Message}",
-                Constants.ApplicationName,
-                System.Windows.Forms.MessageBoxButtons.OK,
-                System.Windows.Forms.MessageBoxIcon.Warning);
-        }
+        EnsureInputHookStarted();
 
         if (!Settings.Tray.StartMinimizedToTray)
         {
@@ -104,9 +98,10 @@ public sealed class AppBootstrapper : IDisposable
             return;
         }
 
-        _mouseHookService.MouseWheel -= OnMouseWheel;
+        _inputHookService.MouseWheel -= OnMouseWheel;
+        _inputHookService.KeyDown -= OnKeyDown;
         MainWindow.ClosingRequested -= HandleMainWindowClosing;
-        _mouseHookService.Dispose();
+        _inputHookService.Dispose();
         _smoothScrollEngine.Dispose();
         MainViewModel.Dispose();
         _trayService.Dispose();
@@ -116,6 +111,12 @@ public sealed class AppBootstrapper : IDisposable
     private bool OnMouseWheel(MouseWheelEvent mouseWheelEvent)
     {
         if (!MainViewModel.TryGetScrollProfile(mouseWheelEvent.TargetWindowHandle, out var scrollSettings, out var deliveryMode))
+        {
+            _smoothScrollEngine.Stop();
+            return false;
+        }
+
+        if (ShouldBypassSmoothScrollForShortcutWheel(scrollSettings))
         {
             _smoothScrollEngine.Stop();
             return false;
@@ -131,6 +132,47 @@ public sealed class AppBootstrapper : IDisposable
             mouseWheelEvent.ScreenY);
 
         return true;
+    }
+
+    private bool ShouldBypassSmoothScrollForShortcutWheel(ScrollSettings scrollSettings)
+    {
+        return _inputHookService.IsAnyShortcutKeyDown(scrollSettings.BypassSmoothingVirtualKeys);
+    }
+
+    private void EnsureInputHookStarted()
+    {
+        if (!_inputHookService.IsRunning)
+        {
+            try
+            {
+                _inputHookService.Start();
+            }
+            catch (Exception ex)
+            {
+                ShowInputHookWarning(ex);
+                return;
+            }
+        }
+    }
+
+    private void ShowInputHookWarning(Exception ex)
+    {
+        if (_inputHookWarningShown)
+        {
+            return;
+        }
+
+        _inputHookWarningShown = true;
+        System.Windows.Forms.MessageBox.Show(
+            $"Не удалось включить перехват колеса и клавиш. Обычная прокрутка продолжит работать.\n\n{ex.Message}",
+            Constants.ApplicationName,
+            System.Windows.Forms.MessageBoxButtons.OK,
+            System.Windows.Forms.MessageBoxIcon.Warning);
+    }
+
+    private void OnKeyDown(VirtualKey virtualKey)
+    {
+        _smoothScrollEngine.StopIfBypassKeyDown(virtualKey);
     }
 
     private void ShowMainWindow()

@@ -15,4 +15,8 @@
   <ItemGroup>
     <FrameworkReference Include="Microsoft.WindowsDesktop.App.WindowsForms" />
   </ItemGroup>
+
+  <ItemGroup>
+    <PackageReference Include="SharpHook" Version="7.1.2" />
+  </ItemGroup>
 </Project>

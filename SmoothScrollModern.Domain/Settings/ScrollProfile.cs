@@ -2,6 +2,7 @@ using System.Globalization;
 using System.Text.Json.Serialization;
 using SmoothScrollModern.Common;
 using SmoothScrollModern.Scroll;
+using Windows.System;
 
 namespace SmoothScrollModern.Settings;
 
@@ -43,6 +44,17 @@ public sealed class ScrollProfile : ObservableEntity
     [JsonIgnore]
     public string ProfileSummaryText =>
         $"{FormatDecimal(Scroll.ScrollMultiplier)}x · {Scroll.DurationMs} мс · плавность {FormatDecimal(Scroll.Smoothness)} · ускорение {FormatDecimal(Scroll.Acceleration)}";
+
+    [JsonIgnore]
+    public IReadOnlyList<ShortcutKeyDisplay> ProfileBypassSmoothingKeyItems =>
+        Scroll.BypassSmoothingVirtualKeys
+            .Select(key => new ShortcutKeyDisplay(key, ShortcutKeys.Format(key)))
+            .ToList();
+
+    [JsonIgnore]
+    public string ProfileBypassSmoothingKeysText => ProfileBypassSmoothingKeyItems.Count == 0
+        ? "Не задано"
+        : string.Join(", ", ProfileBypassSmoothingKeyItems.Select(key => key.Name));
 
     [JsonIgnore]
     public double ProfileScrollMultiplier
@@ -161,6 +173,30 @@ public sealed class ScrollProfile : ObservableEntity
         Scroll.Validate();
     }
 
+    public void AddProfileBypassSmoothingKey(VirtualKey virtualKey)
+    {
+        if (!ShortcutKeys.IsValid(virtualKey)
+            || ShortcutKeys.ContainsConflict(Scroll.BypassSmoothingVirtualKeys, virtualKey))
+        {
+            NotifyBypassSmoothingKeysChanged();
+            return;
+        }
+
+        Scroll.BypassSmoothingVirtualKeys.Add(virtualKey);
+        Scroll.Validate();
+        NotifyBypassSmoothingKeysChanged();
+    }
+
+    public void RemoveProfileBypassSmoothingKey(VirtualKey virtualKey)
+    {
+        if (!Scroll.BypassSmoothingVirtualKeys.Remove(virtualKey))
+        {
+            return;
+        }
+
+        NotifyBypassSmoothingKeysChanged();
+    }
+
     private void OnScrollPropertiesChanged()
     {
         OnPropertyChanged(nameof(ProfileScrollMultiplier));
@@ -169,11 +205,21 @@ public sealed class ScrollProfile : ObservableEntity
         OnPropertyChanged(nameof(ProfileAcceleration));
         OnPropertyChanged(nameof(ProfileEasingType));
         OnPropertyChanged(nameof(ProfileEnableHorizontalScroll));
+        NotifyBypassSmoothingKeysChanged();
         OnPropertyChanged(nameof(ProfileSummaryText));
+    }
+
+    private void NotifyBypassSmoothingKeysChanged()
+    {
+        OnPropertyChanged(nameof(ProfileBypassSmoothingKeyItems));
+        OnPropertyChanged(nameof(ProfileBypassSmoothingKeysText));
     }
 
     private static string FormatDecimal(double value)
     {
         return value.ToString("0.###", CultureInfo.CurrentCulture);
     }
+
 }
+
+public sealed record ShortcutKeyDisplay(VirtualKey VirtualKey, string Name);

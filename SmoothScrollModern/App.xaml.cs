@@ -53,8 +53,8 @@ namespace SmoothScrollModern
             services.AddSingleton<IApplicationRulesService, ApplicationRulesService>();
             services.AddSingleton<IStartupService, WindowsStartupService>();
             services.AddSingleton<IInputInjectionService, InputInjectionService>();
+            services.AddSingleton<IGlobalInputHookService, SharpHookInputService>();
             services.AddSingleton<ISmoothScrollEngine, SmoothScrollEngine>();
-            services.AddSingleton<IMouseHookService, MouseHookService>();
             services.AddSingleton<ITrayService, TrayService>();
 
             services.AddSingleton<MainViewModel>();

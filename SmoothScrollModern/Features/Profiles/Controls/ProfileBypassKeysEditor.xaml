@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="utf-8" ?>
+<UserControl
+    x:Class="SmoothScrollModern.Features.Profiles.Controls.ProfileBypassKeysEditor"
+    xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+    xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.Controls"
+    x:Name="Root"
+    HorizontalAlignment="Stretch">
+
+    <StackPanel Spacing="8">
+        <StackPanel Spacing="2">
+            <TextBlock FontWeight="SemiBold" Text="Обычное колесо с клавишами" />
+            <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Если нажата любая из этих клавиш, прокрутка идет напрямую без плавности и ускорения." />
+        </StackPanel>
+
+        <toolkit:WrapPanel Orientation="Horizontal">
+            <ItemsControl ItemsSource="{Binding ProfileBypassSmoothingKeyItems}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <toolkit:WrapPanel Orientation="Horizontal" />
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <Border
+                            Margin="0,0,8,8"
+                            Padding="10,4,2,4"
+                            Background="{ThemeResource ControlFillColorDefaultBrush}"
+                            BorderBrush="{ThemeResource ControlStrokeColorDefaultBrush}"
+                            BorderThickness="1"
+                            CornerRadius="4">
+                            <StackPanel Orientation="Horizontal" Spacing="4">
+                                <TextBlock VerticalAlignment="Center" Text="{Binding Name}" />
+                                <Button
+                                    Width="28"
+                                    Height="28"
+                                    MinWidth="28"
+                                    Padding="0"
+                                    AutomationProperties.Name="Удалить клавишу"
+                                    Click="OnRemoveKeyClick"
+                                    ToolTipService.ToolTip="Удалить клавишу">
+                                    <FontIcon FontSize="12" Glyph="&#xE711;" />
+                                </Button>
+                            </StackPanel>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+
+            <Button
+                x:Name="CaptureKeyButton"
+                Margin="0,0,8,8"
+                AutomationProperties.Name="Добавить клавишу для обычного колеса"
+                Click="OnCaptureKeyButtonClick"
+                ToolTipService.ToolTip="Добавить клавишу">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <FontIcon x:Name="CaptureKeyButtonIcon" Glyph="&#xE710;" Style="{StaticResource InlineButtonIconStyle}" />
+                    <TextBlock x:Name="CaptureKeyButtonText" Text="Добавить клавишу" />
+                </StackPanel>
+            </Button>
+
+            <Button
+                x:Name="CaptureKeyWaitingButton"
+                Margin="0,0,8,8"
+                AutomationProperties.Name="Нажмите клавишу для обычного колеса"
+                Style="{StaticResource AccentButtonStyle}"
+                ToolTipService.ToolTip="Нажмите клавишу"
+                Visibility="Collapsed">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <FontIcon Glyph="&#xE765;" Style="{StaticResource InlineButtonIconStyle}" />
+                    <TextBlock Text="Нажмите клавишу (Esc - отмена)" />
+                </StackPanel>
+            </Button>
+        </toolkit:WrapPanel>
+    </StackPanel>
+</UserControl>

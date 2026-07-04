@@ -3,6 +3,7 @@
     x:Class="SmoothScrollModern.Widgets.Profiles.GlobalScrollProfileBlock"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+    xmlns:profileControls="using:SmoothScrollModern.Features.Profiles.Controls"
     xmlns:sharedControls="using:SmoothScrollModern.Shared.Controls">
 
     <Border Style="{StaticResource SurfacePanelStyle}">
@@ -63,9 +64,9 @@
                         <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Кривая движения во время одного шага." />
                     </StackPanel>
                     <ComboBox
+                        HorizontalAlignment="Stretch"
                         AutomationProperties.Name="Поведение прокрутки основного профиля"
                         DisplayMemberPath="Name"
-                        HorizontalAlignment="Stretch"
                         ItemsSource="{Binding EasingOptions}"
                         PlaceholderText="Мягкая"
                         SelectedValue="{Binding EasingType, Mode=TwoWay}"
@@ -84,6 +85,8 @@
                         OnContent="Вкл." />
                 </StackPanel>
             </Grid>
+
+            <profileControls:ProfileBypassKeysEditor DataContext="{Binding GlobalScrollProfile}" />
         </StackPanel>
     </Border>
 </UserControl>

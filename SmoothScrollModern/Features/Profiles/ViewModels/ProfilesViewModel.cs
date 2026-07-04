@@ -20,6 +20,7 @@ public sealed class ProfilesViewModel : ObservableObject
     private string _searchQuery = string.Empty;
     private string _appliedSearchQuery = string.Empty;
     private string _newProfileName = string.Empty;
+    private string _newScrollProfileNameErrorText = string.Empty;
     private int _pageIndex;
 
     public ProfilesViewModel(AppSettings settings, DispatcherQueue dispatcherQueue, Action requestSave)
@@ -38,6 +39,7 @@ public sealed class ProfilesViewModel : ObservableObject
         }
 
         AddScrollProfileCommand = new RelayCommand(AddScrollProfile, CanAddScrollProfile);
+        DuplicateScrollProfileCommand = new RelayCommand<ScrollProfile?>(DuplicateScrollProfile, profile => profile is { IsGlobal: false });
         RemoveScrollProfileCommand = new RelayCommand<ScrollProfile?>(RemoveScrollProfile, profile => profile is { IsGlobal: false });
 
         _searchTimer = dispatcherQueue.CreateTimer();
@@ -65,6 +67,8 @@ public sealed class ProfilesViewModel : ObservableObject
     public ObservableCollection<ScrollProfile> ScrollProfileChoices { get; }
 
     public IRelayCommand AddScrollProfileCommand { get; }
+
+    public IRelayCommand<ScrollProfile?> DuplicateScrollProfileCommand { get; }
 
     public IRelayCommand<ScrollProfile?> RemoveScrollProfileCommand { get; }
 
@@ -141,10 +145,25 @@ public sealed class ProfilesViewModel : ObservableObject
         {
             if (SetProperty(ref _newProfileName, value))
             {
+                UpdateNewScrollProfileNameError();
                 AddScrollProfileCommand.NotifyCanExecuteChanged();
             }
         }
     }
+
+    public string NewScrollProfileNameErrorText
+    {
+        get => _newScrollProfileNameErrorText;
+        private set
+        {
+            if (SetProperty(ref _newScrollProfileNameErrorText, value))
+            {
+                OnPropertyChanged(nameof(HasNewScrollProfileNameError));
+            }
+        }
+    }
+
+    public bool HasNewScrollProfileNameError => !string.IsNullOrWhiteSpace(NewScrollProfileNameErrorText);
 
     public string ScrollProfilesCountText => BuildListCountText(
         _filteredMatches.Count,
@@ -194,6 +213,7 @@ public sealed class ProfilesViewModel : ObservableObject
         RebuildScrollProfileChoices();
         RefreshFilter(resetPage: true);
         OnPropertyChanged(string.Empty);
+        UpdateNewScrollProfileNameError();
     }
 
     public ScrollSettings GetScrollSettings(string scrollProfileId)
@@ -297,11 +317,18 @@ public sealed class ProfilesViewModel : ObservableObject
 
     private bool CanAddScrollProfile()
     {
-        return !string.IsNullOrWhiteSpace(NewScrollProfileName);
+        return !string.IsNullOrWhiteSpace(NewScrollProfileName)
+               && !HasDuplicateProfileName(NewScrollProfileName);
     }
 
     private void AddScrollProfile()
     {
+        UpdateNewScrollProfileNameError();
+        if (HasNewScrollProfileNameError)
+        {
+            return;
+        }
+
         var profile = new ScrollProfile
         {
             Name = NewScrollProfileName,
@@ -312,7 +339,8 @@ public sealed class ProfilesViewModel : ObservableObject
                 Smoothness = _settings.Scroll.Smoothness,
                 Acceleration = _settings.Scroll.Acceleration,
                 EasingType = _settings.Scroll.EasingType,
-                EnableHorizontalScroll = _settings.Scroll.EnableHorizontalScroll
+                EnableHorizontalScroll = _settings.Scroll.EnableHorizontalScroll,
+                BypassSmoothingVirtualKeys = _settings.Scroll.BypassSmoothingVirtualKeys.ToList()
             }
         };
 
@@ -321,6 +349,27 @@ public sealed class ProfilesViewModel : ObservableObject
         NewScrollProfileName = string.Empty;
         RebuildScrollProfileChoices();
         RefreshFilter(resetPage: true);
+        SaveAndNotify(nameof(ScrollProfilesCountText));
+    }
+
+    private void DuplicateScrollProfile(ScrollProfile? sourceProfile)
+    {
+        if (sourceProfile is null)
+        {
+            return;
+        }
+
+        var profile = new ScrollProfile
+        {
+            Name = CreateUniqueCopyName(sourceProfile.Name),
+            Scroll = CloneScrollSettings(sourceProfile.Scroll)
+        };
+
+        profile.Validate();
+        AddProfileToCollection(profile);
+        RebuildScrollProfileChoices();
+        RefreshFilter(resetPage: true);
+        RefreshNewScrollProfileNameState();
         SaveAndNotify(nameof(ScrollProfilesCountText));
     }
 
@@ -344,10 +393,25 @@ public sealed class ProfilesViewModel : ObservableObject
         SaveAndNotify(nameof(ScrollProfilesCountText));
     }
 
+    private static ScrollSettings CloneScrollSettings(ScrollSettings source)
+    {
+        return new ScrollSettings
+        {
+            ScrollMultiplier = source.ScrollMultiplier,
+            DurationMs = source.DurationMs,
+            Smoothness = source.Smoothness,
+            Acceleration = source.Acceleration,
+            EasingType = source.EasingType,
+            EnableHorizontalScroll = source.EnableHorizontalScroll,
+            BypassSmoothingVirtualKeys = source.BypassSmoothingVirtualKeys.ToList()
+        };
+    }
+
     private void AddProfileToCollection(ScrollProfile profile)
     {
         profile.PropertyChanged += OnScrollProfilePropertyChanged;
         UserScrollProfiles.Add(profile);
+        RefreshNewScrollProfileNameState();
     }
 
     private void UnsubscribeProfiles()
@@ -376,6 +440,7 @@ public sealed class ProfilesViewModel : ObservableObject
         {
             RebuildScrollProfileChoices();
             RefreshFilter();
+            RefreshNewScrollProfileNameState();
         }
 
         SaveAndNotify(nameof(ScrollProfilesCountText));
@@ -435,6 +500,42 @@ public sealed class ProfilesViewModel : ObservableObject
                || profile.Name.Contains(_appliedSearchQuery, StringComparison.OrdinalIgnoreCase);
     }
 
+    private void UpdateNewScrollProfileNameError()
+    {
+        NewScrollProfileNameErrorText = HasDuplicateProfileName(NewScrollProfileName)
+            ? "Профиль с таким названием уже есть. Выберите другое название."
+            : string.Empty;
+    }
+
+    private void RefreshNewScrollProfileNameState()
+    {
+        UpdateNewScrollProfileNameError();
+        AddScrollProfileCommand.NotifyCanExecuteChanged();
+    }
+
+    private bool HasDuplicateProfileName(string profileName)
+    {
+        var normalizedName = NormalizeProfileName(profileName);
+        return !string.IsNullOrWhiteSpace(normalizedName)
+               && UserScrollProfiles.Any(profile =>
+                   string.Equals(NormalizeProfileName(profile.Name), normalizedName, StringComparison.OrdinalIgnoreCase));
+    }
+
+    private string CreateUniqueCopyName(string sourceName)
+    {
+        var baseName = $"{NormalizeProfileName(sourceName)} копия".Trim();
+        var candidate = baseName;
+        var index = 2;
+
+        while (HasDuplicateProfileName(candidate))
+        {
+            candidate = $"{baseName} {index}";
+            index++;
+        }
+
+        return candidate;
+    }
+
     private void ApplyPageIndex(bool resetPage)
     {
         var pageIndex = CoercePageIndex(resetPage ? 0 : _pageIndex, ScrollProfilesPageCount);
@@ -453,6 +554,11 @@ public sealed class ProfilesViewModel : ObservableObject
     private static int GetPageCount(int itemCount)
     {
         return Math.Max(1, (int)Math.Ceiling(itemCount / (double)ListPageSize));
+    }
+
+    private static string NormalizeProfileName(string profileName)
+    {
+        return profileName.Trim();
     }
 
     private static string BuildListCountText(int filteredCount, int totalCount, int pageIndex, bool isSearching)

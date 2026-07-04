@@ -5,21 +5,6 @@ namespace SmoothScrollModern.Native;
 
 internal static partial class NativeMethods
 {
-    internal delegate IntPtr LowLevelMouseProc(int nCode, IntPtr wParam, IntPtr lParam);
-
-    [LibraryImport("user32.dll", SetLastError = true)]
-    internal static partial IntPtr SetWindowsHookExW(int idHook, LowLevelMouseProc lpfn, IntPtr hmod, uint dwThreadId);
-
-    [LibraryImport("user32.dll", SetLastError = true)]
-    [return: MarshalAs(UnmanagedType.Bool)]
-    internal static partial bool UnhookWindowsHookEx(IntPtr hhk);
-
-    [LibraryImport("user32.dll")]
-    internal static partial IntPtr CallNextHookEx(IntPtr hhk, int nCode, IntPtr wParam, IntPtr lParam);
-
-    [LibraryImport("user32.dll", SetLastError = true)]
-    internal static partial uint SendInput(uint cInputs, [In] INPUT[] pInputs, int cbSize);
-
     [LibraryImport("user32.dll")]
     internal static partial IntPtr GetForegroundWindow();
 
@@ -32,9 +17,6 @@ internal static partial class NativeMethods
     [LibraryImport("user32.dll", SetLastError = true)]
     [return: MarshalAs(UnmanagedType.Bool)]
     internal static partial bool GetCursorPos(out POINT lpPoint);
-
-    [LibraryImport("user32.dll")]
-    internal static partial short GetKeyState(int nVirtKey);
 
     [LibraryImport("user32.dll")]
     internal static partial uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);

@@ -40,6 +40,12 @@
                         </StackPanel>
                     </Button>
                 </Grid>
+                <InfoBar
+                    IsClosable="False"
+                    IsOpen="{Binding HasNewScrollProfileNameError}"
+                    Message="{Binding NewScrollProfileNameErrorText}"
+                    Severity="Error"
+                    Title="Не удалось создать профиль" />
             </StackPanel>
         </Border>
 

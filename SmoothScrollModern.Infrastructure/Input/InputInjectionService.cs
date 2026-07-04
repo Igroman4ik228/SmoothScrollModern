@@ -1,10 +1,13 @@
-using System.Runtime.InteropServices;
+using SharpHook;
+using SharpHook.Data;
 using SmoothScrollModern.Native;
 
 namespace SmoothScrollModern.Input;
 
 public sealed class InputInjectionService : IInputInjectionService
 {
+    private readonly IEventSimulator _eventSimulator = new EventSimulator();
+
     public void SendWheel(int delta, bool horizontal, IntPtr targetWindowHandle, int screenX, int screenY)
     {
         if (delta == 0)
@@ -27,23 +30,12 @@ public sealed class InputInjectionService : IInputInjectionService
         SendWheelInput(delta, horizontal);
     }
 
-    private static void SendWheelInput(int delta, bool horizontal)
+    private void SendWheelInput(int delta, bool horizontal)
     {
-        var input = new INPUT
-        {
-            Type = NativeConstants.INPUT_MOUSE,
-            MouseInput = new MOUSEINPUT
-            {
-                MouseData = unchecked((uint)delta),
-                DwFlags = horizontal ? NativeConstants.MOUSEEVENTF_HWHEEL : NativeConstants.MOUSEEVENTF_WHEEL
-            }
-        };
-
-        var sent = NativeMethods.SendInput(1, [input], Marshal.SizeOf<INPUT>());
-        if (sent != 1)
-        {
-            throw new WinApiException(nameof(NativeMethods.SendInput));
-        }
+        _eventSimulator.SimulateMouseWheel(
+            (short)Math.Clamp(delta, short.MinValue, short.MaxValue),
+            horizontal ? MouseWheelScrollDirection.Horizontal : MouseWheelScrollDirection.Vertical,
+            MouseWheelScrollType.UnitScroll);
     }
 
     private static bool TryPostWheelToCurrentPointerTarget(
@@ -95,7 +87,7 @@ public sealed class InputInjectionService : IInputInjectionService
 
     private static nuint MakeWheelWParam(int delta)
     {
-        return (nuint)((unchecked((uint)(ushort)delta) << 16) | GetMouseKeyState());
+        return (nuint)(unchecked((uint)(ushort)delta) << 16);
     }
 
     private static nint MakePointLParam(int x, int y)
@@ -103,21 +95,4 @@ public sealed class InputInjectionService : IInputInjectionService
         return (nint)unchecked((int)(((uint)(ushort)y << 16) | (ushort)x));
     }
 
-    private static uint GetMouseKeyState()
-    {
-        uint state = 0;
-        state |= IsKeyDown(NativeConstants.VK_LBUTTON) ? NativeConstants.MK_LBUTTON : 0;
-        state |= IsKeyDown(NativeConstants.VK_RBUTTON) ? NativeConstants.MK_RBUTTON : 0;
-        state |= IsKeyDown(NativeConstants.VK_SHIFT) ? NativeConstants.MK_SHIFT : 0;
-        state |= IsKeyDown(NativeConstants.VK_CONTROL) ? NativeConstants.MK_CONTROL : 0;
-        state |= IsKeyDown(NativeConstants.VK_MBUTTON) ? NativeConstants.MK_MBUTTON : 0;
-        state |= IsKeyDown(NativeConstants.VK_XBUTTON1) ? NativeConstants.MK_XBUTTON1 : 0;
-        state |= IsKeyDown(NativeConstants.VK_XBUTTON2) ? NativeConstants.MK_XBUTTON2 : 0;
-        return state;
-    }
-
-    private static bool IsKeyDown(int virtualKey)
-    {
-        return (NativeMethods.GetKeyState(virtualKey) & 0x8000) != 0;
-    }
 }

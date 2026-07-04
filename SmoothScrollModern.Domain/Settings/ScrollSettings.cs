@@ -1,4 +1,5 @@
 using SmoothScrollModern.Scroll;
+using Windows.System;
 
 namespace SmoothScrollModern.Settings;
 
@@ -32,12 +33,19 @@ public sealed class ScrollSettings
 
     public bool EnableHorizontalScroll { get; set; } = true;
 
+    public List<VirtualKey> BypassSmoothingVirtualKeys { get; set; } = [ShortcutKeys.LeftControl, ShortcutKeys.RightControl];
+
     public void Validate()
     {
         ScrollMultiplier = Snap(ScrollMultiplier, ScrollMultiplierMin, ScrollMultiplierMax, ScrollMultiplierStep);
         DurationMs = Snap(DurationMs, DurationMin, DurationMax, DurationStep);
         Smoothness = Snap(Smoothness, SmoothnessMin, SmoothnessMax, SmoothnessStep);
         Acceleration = Snap(Acceleration, AccelerationMin, AccelerationMax, AccelerationStep);
+        BypassSmoothingVirtualKeys = BypassSmoothingVirtualKeys
+            ?.SelectMany(ShortcutKeys.ExpandGenericModifier)
+            .Where(ShortcutKeys.IsValid)
+            .Distinct()
+            .ToList() ?? [];
     }
 
     private static double Snap(double value, double minimum, double maximum, double step)

@@ -55,6 +55,12 @@
                         </StackPanel>
                     </Button>
                 </StackPanel>
+                <InfoBar
+                    IsClosable="False"
+                    IsOpen="{Binding HasSettingsImportError}"
+                    Message="{Binding SettingsImportErrorText}"
+                    Severity="Error"
+                    Title="Не удалось импортировать настройки" />
             </StackPanel>
         </StackPanel>
 

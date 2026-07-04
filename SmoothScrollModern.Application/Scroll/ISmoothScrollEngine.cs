@@ -1,4 +1,5 @@
 using SmoothScrollModern.Settings;
+using Windows.System;
 
 namespace SmoothScrollModern.Scroll;
 
@@ -14,4 +15,6 @@ public interface ISmoothScrollEngine : IDisposable
         int screenY);
 
     void Stop();
+
+    bool StopIfBypassKeyDown(VirtualKey virtualKey);
 }

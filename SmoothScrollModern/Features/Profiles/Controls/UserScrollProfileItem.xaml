@@ -26,16 +26,28 @@
         </toolkit:SettingsExpander.Header>
 
         <toolkit:SettingsExpander.Content>
-            <Button
-                Width="40"
-                Height="32"
-                MinWidth="40"
-                Padding="0"
-                AutomationProperties.Name="Удалить профиль прокрутки"
-                Click="OnRemoveScrollProfileClick"
-                ToolTipService.ToolTip="Удалить профиль">
-                <FontIcon Glyph="&#xE74D;" Style="{StaticResource InlineButtonIconStyle}" />
-            </Button>
+            <StackPanel Orientation="Horizontal" Spacing="4">
+                <Button
+                    Width="40"
+                    Height="32"
+                    MinWidth="40"
+                    Padding="0"
+                    AutomationProperties.Name="Скопировать профиль прокрутки"
+                    Click="OnDuplicateScrollProfileClick"
+                    ToolTipService.ToolTip="Скопировать профиль">
+                    <FontIcon Glyph="&#xE8C8;" Style="{StaticResource InlineButtonIconStyle}" />
+                </Button>
+                <Button
+                    Width="40"
+                    Height="32"
+                    MinWidth="40"
+                    Padding="0"
+                    AutomationProperties.Name="Удалить профиль прокрутки"
+                    Click="OnRemoveScrollProfileClick"
+                    ToolTipService.ToolTip="Удалить профиль">
+                    <FontIcon Glyph="&#xE74D;" Style="{StaticResource InlineButtonIconStyle}" />
+                </Button>
+            </StackPanel>
         </toolkit:SettingsExpander.Content>
 
         <toolkit:SettingsExpander.ItemsHeader>

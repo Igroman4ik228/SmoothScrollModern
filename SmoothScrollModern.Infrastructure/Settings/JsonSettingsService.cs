@@ -65,6 +65,7 @@ public sealed class JsonSettingsService : ISettingsService
         var json = File.ReadAllText(path);
         var settings = JsonSerializer.Deserialize<AppSettings>(json, _serializerOptions) ?? CreateDefaultSettings();
         settings.Validate();
+        ValidateUniqueScrollProfileNames(settings);
         EnsureDefaultProfiles(settings);
         return settings;
     }
@@ -133,6 +134,21 @@ public sealed class JsonSettingsService : ISettingsService
         }
 
         settings.ApplicationRules.Add(profile);
+    }
+
+    private static void ValidateUniqueScrollProfileNames(AppSettings settings)
+    {
+        var duplicateName = settings.ScrollProfiles
+            .Select(profile => profile.Name.Trim())
+            .Where(name => !string.IsNullOrWhiteSpace(name))
+            .GroupBy(name => name, StringComparer.OrdinalIgnoreCase)
+            .FirstOrDefault(group => group.Count() > 1)
+            ?.Key;
+
+        if (duplicateName is not null)
+        {
+            throw new InvalidDataException($"В импортируемом файле есть несколько профилей с названием \"{duplicateName}\".");
+        }
     }
 
     private void BackupCorruptedSettings()

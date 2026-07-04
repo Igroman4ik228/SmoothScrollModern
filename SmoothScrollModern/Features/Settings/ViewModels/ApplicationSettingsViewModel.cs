@@ -16,6 +16,7 @@ public sealed class ApplicationSettingsViewModel : ObservableObject
     private readonly Action _requestSave;
     private readonly Action _stateChanged;
     private readonly Action<string> _themeChanged;
+    private string _settingsImportErrorText = string.Empty;
     private DateTimeOffset? _pausedUntil;
 
     public ApplicationSettingsViewModel(
@@ -157,6 +158,20 @@ public sealed class ApplicationSettingsViewModel : ObservableObject
         }
     }
 
+    public string SettingsImportErrorText
+    {
+        get => _settingsImportErrorText;
+        private set
+        {
+            if (SetProperty(ref _settingsImportErrorText, value))
+            {
+                OnPropertyChanged(nameof(HasSettingsImportError));
+            }
+        }
+    }
+
+    public bool HasSettingsImportError => !string.IsNullOrWhiteSpace(SettingsImportErrorText);
+
     private AppSettings Settings => _settingsAccessor();
 
     public void LoadSettings()
@@ -206,6 +221,7 @@ public sealed class ApplicationSettingsViewModel : ObservableObject
         if (dialog.ShowDialog() == Forms.DialogResult.OK)
         {
             _settingsService.Export(Settings, dialog.FileName);
+            SettingsImportErrorText = string.Empty;
         }
     }
 
@@ -222,8 +238,16 @@ public sealed class ApplicationSettingsViewModel : ObservableObject
             return;
         }
 
-        _replaceSettings(_settingsService.Import(dialog.FileName));
-        _settingsService.Save(Settings);
+        try
+        {
+            _replaceSettings(_settingsService.Import(dialog.FileName));
+            _settingsService.Save(Settings);
+            SettingsImportErrorText = string.Empty;
+        }
+        catch (Exception ex) when (ex is InvalidDataException or System.Text.Json.JsonException or UnauthorizedAccessException or IOException)
+        {
+            SettingsImportErrorText = ex.Message;
+        }
     }
 
     private void SaveAndNotify(params string[] propertyNames)

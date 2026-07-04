@@ -77,4 +77,14 @@ public sealed partial class UserScrollProfileItem : UserControl
             viewModel.RemoveScrollProfileCommand.Execute(profile);
         }
     }
+
+    private void OnDuplicateScrollProfileClick(object sender, RoutedEventArgs e)
+    {
+        if (DataContext is ScrollProfile profile
+            && VisualTreeDataContext.FindAncestor<ProfilesViewModel>(this) is { } viewModel
+            && viewModel.DuplicateScrollProfileCommand.CanExecute(profile))
+        {
+            viewModel.DuplicateScrollProfileCommand.Execute(profile);
+        }
+    }
 }

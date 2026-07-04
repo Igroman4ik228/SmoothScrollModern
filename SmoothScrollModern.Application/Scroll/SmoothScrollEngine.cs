@@ -1,6 +1,7 @@
 using SmoothScrollModern.Input;
 using SmoothScrollModern.Core;
 using SmoothScrollModern.Settings;
+using Windows.System;
 
 namespace SmoothScrollModern.Scroll;
 
@@ -29,6 +30,7 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
     private IntPtr _targetWindowHandle;
     private int _targetScreenX;
     private int _targetScreenY;
+    private VirtualKey[] _bypassSmoothingVirtualKeys = [];
 
     public SmoothScrollEngine(IInputInjectionService inputInjectionService)
     {
@@ -63,6 +65,7 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
             _targetWindowHandle = targetWindowHandle;
             _targetScreenX = screenX;
             _targetScreenY = screenY;
+            _bypassSmoothingVirtualKeys = settings.BypassSmoothingVirtualKeys.ToArray();
 
             var isBurst = _isAnimating
                           && now - _lastInputAt <= TimeSpan.FromMilliseconds(Math.Max(80, settings.DurationMs));
@@ -257,6 +260,22 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
         }
     }
 
+    public bool StopIfBypassKeyDown(VirtualKey virtualKey)
+    {
+        lock (_gate)
+        {
+            if (!_isAnimating || !ShortcutKeys.ContainsMatch(_bypassSmoothingVirtualKeys, virtualKey))
+            {
+                return false;
+            }
+
+            ResetPendingDeltas();
+            _isAnimating = false;
+            _animationCancellation?.Cancel();
+            return true;
+        }
+    }
+
     private bool IsAnimationComplete()
     {
         var remainderThreshold = _options.DeliveryMode == ScrollDeliveryMode.WheelStep
@@ -279,6 +298,7 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
         _targetWindowHandle = IntPtr.Zero;
         _targetScreenX = 0;
         _targetScreenY = 0;
+        _bypassSmoothingVirtualKeys = [];
     }
 
     private readonly record struct ScrollAnimationOptions(
