@@ -23,16 +23,16 @@ public sealed class ApplicationRulesService : IApplicationRulesService
             && Matches(rule, application));
     }
 
-    public ApplicationRule AddOrUpdateRule(AppSettings settings, ApplicationInfo application)
+    public ApplicationRule AddOrUpdateRule(AppSettings settings, ApplicationInfo application, bool disableSmoothScroll)
     {
         var processName = application.ProcessName;
         var displayName = string.IsNullOrWhiteSpace(application.DisplayName) ? processName : application.DisplayName;
-        var rule = AddManualRule(settings, processName, displayName);
+        var rule = AddManualRule(settings, processName, displayName, disableSmoothScroll);
         rule.ExecutablePath = application.ExecutablePath;
         return rule;
     }
 
-    public ApplicationRule AddManualRule(AppSettings settings, string processName, string displayName)
+    public ApplicationRule AddManualRule(AppSettings settings, string processName, string displayName, bool disableSmoothScroll)
     {
         var normalized = ApplicationRule.NormalizeProcessName(processName);
         var rule = settings.ApplicationRules.FirstOrDefault(item =>
@@ -41,7 +41,7 @@ public sealed class ApplicationRulesService : IApplicationRulesService
         if (rule is not null)
         {
             rule.DisplayName = string.IsNullOrWhiteSpace(displayName) ? normalized : displayName;
-            rule.IsSmoothScrollDisabled = true;
+            rule.IsSmoothScrollDisabled = disableSmoothScroll;
             rule.IsRuleEnabled = true;
             return rule;
         }
@@ -50,7 +50,7 @@ public sealed class ApplicationRulesService : IApplicationRulesService
         {
             ProcessName = normalized,
             DisplayName = string.IsNullOrWhiteSpace(displayName) ? normalized : displayName.Trim(),
-            IsSmoothScrollDisabled = true,
+            IsSmoothScrollDisabled = disableSmoothScroll,
             IsRuleEnabled = true,
             IsUserRule = true
         };
@@ -59,14 +59,15 @@ public sealed class ApplicationRulesService : IApplicationRulesService
         return rule;
     }
 
-    public ApplicationRule AddApplicationPath(AppSettings settings, string executablePath, string displayName)
+    public ApplicationRule AddApplicationPath(AppSettings settings, string executablePath, string displayName, bool disableSmoothScroll)
     {
         var normalizedPath = ApplicationRule.NormalizeExecutablePath(executablePath);
         var processName = Path.GetFileName(normalizedPath);
         var rule = AddManualRule(
             settings,
             processName,
-            string.IsNullOrWhiteSpace(displayName) ? processName : displayName);
+            string.IsNullOrWhiteSpace(displayName) ? processName : displayName,
+            disableSmoothScroll);
         rule.ExecutablePath = normalizedPath;
         return rule;
     }

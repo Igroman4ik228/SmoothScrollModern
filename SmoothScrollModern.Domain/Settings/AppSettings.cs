@@ -16,6 +16,8 @@ public sealed class AppSettings
 
     public bool AutoDetectExcludedApps { get; set; } = true;
 
+    public ApplicationListMode ApplicationListMode { get; set; } = ApplicationListMode.Exclusions;
+
     public string Theme { get; set; } = "System";
 
     public void Validate()

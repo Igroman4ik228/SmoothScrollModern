@@ -1,20 +1,19 @@
-using System.Collections.ObjectModel;
-using System.ComponentModel;
-using System.Diagnostics;
-using System.IO;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using SmoothScrollModern.Applications;
-using SmoothScrollModern.Shared.Presentation;
 using SmoothScrollModern.Features.Profiles.ViewModels;
 using SmoothScrollModern.Scroll;
 using SmoothScrollModern.Settings;
+using SmoothScrollModern.Shared.Presentation;
+using System.Collections.ObjectModel;
+using System.ComponentModel;
+using System.Diagnostics;
 using Forms = System.Windows.Forms;
 
 namespace SmoothScrollModern.Features.Applications.ViewModels;
 
-public sealed class ApplicationRulesViewModel : ObservableObject
+public sealed partial class ApplicationRulesViewModel : ObservableObject
 {
     private const int ListPageSize = 8;
     private static readonly TimeSpan SearchDebounceInterval = TimeSpan.FromMilliseconds(300);
@@ -94,6 +93,65 @@ public sealed class ApplicationRulesViewModel : ObservableObject
     public IRelayCommand BrowseApplicationCommand { get; }
 
     public IRelayCommand<ApplicationRule?> RemoveRuleCommand { get; }
+
+    public ApplicationListMode SelectedApplicationListMode
+    {
+        get => _settings.ApplicationListMode;
+        set
+        {
+            if (_settings.ApplicationListMode == value)
+            {
+                return;
+            }
+
+            _settings.ApplicationListMode = value;
+            SaveAndNotifyApplicationMode();
+            _stateChanged();
+        }
+    }
+
+    public bool IsExclusionsModeSelected
+    {
+        get => SelectedApplicationListMode == ApplicationListMode.Exclusions;
+        set
+        {
+            if (value)
+            {
+                SelectedApplicationListMode = ApplicationListMode.Exclusions;
+            }
+            else
+            {
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public bool IsSelectedOnlyModeSelected
+    {
+        get => SelectedApplicationListMode == ApplicationListMode.SelectedOnly;
+        set
+        {
+            if (value)
+            {
+                SelectedApplicationListMode = ApplicationListMode.SelectedOnly;
+            }
+            else
+            {
+                OnPropertyChanged();
+            }
+        }
+    }
+
+    public int SelectedApplicationListModeIndex
+    {
+        get => SelectedApplicationListMode == ApplicationListMode.SelectedOnly ? 1 : 0;
+        set
+        {
+            SelectedApplicationListMode = value == 1
+                ? ApplicationListMode.SelectedOnly
+                : ApplicationListMode.Exclusions;
+        }
+    }
 
     public string ManualProcessName
     {
@@ -214,7 +272,10 @@ public sealed class ApplicationRulesViewModel : ObservableObject
                 return;
             }
 
-            var rule = _applicationRulesService.AddOrUpdateRule(_settings, _currentApplication);
+            var rule = _applicationRulesService.AddOrUpdateRule(
+                _settings,
+                _currentApplication,
+                disableSmoothScroll: SelectedApplicationListMode == ApplicationListMode.Exclusions);
             AddRuleToCollection(rule);
             SaveAndNotifyCurrentApplicationRuleState();
         }).ConfigureAwait(false);
@@ -277,6 +338,11 @@ public sealed class ApplicationRulesViewModel : ObservableObject
         }
 
         var rule = FindApplicationRule(targetApplication);
+        if (SelectedApplicationListMode == ApplicationListMode.SelectedOnly && rule is not { IsRuleEnabled: true })
+        {
+            return false;
+        }
+
         if (rule is { IsRuleEnabled: true, IsSmoothScrollDisabled: true }
             || _applicationRulesService.ShouldBypass(targetApplication, _settings))
         {
@@ -313,7 +379,11 @@ public sealed class ApplicationRulesViewModel : ObservableObject
 
     private void AddManualRule()
     {
-        var rule = _applicationRulesService.AddManualRule(_settings, ManualProcessName, ManualProcessName);
+        var rule = _applicationRulesService.AddManualRule(
+            _settings,
+            ManualProcessName,
+            ManualProcessName,
+            disableSmoothScroll: SelectedApplicationListMode == ApplicationListMode.Exclusions);
         AddRuleToCollection(rule);
         ManualProcessName = string.Empty;
         SaveAndNotifyCurrentApplicationRuleState();
@@ -336,7 +406,11 @@ public sealed class ApplicationRulesViewModel : ObservableObject
 
         var processName = Path.GetFileName(dialog.FileName);
         var displayName = TryGetFileDescription(dialog.FileName) ?? processName;
-        var rule = _applicationRulesService.AddApplicationPath(_settings, dialog.FileName, displayName);
+        var rule = _applicationRulesService.AddApplicationPath(
+            _settings,
+            dialog.FileName,
+            displayName,
+            disableSmoothScroll: SelectedApplicationListMode == ApplicationListMode.Exclusions);
         AddRuleToCollection(rule);
         ManualProcessName = processName;
         SaveAndNotifyCurrentApplicationRuleState();
@@ -534,6 +608,16 @@ public sealed class ApplicationRulesViewModel : ObservableObject
             nameof(HasCurrentApplicationRule),
             nameof(IsCurrentApplicationRuleMissing));
         RemoveRuleCommand.NotifyCanExecuteChanged();
+    }
+
+    private void SaveAndNotifyApplicationMode()
+    {
+        SaveAndNotify(
+            nameof(SelectedApplicationListMode),
+            nameof(IsExclusionsModeSelected),
+            nameof(IsSelectedOnlyModeSelected),
+            nameof(SelectedApplicationListModeIndex));
+        DisableCurrentApplicationCommand.NotifyCanExecuteChanged();
     }
 
     private static bool RulePropertyAffectsSearch(string? propertyName)

@@ -3,7 +3,8 @@
     x:Class="SmoothScrollModern.Pages.ExceptionsPage"
     xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
     xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
-    xmlns:applicationWidgets="using:SmoothScrollModern.Widgets.Applications">
+    xmlns:applicationWidgets="using:SmoothScrollModern.Widgets.Applications"
+    xmlns:toolkit="using:CommunityToolkit.WinUI.Controls">
 
     <ScrollViewer
         HorizontalScrollBarVisibility="Disabled"
@@ -13,6 +14,20 @@
             Margin="32,16,32,32"
             HorizontalAlignment="Stretch"
             Spacing="24">
+            <toolkit:SettingsCard
+                HorizontalContentAlignment="Stretch"
+                Description="Настройте режим работы списка приложений"
+                Header="В каких приложениях работает плавная прокрутка">
+                <toolkit:Segmented
+                    HorizontalAlignment="Right"
+                    AutomationProperties.Name="В каких приложениях работает плавная прокрутка"
+                    SelectedIndex="{Binding SelectedApplicationListModeIndex, Mode=TwoWay}"
+                    SelectionMode="Single">
+                    <toolkit:SegmentedItem Content="Во всех, кроме выбранных" />
+                    <toolkit:SegmentedItem Content="Только выбранные" />
+                </toolkit:Segmented>
+            </toolkit:SettingsCard>
+
             <applicationWidgets:ActiveApplicationRuleBlock />
             <applicationWidgets:ManualApplicationRuleBlock />
             <applicationWidgets:ApplicationRulesListBlock />

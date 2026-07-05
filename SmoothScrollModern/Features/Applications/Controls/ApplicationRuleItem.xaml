@@ -23,19 +23,19 @@
         <toolkit:SettingsExpander.Content>
             <StackPanel Orientation="Horizontal" Spacing="8">
                 <ToggleSwitch
-                    AutomationProperties.Name="Использовать правило"
+                    AutomationProperties.Name="Использовать исключение"
                     IsOn="{Binding IsRuleEnabled, Mode=TwoWay}"
                     OffContent="Откл."
                     OnContent="Вкл."
-                    ToolTipService.ToolTip="Использовать правило" />
+                    ToolTipService.ToolTip="Использовать исключение" />
                 <Button
                     Width="40"
                     Height="32"
                     MinWidth="40"
                     Padding="0"
-                    AutomationProperties.Name="Удалить правило исключения"
+                    AutomationProperties.Name="Удалить исключение"
                     Click="OnRemoveRuleClick"
-                    ToolTipService.ToolTip="Удалить правило">
+                    ToolTipService.ToolTip="Удалить исключение">
                     <FontIcon
                         Glyph="&#xE74D;"
                         Style="{StaticResource InlineButtonIconStyle}" />

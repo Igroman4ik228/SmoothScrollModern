@@ -6,9 +6,9 @@ public interface IApplicationRulesService
 {
     bool ShouldBypass(ApplicationInfo application, AppSettings settings);
 
-    ApplicationRule AddOrUpdateRule(AppSettings settings, ApplicationInfo application);
+    ApplicationRule AddOrUpdateRule(AppSettings settings, ApplicationInfo application, bool disableSmoothScroll);
 
-    ApplicationRule AddManualRule(AppSettings settings, string processName, string displayName);
+    ApplicationRule AddManualRule(AppSettings settings, string processName, string displayName, bool disableSmoothScroll);
 
-    ApplicationRule AddApplicationPath(AppSettings settings, string executablePath, string displayName);
+    ApplicationRule AddApplicationPath(AppSettings settings, string executablePath, string displayName, bool disableSmoothScroll);
 }

@@ -28,10 +28,10 @@
 
                 <Button
                     Grid.Column="1"
-                    AutomationProperties.Name="Удалить правило для активного приложения"
+                    AutomationProperties.Name="Удалить исключение для активного приложения"
                     Command="{Binding RemoveRuleCommand}"
                     CommandParameter="{Binding CurrentApplicationRule}"
-                    ToolTipService.ToolTip="Удалить правило"
+                    ToolTipService.ToolTip="Удалить исключение"
                     Visibility="{Binding HasCurrentApplicationRule, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <FontIcon Glyph="&#xE74D;" Style="{StaticResource InlineButtonIconStyle}" />
                 </Button>
@@ -45,14 +45,14 @@
 
             <Button
                 HorizontalAlignment="Left"
-                AutomationProperties.Name="Добавить активное приложение в исключения"
+                AutomationProperties.Name="Добавить текущее приложение"
                 Command="{Binding DisableCurrentApplicationCommand}"
                 Style="{StaticResource AccentButtonStyle}"
-                ToolTipService.ToolTip="Создать правило для текущего активного приложения"
+                ToolTipService.ToolTip="Добавить текущее активное приложение"
                 Visibility="{Binding IsCurrentApplicationRuleMissing, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <StackPanel Orientation="Horizontal" Spacing="6">
                     <FontIcon Glyph="&#xE710;" Style="{StaticResource InlineButtonIconStyle}" />
-                    <TextBlock Text="Добавить исключение" />
+                    <TextBlock Text="Добавить текущее" />
                 </StackPanel>
             </Button>
         </StackPanel>

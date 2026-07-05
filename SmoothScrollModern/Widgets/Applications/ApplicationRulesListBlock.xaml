@@ -14,8 +14,8 @@
                     <ColumnDefinition Width="Auto" />
                 </Grid.ColumnDefinitions>
                 <StackPanel Spacing="3">
-                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Правила исключений" />
-                    <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Найдите исключение, отключите его или назначьте отдельный профиль прокрутки." />
+                    <TextBlock Style="{StaticResource SectionTitleStyle}" Text="Приложения" />
+                    <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Добавляйте приложения для исключений, отдельных профилей или режима выбранных приложений." />
                 </StackPanel>
                 <Border
                     Grid.Column="1"
@@ -34,13 +34,13 @@
             </Grid>
 
             <AutoSuggestBox
-                AutomationProperties.Name="Поиск правил исключений"
+                AutomationProperties.Name="Поиск приложений"
                 PlaceholderText="Поиск по названию, процессу или пути"
                 QueryIcon="Find"
                 Text="{Binding ApplicationSearchQuery, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
 
             <sharedControls:ListEmptyState
-                Description="Добавьте текущее приложение, укажите процесс вручную или выберите exe-файл, чтобы настроить исключение."
+                Description="Добавьте приложение, которое нужно исключить, настроить отдельно или выбрать для плавной прокрутки."
                 State="EmptyList"
                 Visibility="{Binding IsApplicationRulesEmpty, Converter={StaticResource BooleanToVisibilityConverter}}" />
 

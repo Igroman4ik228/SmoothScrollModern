@@ -9,10 +9,10 @@
             <StackPanel Spacing="3">
                 <TextBlock
                     Style="{StaticResource SectionTitleStyle}"
-                    Text="Добавить исключение" />
+                    Text="Добавить приложение" />
                 <TextBlock
                     Style="{StaticResource CaptionTextStyle}"
-                    Text="Введите имя процесса или выберите exe-файл, чтобы создать правило вручную." />
+                    Text="Введите имя процесса или выберите exe-файл." />
             </StackPanel>
             <Grid ColumnSpacing="10">
                 <Grid.ColumnDefinitions>
@@ -29,11 +29,11 @@
                     Text="{Binding ManualProcessName, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}" />
                 <Button
                     Grid.Column="1"
-                    AutomationProperties.Name="Добавить правило по имени процесса"
+                    AutomationProperties.Name="Добавить приложение по имени процесса"
                     VerticalAlignment="Bottom"
                     Command="{Binding AddManualRuleCommand}"
                     Style="{StaticResource AccentButtonStyle}"
-                    ToolTipService.ToolTip="Добавить правило по имени процесса">
+                    ToolTipService.ToolTip="Добавить приложение по имени процесса">
                     <StackPanel Orientation="Horizontal" Spacing="6">
                         <FontIcon
                             Glyph="&#xE710;"
