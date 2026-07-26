@@ -14,77 +14,89 @@
             </StackPanel>
 
             <sharedControls:ProfileSettingRow
-                Description="Сколько прокручивать за один шаг колеса."
+                Description="Сколько прокручивать от одного движения колеса."
                 FractionDigits="3"
                 Label="Сила прокрутки"
-                Maximum="6"
-                Minimum="0.2"
+                Maximum="10"
+                Minimum="0.1"
                 SmallChange="0.05"
                 StepFrequency="0.05"
-                Value="{Binding ScrollMultiplier, Mode=TwoWay}" />
+                Unit="x"
+                Value="{Binding ScrollStrength, Mode=TwoWay}" />
 
             <sharedControls:ProfileSettingRow
-                Description="Как долго длится один шаг прокрутки."
-                Label="Время прокрутки, мс"
-                Maximum="900"
-                Minimum="30"
-                SmallChange="10"
-                StepFrequency="10"
-                Value="{Binding DurationMs, Mode=TwoWay}" />
+                Description="Как быстро скорость затухает сама по себе."
+                FractionDigits="1"
+                Label="Трение"
+                Maximum="60"
+                Minimum="1.5"
+                SmallChange="0.1"
+                StepFrequency="0.1"
+                Unit="1/с"
+                Value="{Binding Friction, Mode=TwoWay}" />
 
             <sharedControls:ProfileSettingRow
-                Description="Насколько мягко движется прокрутка."
-                FractionDigits="3"
-                Label="Плавность"
-                Maximum="1"
+                Description="Насколько сильнее реагировать на быстрые повторные движения колеса."
+                Label="Разгон серии"
+                Maximum="600"
+                Minimum="5"
+                SmallChange="5"
+                StepFrequency="5"
+                Unit="%"
+                Value="{Binding FastScrollBoostPercent, Mode=TwoWay}" />
+
+            <sharedControls:ProfileSettingRow
+                Description="Насколько быстро гасить старую инерцию при обратной прокрутке."
+                Label="Контроль направления"
+                Maximum="98"
                 Minimum="0"
-                SmallChange="0.025"
-                StepFrequency="0.025"
-                Value="{Binding Smoothness, Mode=TwoWay}" />
+                SmallChange="1"
+                StepFrequency="1"
+                Unit="%"
+                Value="{Binding DirectionControlPercent, Mode=TwoWay}" />
 
             <sharedControls:ProfileSettingRow
-                Description="Ускоряет прокрутку при быстрых движениях колеса."
+                Description="Ограничивает скорость, чтобы скролл не улетал при сильном вращении."
+                Label="Предел скорости"
+                Maximum="40000"
+                Minimum="500"
+                SmallChange="50"
+                StepFrequency="50"
+                Unit="ед/с"
+                Value="{Binding MaxVelocity, Mode=TwoWay}" />
+
+            <sharedControls:ProfileSettingRow
+                Description="Скорость, ниже которой движение считается остановившимся."
+                Label="Порог остановки"
+                Maximum="120"
+                Minimum="1"
+                SmallChange="1"
+                StepFrequency="1"
+                Unit="ед/с"
+                Value="{Binding StopVelocityThreshold, Mode=TwoWay}" />
+
+            <sharedControls:ProfileSettingRow
+                Description="Чувствительность к мелким high-resolution wheel delta."
                 FractionDigits="3"
-                Label="Ускорение"
-                Maximum="4"
-                Minimum="0.2"
+                Label="Точное колесо"
+                Maximum="3"
+                Minimum="0.1"
                 SmallChange="0.05"
                 StepFrequency="0.05"
-                Value="{Binding Acceleration, Mode=TwoWay}" />
+                Unit="x"
+                Value="{Binding PrecisionMultiplier, Mode=TwoWay}" />
 
-            <Grid ColumnSpacing="18">
-                <Grid.ColumnDefinitions>
-                    <ColumnDefinition Width="*" />
-                    <ColumnDefinition Width="*" />
-                </Grid.ColumnDefinitions>
-
-                <StackPanel Spacing="6">
-                    <StackPanel Spacing="2">
-                        <TextBlock FontWeight="SemiBold" Text="Поведение прокрутки" />
-                        <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Кривая движения во время одного шага." />
-                    </StackPanel>
-                    <ComboBox
-                        HorizontalAlignment="Stretch"
-                        AutomationProperties.Name="Поведение прокрутки основного профиля"
-                        DisplayMemberPath="Name"
-                        ItemsSource="{Binding EasingOptions}"
-                        PlaceholderText="Мягкая"
-                        SelectedValue="{Binding EasingType, Mode=TwoWay}"
-                        SelectedValuePath="Value" />
+            <StackPanel Spacing="6">
+                <StackPanel Spacing="2">
+                    <TextBlock FontWeight="SemiBold" Text="Горизонтальная прокрутка" />
+                    <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Разрешает горизонтальную прокрутку там, где приложение ее поддерживает." />
                 </StackPanel>
-
-                <StackPanel Grid.Column="1" Spacing="6">
-                    <StackPanel Spacing="2">
-                        <TextBlock FontWeight="SemiBold" Text="Горизонтальная прокрутка" />
-                        <TextBlock Style="{StaticResource CaptionTextStyle}" Text="Разрешает горизонтальную прокрутку там, где приложение ее поддерживает." />
-                    </StackPanel>
-                    <ToggleSwitch
-                        AutomationProperties.Name="Горизонтальная прокрутка основного профиля"
-                        IsOn="{Binding EnableHorizontalScroll, Mode=TwoWay}"
-                        OffContent="Откл."
-                        OnContent="Вкл." />
-                </StackPanel>
-            </Grid>
+                <ToggleSwitch
+                    AutomationProperties.Name="Горизонтальная прокрутка основного профиля"
+                    IsOn="{Binding EnableHorizontalScroll, Mode=TwoWay}"
+                    OffContent="Откл."
+                    OnContent="Вкл." />
+            </StackPanel>
 
             <profileControls:ProfileBypassKeysEditor DataContext="{Binding GlobalScrollProfile}" />
         </StackPanel>

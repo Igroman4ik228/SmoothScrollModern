@@ -109,91 +109,6 @@ public sealed class ApplicationRule : ObservableEntity
     }
 
     [JsonIgnore]
-    public double RuleScrollMultiplier
-    {
-        get => Scroll.ScrollMultiplier;
-        set
-        {
-            if (Math.Abs(Scroll.ScrollMultiplier - value) < 0.0005)
-            {
-                return;
-            }
-
-            Scroll.ScrollMultiplier = value;
-            Scroll.Validate();
-            OnPropertyChanged();
-        }
-    }
-
-    [JsonIgnore]
-    public int RuleDurationMs
-    {
-        get => Scroll.DurationMs;
-        set
-        {
-            if (Scroll.DurationMs == value)
-            {
-                return;
-            }
-
-            Scroll.DurationMs = value;
-            Scroll.Validate();
-            OnPropertyChanged();
-        }
-    }
-
-    [JsonIgnore]
-    public double RuleSmoothness
-    {
-        get => Scroll.Smoothness;
-        set
-        {
-            if (Math.Abs(Scroll.Smoothness - value) < 0.0005)
-            {
-                return;
-            }
-
-            Scroll.Smoothness = value;
-            Scroll.Validate();
-            OnPropertyChanged();
-        }
-    }
-
-    [JsonIgnore]
-    public double RuleAcceleration
-    {
-        get => Scroll.Acceleration;
-        set
-        {
-            if (Math.Abs(Scroll.Acceleration - value) < 0.0005)
-            {
-                return;
-            }
-
-            Scroll.Acceleration = value;
-            Scroll.Validate();
-            OnPropertyChanged();
-        }
-    }
-
-    [JsonIgnore]
-    public EasingType RuleEasingType
-    {
-        get => Scroll.EasingType;
-        set
-        {
-            if (Scroll.EasingType == value)
-            {
-                return;
-            }
-
-            Scroll.EasingType = value;
-            Scroll.Validate();
-            OnPropertyChanged();
-        }
-    }
-
-    [JsonIgnore]
     public bool RuleEnableHorizontalScroll
     {
         get => Scroll.EnableHorizontalScroll;
@@ -262,11 +177,6 @@ public sealed class ApplicationRule : ObservableEntity
 
     private void OnScrollPropertiesChanged()
     {
-        OnPropertyChanged(nameof(RuleScrollMultiplier));
-        OnPropertyChanged(nameof(RuleDurationMs));
-        OnPropertyChanged(nameof(RuleSmoothness));
-        OnPropertyChanged(nameof(RuleAcceleration));
-        OnPropertyChanged(nameof(RuleEasingType));
         OnPropertyChanged(nameof(RuleEnableHorizontalScroll));
     }
 }

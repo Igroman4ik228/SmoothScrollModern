@@ -20,6 +20,12 @@ public sealed partial class ProfileSettingRow : UserControl
         typeof(ProfileSettingRow),
         new PropertyMetadata(string.Empty));
 
+    public static readonly DependencyProperty UnitProperty = DependencyProperty.Register(
+        nameof(Unit),
+        typeof(string),
+        typeof(ProfileSettingRow),
+        new PropertyMetadata(string.Empty));
+
     public static readonly DependencyProperty MinimumProperty = DependencyProperty.Register(
         nameof(Minimum),
         typeof(double),
@@ -78,6 +84,12 @@ public sealed partial class ProfileSettingRow : UserControl
     {
         get => (string)GetValue(DescriptionProperty);
         set => SetValue(DescriptionProperty, value);
+    }
+
+    public string Unit
+    {
+        get => (string)GetValue(UnitProperty);
+        set => SetValue(UnitProperty, value);
     }
 
     public double Minimum
@@ -179,7 +191,7 @@ public sealed partial class ProfileSettingRow : UserControl
 
         ValueBox.NumberFormatter = new DecimalFormatter
         {
-            FractionDigits = 0,
+            FractionDigits = digits,
             NumberRounder = new IncrementNumberRounder
             {
                 Increment = increment,

@@ -21,9 +21,9 @@ public sealed class InputInjectionService : IInputInjectionService
             return;
         }
 
-        if (targetWindowHandle != IntPtr.Zero)
+        if (targetWindowHandle != IntPtr.Zero
+            && TryPostWheelToCurrentPointerTarget(targetWindowHandle, delta, horizontal, screenX, screenY))
         {
-            TryPostWheelToCurrentPointerTarget(targetWindowHandle, delta, horizontal, screenX, screenY);
             return;
         }
 

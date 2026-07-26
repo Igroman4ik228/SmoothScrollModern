@@ -1,5 +1,6 @@
-using SmoothScrollModern.Input;
+using System.Diagnostics;
 using SmoothScrollModern.Core;
+using SmoothScrollModern.Input;
 using SmoothScrollModern.Settings;
 using Windows.System;
 
@@ -7,24 +8,21 @@ namespace SmoothScrollModern.Scroll;
 
 public sealed class SmoothScrollEngine : ISmoothScrollEngine
 {
-    private const int FrameMs = 8;
-    private const int MinimumStep = 1;
-    private const int MaxSingleEventDelta = 720;
-    private const int MaxBurstLevel = 8;
-    private const int MaxWheelStepsPerFrame = 1;
-    private const double BurstAccelerationStep = 0.14;
-    private const double BurstDrainStep = 0.08;
+    private const double MaxFrameDeltaSeconds = 0.05;
+    private const double RemainderCompletionThreshold = 0.95;
+    private const int TargetFrameTimeMs = 8;
+    private const int MaxWheelStepsPerFrame = 3;
+
     private readonly IInputInjectionService _inputInjectionService;
+    private readonly Stopwatch _stopwatch = Stopwatch.StartNew();
     private readonly object _gate = new();
-    private CancellationTokenSource? _animationCancellation;
+    private CancellationTokenSource? _physicsCancellation;
     private bool _disposed;
-    private bool _isAnimating;
-    private DateTimeOffset _lastInputAt = DateTimeOffset.MinValue;
-    private ScrollAnimationOptions _options = ScrollAnimationOptions.Default;
+    private bool _isPhysicsRunning;
+    private ScrollPhysicsOptions _options = ScrollPhysicsOptions.Default;
     private ScrollDeliveryMode _deliveryMode = ScrollDeliveryMode.FineDelta;
-    private int _burstLevel;
-    private double _remainingVerticalDelta;
-    private double _remainingHorizontalDelta;
+    private double _velocityY;
+    private double _velocityX;
     private double _verticalOutputRemainder;
     private double _horizontalOutputRemainder;
     private IntPtr _targetWindowHandle;
@@ -46,19 +44,17 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
         int screenX,
         int screenY)
     {
-        if (horizontal && !settings.EnableHorizontalScroll)
+        if (delta == 0 || horizontal && !settings.EnableHorizontalScroll)
         {
             return;
         }
 
         settings.Validate();
-        var now = DateTimeOffset.UtcNow;
-
         lock (_gate)
         {
-            if (_deliveryMode != deliveryMode || _targetWindowHandle != targetWindowHandle)
+            if (_deliveryMode != deliveryMode || IsDifferentTargetWindow(targetWindowHandle))
             {
-                ResetPendingDeltas();
+                ResetMotion();
                 _deliveryMode = deliveryMode;
             }
 
@@ -66,38 +62,23 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
             _targetScreenX = screenX;
             _targetScreenY = screenY;
             _bypassSmoothingVirtualKeys = settings.BypassSmoothingVirtualKeys.ToArray();
+            _options = ScrollPhysicsOptions.From(settings, deliveryMode);
 
-            var isBurst = _isAnimating
-                          && now - _lastInputAt <= TimeSpan.FromMilliseconds(Math.Max(80, settings.DurationMs));
-
-            _burstLevel = isBurst ? Math.Min(_burstLevel + 1, MaxBurstLevel) : 0;
-            _lastInputAt = now;
-            _options = ScrollAnimationOptions.From(settings, _burstLevel, deliveryMode);
-
-            var accelerationBoost = 1.0 + (_burstLevel * BurstAccelerationStep * settings.Acceleration);
-            var scaledDelta = NormalizeScaledDelta(
-                Math.Clamp(
-                delta * settings.ScrollMultiplier * settings.Acceleration * accelerationBoost,
-                -MaxSingleEventDelta,
-                MaxSingleEventDelta),
-                deliveryMode);
-
+            var currentVelocity = horizontal ? _velocityX : _velocityY;
+            var impulse = CalculateVelocityImpulse(delta, currentVelocity, _options);
             if (horizontal)
             {
-                _remainingHorizontalDelta += scaledDelta;
+                ApplyDirectionChangeDamping(ref _velocityX, delta, _options.DirectionChangeDamping);
+                _velocityX = Math.Clamp(_velocityX + impulse, -_options.MaxVelocity, _options.MaxVelocity);
             }
             else
             {
-                _remainingVerticalDelta += scaledDelta;
+                ApplyDirectionChangeDamping(ref _velocityY, delta, _options.DirectionChangeDamping);
+                _velocityY = Math.Clamp(_velocityY + impulse, -_options.MaxVelocity, _options.MaxVelocity);
             }
 
-            if (!_isAnimating)
-            {
-                _animationCancellation?.Dispose();
-                _animationCancellation = new CancellationTokenSource();
-                _isAnimating = true;
-                _ = RunAnimationAsync(_animationCancellation.Token);
-            }
+            TraceInput(delta, horizontal, impulse);
+            EnsurePhysicsStarted();
         }
     }
 
@@ -105,9 +86,9 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
     {
         lock (_gate)
         {
-            ResetPendingDeltas();
-            _isAnimating = false;
-            _animationCancellation?.Cancel();
+            ResetMotion();
+            _isPhysicsRunning = false;
+            _physicsCancellation?.Cancel();
         }
     }
 
@@ -119,18 +100,40 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
         }
 
         Stop();
-        _animationCancellation?.Dispose();
+        _physicsCancellation?.Dispose();
         _disposed = true;
     }
 
-    private async Task RunAnimationAsync(CancellationToken cancellationToken)
+    public bool StopIfBypassKeyDown(VirtualKey virtualKey)
     {
+        lock (_gate)
+        {
+            if (!_isPhysicsRunning || !ShortcutKeys.ContainsMatch(_bypassSmoothingVirtualKeys, virtualKey))
+            {
+                return false;
+            }
+
+            ResetMotion();
+            _isPhysicsRunning = false;
+            _physicsCancellation?.Cancel();
+            return true;
+        }
+    }
+
+    private async Task RunPhysicsAsync(CancellationToken cancellationToken)
+    {
+        var lastFrameTime = _stopwatch.Elapsed;
+
         try
         {
             while (!cancellationToken.IsCancellationRequested)
             {
-                var options = GetOptions();
-                await Task.Delay(options.FrameDelayMs, cancellationToken).ConfigureAwait(false);
+                var frameDelayMs = GetFrameDelayMs();
+                await Task.Delay(frameDelayMs, cancellationToken).ConfigureAwait(false);
+
+                var now = _stopwatch.Elapsed;
+                var dt = Math.Min(Math.Max((now - lastFrameTime).TotalSeconds, 0), MaxFrameDeltaSeconds);
+                lastFrameTime = now;
 
                 int verticalDelta;
                 int horizontalDelta;
@@ -141,28 +144,25 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
 
                 lock (_gate)
                 {
-                    var verticalStep = CalculateFrameDelta(_remainingVerticalDelta, _options);
-                    var horizontalStep = CalculateFrameDelta(_remainingHorizontalDelta, _options);
+                    var outputY = _velocityY * dt;
+                    var outputX = _velocityX * dt;
 
-                    _remainingVerticalDelta -= verticalStep;
-                    _remainingHorizontalDelta -= horizontalStep;
+                    verticalDelta = ConsumeOutputDelta(ref _verticalOutputRemainder, outputY, _options.DeliveryMode);
+                    horizontalDelta = ConsumeOutputDelta(ref _horizontalOutputRemainder, outputX, _options.DeliveryMode);
 
-                    verticalDelta = ConsumeOutputDelta(ref _verticalOutputRemainder, verticalStep, _options.DeliveryMode);
-                    horizontalDelta = ConsumeOutputDelta(ref _horizontalOutputRemainder, horizontalStep, _options.DeliveryMode);
+                    ApplyFriction(ref _velocityY, _options.Friction, dt, _options.StopVelocityThreshold);
+                    ApplyFriction(ref _velocityX, _options.Friction, dt, _options.StopVelocityThreshold);
+
                     targetWindowHandle = _targetWindowHandle;
                     targetScreenX = _targetScreenX;
                     targetScreenY = _targetScreenY;
 
-                    if (_burstLevel > 0)
-                    {
-                        _burstLevel--;
-                        _options = _options with { BurstLevel = _burstLevel };
-                    }
+                    TraceFrame(dt, outputY, outputX, verticalDelta, horizontalDelta);
 
-                    if (IsAnimationComplete())
+                    if (IsMotionComplete())
                     {
-                        _isAnimating = false;
-                        _burstLevel = 0;
+                        ResetMotion();
+                        _isPhysicsRunning = false;
                         isComplete = true;
                     }
                 }
@@ -181,60 +181,75 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
         }
     }
 
-    private ScrollAnimationOptions GetOptions()
+    private int GetFrameDelayMs()
     {
         lock (_gate)
         {
-            return _options;
+            return _options.TargetFrameTimeMs;
         }
     }
 
-    private static double CalculateFrameDelta(double remainingDelta, ScrollAnimationOptions options)
+    private bool IsDifferentTargetWindow(IntPtr targetWindowHandle)
     {
-        if (Math.Abs(remainingDelta) < 0.001)
-        {
-            return 0;
-        }
-
-        var frameProgress = options.FrameDelayMs / (double)options.DurationMs;
-        var easedProgress = EasingFunctions.Apply(options.EasingType, frameProgress);
-        var smoothnessFactor = 1.0 + ((1.0 - options.Smoothness) * 0.55);
-        var burstFactor = 1.0 + (options.BurstLevel * BurstDrainStep);
-        var frameFactor = Math.Clamp(easedProgress * smoothnessFactor * burstFactor, 0.045, 0.65);
-
-        return remainingDelta * frameFactor;
+        return _targetWindowHandle != IntPtr.Zero
+               && targetWindowHandle != IntPtr.Zero
+               && _targetWindowHandle != targetWindowHandle;
     }
 
-    private static double NormalizeScaledDelta(double scaledDelta, ScrollDeliveryMode deliveryMode)
+    private static double CalculateVelocityImpulse(int delta, double currentVelocity, ScrollPhysicsOptions options)
     {
-        if (deliveryMode == ScrollDeliveryMode.FineDelta || Math.Abs(scaledDelta) < 0.001)
+        var speedRatio = Math.Clamp(Math.Abs(currentVelocity) / options.MaxVelocity, 0.0, 1.0);
+        var burstBoost = 1.0 + (speedRatio * options.BurstAcceleration);
+        if (Math.Abs(delta) < Constants.WheelDelta)
         {
-            return scaledDelta;
+            burstBoost = Math.Min(burstBoost, 1.2);
         }
 
-        var direction = Math.Sign(scaledDelta);
-        var steps = Math.Max(1, (int)Math.Round(Math.Abs(scaledDelta) / Constants.WheelDelta));
-        return direction * Math.Min(steps * Constants.WheelDelta, MaxSingleEventDelta);
+        var targetDistance = delta * options.DistanceMultiplier * options.PrecisionMultiplier * burstBoost;
+        return targetDistance * options.Friction;
+    }
+
+    private static void ApplyDirectionChangeDamping(ref double velocity, int inputDelta, double damping)
+    {
+        if (Math.Sign(velocity) != 0 && Math.Sign(velocity) != Math.Sign(inputDelta))
+        {
+            velocity *= damping;
+        }
+    }
+
+    private static void ApplyFriction(ref double velocity, double friction, double dt, double stopVelocityThreshold)
+    {
+        if (Math.Abs(velocity) < stopVelocityThreshold)
+        {
+            velocity = 0;
+            return;
+        }
+
+        velocity *= Math.Exp(-friction * dt);
+        if (Math.Abs(velocity) < stopVelocityThreshold)
+        {
+            velocity = 0;
+        }
     }
 
     private static int ConsumeOutputDelta(ref double remainder, double frameDelta, ScrollDeliveryMode deliveryMode)
     {
         remainder += frameDelta;
+        return deliveryMode == ScrollDeliveryMode.WheelStep
+            ? ConsumeWheelStepDelta(ref remainder)
+            : ExtractIntegerDelta(ref remainder);
+    }
 
-        if (deliveryMode == ScrollDeliveryMode.WheelStep)
-        {
-            return ConsumeWheelStepDelta(ref remainder);
-        }
-
-        if (Math.Abs(remainder) < MinimumStep)
+    private static int ExtractIntegerDelta(ref double remainder)
+    {
+        if (Math.Abs(remainder) < 1)
         {
             return 0;
         }
 
-        var delta = (int)Math.Truncate(remainder);
-        delta = Math.Clamp(delta, -Constants.WheelDelta, Constants.WheelDelta);
-        remainder -= delta;
-        return delta;
+        var value = (int)Math.Truncate(remainder);
+        remainder -= value;
+        return value;
     }
 
     private static int ConsumeWheelStepDelta(ref double remainder)
@@ -260,74 +275,95 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
         }
     }
 
-    public bool StopIfBypassKeyDown(VirtualKey virtualKey)
-    {
-        lock (_gate)
-        {
-            if (!_isAnimating || !ShortcutKeys.ContainsMatch(_bypassSmoothingVirtualKeys, virtualKey))
-            {
-                return false;
-            }
-
-            ResetPendingDeltas();
-            _isAnimating = false;
-            _animationCancellation?.Cancel();
-            return true;
-        }
-    }
-
-    private bool IsAnimationComplete()
+    private bool IsMotionComplete()
     {
         var remainderThreshold = _options.DeliveryMode == ScrollDeliveryMode.WheelStep
             ? Constants.WheelDelta
-            : MinimumStep;
+            : RemainderCompletionThreshold;
 
-        return Math.Abs(_remainingVerticalDelta) < 0.5
-               && Math.Abs(_remainingHorizontalDelta) < 0.5
+        return Math.Abs(_velocityY) < _options.StopVelocityThreshold
+               && Math.Abs(_velocityX) < _options.StopVelocityThreshold
                && Math.Abs(_verticalOutputRemainder) < remainderThreshold
                && Math.Abs(_horizontalOutputRemainder) < remainderThreshold;
     }
 
-    private void ResetPendingDeltas()
+    private void EnsurePhysicsStarted()
     {
-        _remainingHorizontalDelta = 0;
-        _remainingVerticalDelta = 0;
+        if (_isPhysicsRunning)
+        {
+            return;
+        }
+
+        _physicsCancellation?.Dispose();
+        _physicsCancellation = new CancellationTokenSource();
+        _isPhysicsRunning = true;
+        _ = RunPhysicsAsync(_physicsCancellation.Token);
+    }
+
+    private void ResetMotion()
+    {
+        _velocityX = 0;
+        _velocityY = 0;
         _horizontalOutputRemainder = 0;
         _verticalOutputRemainder = 0;
-        _burstLevel = 0;
         _targetWindowHandle = IntPtr.Zero;
         _targetScreenX = 0;
         _targetScreenY = 0;
         _bypassSmoothingVirtualKeys = [];
     }
 
-    private readonly record struct ScrollAnimationOptions(
-        int DurationMs,
-        int FrameDelayMs,
-        double Smoothness,
-        EasingType EasingType,
-        int BurstLevel,
+    [Conditional("DEBUG")]
+    private void TraceInput(int delta, bool horizontal, double impulse)
+    {
+        Debug.WriteLine(
+            $"SmoothScroll input delta={delta}, horizontal={horizontal}, impulse={impulse:0.###}, " +
+            $"velocityX={_velocityX:0.###}, velocityY={_velocityY:0.###}, " +
+            $"deliveryMode={_options.DeliveryMode}, target=0x{_targetWindowHandle.ToInt64():X}");
+    }
+
+    [Conditional("DEBUG")]
+    private void TraceFrame(double dt, double outputY, double outputX, int intDeltaY, int intDeltaX)
+    {
+        Debug.WriteLine(
+            $"SmoothScroll frame dt={dt:0.0000}, outputY={outputY:0.###}, outputX={outputX:0.###}, " +
+            $"intDeltaY={intDeltaY}, intDeltaX={intDeltaX}, velocityX={_velocityX:0.###}, " +
+            $"velocityY={_velocityY:0.###}, deliveryMode={_options.DeliveryMode}, " +
+            $"target=0x{_targetWindowHandle.ToInt64():X}");
+    }
+
+    private readonly record struct ScrollPhysicsOptions(
+        int TargetFrameTimeMs,
+        double DistanceMultiplier,
+        double Friction,
+        double BurstAcceleration,
+        double MaxVelocity,
+        double DirectionChangeDamping,
+        double StopVelocityThreshold,
+        double PrecisionMultiplier,
         ScrollDeliveryMode DeliveryMode)
     {
-        public static ScrollAnimationOptions Default { get; } = new(
-            160,
-            FrameMs,
-            0.75,
-            EasingType.EaseOutCubic,
-            0,
+        public static ScrollPhysicsOptions Default { get; } = new(
+            8,
+            1.4,
+            18.0,
+            1.0,
+            7000.0,
+            0.18,
+            8.0,
+            1.0,
             ScrollDeliveryMode.FineDelta);
 
-        public static ScrollAnimationOptions From(ScrollSettings settings, int burstLevel, ScrollDeliveryMode deliveryMode)
+        public static ScrollPhysicsOptions From(ScrollSettings settings, ScrollDeliveryMode deliveryMode)
         {
-            var smoothness = Math.Clamp(settings.Smoothness, 0.0, 1.0);
-            var frameDelay = Math.Max(FrameMs, (int)Math.Round(FrameMs + ((1.0 - smoothness) * FrameMs)));
-
-            return new ScrollAnimationOptions(
-                Math.Max(settings.DurationMs, FrameMs),
-                frameDelay,
-                smoothness,
-                settings.EasingType,
-                burstLevel,
+            return new ScrollPhysicsOptions(
+                SmoothScrollEngine.TargetFrameTimeMs,
+                settings.DistanceMultiplier,
+                settings.Friction,
+                settings.BurstAcceleration,
+                settings.MaxVelocity,
+                settings.DirectionChangeDamping,
+                settings.StopVelocityThreshold,
+                settings.PrecisionMultiplier,
                 deliveryMode);
         }
     }

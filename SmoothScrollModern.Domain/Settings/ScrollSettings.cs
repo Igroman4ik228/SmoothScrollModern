@@ -1,35 +1,50 @@
-using SmoothScrollModern.Scroll;
 using Windows.System;
 
 namespace SmoothScrollModern.Settings;
 
 public sealed class ScrollSettings
 {
-    public const double ScrollMultiplierMin = 0.2;
-    public const double ScrollMultiplierMax = 6.0;
-    public const double ScrollMultiplierStep = 0.05;
+    public const double DistanceMultiplierMin = 0.1;
+    public const double DistanceMultiplierMax = 10.0;
+    public const double DistanceMultiplierStep = 0.05;
 
-    public const int DurationMin = 30;
-    public const int DurationMax = 900;
-    public const int DurationStep = 10;
+    public const double FrictionMin = 1.5;
+    public const double FrictionMax = 60.0;
+    public const double FrictionStep = 0.1;
 
-    public const double SmoothnessMin = 0.0;
-    public const double SmoothnessMax = 1.0;
-    public const double SmoothnessStep = 0.025;
+    public const double BurstAccelerationMin = 0.0;
+    public const double BurstAccelerationMax = 6.0;
+    public const double BurstAccelerationStep = 0.05;
 
-    public const double AccelerationMin = 0.2;
-    public const double AccelerationMax = 4.0;
-    public const double AccelerationStep = 0.05;
+    public const double DirectionChangeDampingMin = 0.02;
+    public const double DirectionChangeDampingMax = 1.0;
+    public const double DirectionChangeDampingStep = 0.01;
 
-    public double ScrollMultiplier { get; set; } = 1.4;
+    public const double MaxVelocityMin = 500.0;
+    public const double MaxVelocityMax = 40000.0;
+    public const double MaxVelocityStep = 50.0;
 
-    public int DurationMs { get; set; } = 160;
+    public const double StopVelocityThresholdMin = 1.0;
+    public const double StopVelocityThresholdMax = 120.0;
+    public const double StopVelocityThresholdStep = 1.0;
 
-    public double Smoothness { get; set; } = 0.75;
+    public const double PrecisionMultiplierMin = 0.1;
+    public const double PrecisionMultiplierMax = 3.0;
+    public const double PrecisionMultiplierStep = 0.05;
 
-    public double Acceleration { get; set; } = 1.0;
+    public double DistanceMultiplier { get; set; } = 0.6;
 
-    public EasingType EasingType { get; set; } = EasingType.EaseOutCubic;
+    public double Friction { get; set; } = 7.0;
+
+    public double BurstAcceleration { get; set; } = 1.0;
+
+    public double DirectionChangeDamping { get; set; } = 0.18;
+
+    public double MaxVelocity { get; set; } = 40000.0;
+
+    public double StopVelocityThreshold { get; set; } = 8.0;
+
+    public double PrecisionMultiplier { get; set; } = 1.0;
 
     public bool EnableHorizontalScroll { get; set; } = true;
 
@@ -37,10 +52,14 @@ public sealed class ScrollSettings
 
     public void Validate()
     {
-        ScrollMultiplier = Snap(ScrollMultiplier, ScrollMultiplierMin, ScrollMultiplierMax, ScrollMultiplierStep);
-        DurationMs = Snap(DurationMs, DurationMin, DurationMax, DurationStep);
-        Smoothness = Snap(Smoothness, SmoothnessMin, SmoothnessMax, SmoothnessStep);
-        Acceleration = Snap(Acceleration, AccelerationMin, AccelerationMax, AccelerationStep);
+        DistanceMultiplier = Snap(DistanceMultiplier, DistanceMultiplierMin, DistanceMultiplierMax, DistanceMultiplierStep);
+        Friction = Snap(Friction, FrictionMin, FrictionMax, FrictionStep);
+        BurstAcceleration = Snap(BurstAcceleration, BurstAccelerationMin, BurstAccelerationMax, BurstAccelerationStep);
+        DirectionChangeDamping = Snap(DirectionChangeDamping, DirectionChangeDampingMin, DirectionChangeDampingMax, DirectionChangeDampingStep);
+        MaxVelocity = Snap(MaxVelocity, MaxVelocityMin, MaxVelocityMax, MaxVelocityStep);
+        StopVelocityThreshold = Snap(StopVelocityThreshold, StopVelocityThresholdMin, StopVelocityThresholdMax, StopVelocityThresholdStep);
+        PrecisionMultiplier = Snap(PrecisionMultiplier, PrecisionMultiplierMin, PrecisionMultiplierMax, PrecisionMultiplierStep);
+
         BypassSmoothingVirtualKeys = BypassSmoothingVirtualKeys
             ?.SelectMany(ShortcutKeys.ExpandGenericModifier)
             .Where(ShortcutKeys.IsValid)
@@ -59,12 +78,5 @@ public sealed class ScrollSettings
         var steps = Math.Round((clamped - minimum) / step, MidpointRounding.AwayFromZero);
         var snapped = minimum + (steps * step);
         return Math.Round(Math.Clamp(snapped, minimum, maximum), 3, MidpointRounding.AwayFromZero);
-    }
-
-    private static int Snap(int value, int minimum, int maximum, int step)
-    {
-        var clamped = Math.Clamp(value, minimum, maximum);
-        var steps = (int)Math.Round((clamped - minimum) / (double)step, MidpointRounding.AwayFromZero);
-        return Math.Clamp(minimum + (steps * step), minimum, maximum);
     }
 }

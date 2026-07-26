@@ -15,7 +15,7 @@
         </Grid.RowDefinitions>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*" />
-            <ColumnDefinition Width="124" />
+            <ColumnDefinition Width="172" />
         </Grid.ColumnDefinitions>
 
         <StackPanel Spacing="2">
@@ -23,18 +23,33 @@
             <TextBlock Style="{StaticResource CaptionTextStyle}" Text="{Binding Description, ElementName=Root}" />
         </StackPanel>
 
-        <NumberBox
-            x:Name="ValueBox"
+        <Grid
             Grid.Column="1"
             VerticalAlignment="Center"
-            AcceptsExpression="False"
-            AutomationProperties.Name="{Binding Label, ElementName=Root}"
-            Maximum="{Binding Maximum, ElementName=Root}"
-            Minimum="{Binding Minimum, ElementName=Root}"
-            SmallChange="{Binding SmallChange, ElementName=Root}"
-            Style="{StaticResource CompactNumberBoxStyle}"
-            ValueChanged="OnValueBoxValueChanged"
-            Value="{Binding Value, ElementName=Root, Mode=TwoWay}" />
+            ColumnSpacing="8">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*" />
+                <ColumnDefinition Width="Auto" />
+            </Grid.ColumnDefinitions>
+
+            <NumberBox
+                x:Name="ValueBox"
+                AcceptsExpression="False"
+                AutomationProperties.Name="{Binding Label, ElementName=Root}"
+                Maximum="{Binding Maximum, ElementName=Root}"
+                Minimum="{Binding Minimum, ElementName=Root}"
+                SmallChange="{Binding SmallChange, ElementName=Root}"
+                Style="{StaticResource CompactNumberBoxStyle}"
+                ValueChanged="OnValueBoxValueChanged"
+                Value="{Binding Value, ElementName=Root, Mode=TwoWay}" />
+
+            <TextBlock
+                Grid.Column="1"
+                MinWidth="28"
+                VerticalAlignment="Center"
+                Style="{StaticResource CaptionTextStyle}"
+                Text="{Binding Unit, ElementName=Root}" />
+        </Grid>
 
         <Slider
             Grid.Row="1"

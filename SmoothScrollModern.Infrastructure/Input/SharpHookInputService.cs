@@ -138,7 +138,7 @@ public sealed class SharpHookInputService : IGlobalInputHookService
             delta,
             wheelData.Direction == MouseWheelScrollDirection.Horizontal,
             unchecked((uint)args.RawEvent.Time),
-            NativeMethods.WindowFromPoint(new POINT(wheelData.X, wheelData.Y)),
+            GetRootWindow(NativeMethods.WindowFromPoint(new POINT(wheelData.X, wheelData.Y))),
             wheelData.X,
             wheelData.Y)) ?? false;
 
@@ -171,14 +171,18 @@ public sealed class SharpHookInputService : IGlobalInputHookService
 
     private static int NormalizeWheelDelta(short rotation)
     {
-        if (rotation == 0)
+        return rotation;
+    }
+
+    private static IntPtr GetRootWindow(IntPtr windowHandle)
+    {
+        if (windowHandle == IntPtr.Zero)
         {
-            return 0;
+            return IntPtr.Zero;
         }
 
-        return Math.Abs(rotation) < 120
-            ? Math.Sign(rotation) * 120
-            : rotation;
+        var root = NativeMethods.GetAncestor(windowHandle, NativeConstants.GA_ROOT);
+        return root == IntPtr.Zero ? windowHandle : root;
     }
 
     private static bool TryMapKeyCode(KeyCode keyCode, out VirtualKey virtualKey)

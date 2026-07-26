@@ -1,8 +1,5 @@
 using Microsoft.UI.Windowing;
 using Microsoft.UI.Xaml;
-using Microsoft.UI.Xaml.Controls;
-using Microsoft.UI.Xaml.Input;
-using Microsoft.UI.Xaml.Media;
 using SmoothScrollModern.Widgets.Shell.ViewModels;
 using System.ComponentModel;
 using Windows.UI;
@@ -13,7 +10,6 @@ namespace SmoothScrollModern;
 
 public sealed partial class MainWindow : WindowEx
 {
-    private readonly Dictionary<ScrollViewer, double> _scrollTargets = [];
     private readonly MainViewModel _viewModel;
 
     public MainWindow(MainViewModel viewModel)
@@ -22,7 +18,6 @@ public sealed partial class MainWindow : WindowEx
 
         InitializeComponent();
         ContentRoot.DataContext = viewModel;
-        ContentRoot.AddHandler(UIElement.PointerWheelChangedEvent, new PointerEventHandler(OnPointerWheelChanged), true);
 
         ConfigureTitleBar();
         AppWindow.Closing += OnAppWindowClosing;
@@ -78,73 +73,5 @@ public sealed partial class MainWindow : WindowEx
             "Dark" => ElementTheme.Dark,
             _ => ElementTheme.Default
         };
-    }
-
-    private void OnPointerWheelChanged(object sender, PointerRoutedEventArgs e)
-    {
-        var wheelDelta = e.GetCurrentPoint(ContentRoot).Properties.MouseWheelDelta;
-        if (wheelDelta == 0)
-        {
-            return;
-        }
-
-        var viewer = FindScrollableViewer(e.OriginalSource as DependencyObject, wheelDelta);
-        if (viewer is null)
-        {
-            return;
-        }
-
-        e.Handled = true;
-        AnimateScroll(viewer, wheelDelta);
-    }
-
-    private void AnimateScroll(ScrollViewer viewer, int wheelDelta)
-    {
-        var settings = _viewModel.Settings.Scroll;
-        var multiplier = settings.ScrollMultiplier;
-        var acceleration = settings.Acceleration;
-        var currentTarget = _scrollTargets.TryGetValue(viewer, out var pendingTarget)
-            ? pendingTarget
-            : viewer.VerticalOffset;
-
-        var target = Math.Clamp(
-            currentTarget - (wheelDelta * multiplier * acceleration),
-            0,
-            viewer.ScrollableHeight);
-
-        _scrollTargets[viewer] = target;
-        viewer.ChangeView(null, target, null, disableAnimation: false);
-
-        _ = ClearScrollTargetAsync(viewer, target, TimeSpan.FromMilliseconds(Math.Clamp(settings.DurationMs, 30, 900)));
-    }
-
-    private async Task ClearScrollTargetAsync(ScrollViewer viewer, double target, TimeSpan delay)
-    {
-        await Task.Delay(delay);
-        if (_scrollTargets.TryGetValue(viewer, out var existingTarget)
-            && Math.Abs(existingTarget - target) < 0.1)
-        {
-            _scrollTargets.Remove(viewer);
-        }
-    }
-
-    private static ScrollViewer? FindScrollableViewer(DependencyObject? source, int wheelDelta)
-    {
-        for (var current = source; current is not null; current = VisualTreeHelper.GetParent(current))
-        {
-            if (current is ScrollViewer viewer && CanScroll(viewer, wheelDelta))
-            {
-                return viewer;
-            }
-        }
-
-        return null;
-    }
-
-    private static bool CanScroll(ScrollViewer viewer, int wheelDelta)
-    {
-        return viewer.ScrollableHeight > 0
-               && ((wheelDelta < 0 && viewer.VerticalOffset < viewer.ScrollableHeight)
-                   || (wheelDelta > 0 && viewer.VerticalOffset > 0));
     }
 }

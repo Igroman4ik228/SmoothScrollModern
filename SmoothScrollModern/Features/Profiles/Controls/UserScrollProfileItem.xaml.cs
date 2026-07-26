@@ -60,11 +60,6 @@ public sealed partial class UserScrollProfileItem : UserControl
             HorizontalAlignment = HorizontalAlignment.Stretch
         };
 
-        if (VisualTreeDataContext.FindAncestor<ProfilesViewModel>(this) is { } viewModel)
-        {
-            profileSettings.EasingOptions = viewModel.EasingOptions;
-        }
-
         ProfileSettingsHost.Content = profileSettings;
     }
 

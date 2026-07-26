@@ -73,6 +73,7 @@ public sealed class JsonSettingsService : ISettingsService
     private static AppSettings CreateDefaultSettings()
     {
         var settings = new AppSettings();
+        settings.Validate();
         EnsureDefaultProfiles(settings);
         return settings;
     }

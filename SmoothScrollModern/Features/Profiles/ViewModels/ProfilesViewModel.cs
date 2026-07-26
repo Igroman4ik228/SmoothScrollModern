@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using Microsoft.UI.Dispatching;
 using SmoothScrollModern.Shared.Presentation;
-using SmoothScrollModern.Scroll;
 using SmoothScrollModern.Settings;
 
 namespace SmoothScrollModern.Features.Profiles.ViewModels;
@@ -50,14 +49,6 @@ public sealed class ProfilesViewModel : ObservableObject
         RefreshFilter();
     }
 
-    public IReadOnlyList<SelectionOption<EasingType>> EasingOptions { get; } =
-    [
-        new(EasingType.Linear, "Ровно"),
-        new(EasingType.EaseOutCubic, "Мягко"),
-        new(EasingType.EaseOutQuart, "Очень мягко"),
-        new(EasingType.EaseOutQuint, "Максимально мягко")
-    ];
-
     public ScrollProfile GlobalScrollProfile { get; }
 
     public ObservableCollection<ScrollProfile> UserScrollProfiles { get; }
@@ -72,43 +63,46 @@ public sealed class ProfilesViewModel : ObservableObject
 
     public IRelayCommand<ScrollProfile?> RemoveScrollProfileCommand { get; }
 
-    public double ScrollMultiplier
+    public double ScrollStrength
     {
-        get => _settings.Scroll.ScrollMultiplier;
-        set => UpdateGlobalScroll(value, nameof(ScrollMultiplier));
+        get => _settings.Scroll.DistanceMultiplier;
+        set => UpdateGlobalScroll(value, nameof(ScrollStrength));
     }
 
-    public int DurationMs
+    public double Friction
     {
-        get => _settings.Scroll.DurationMs;
-        set => UpdateGlobalScroll(value, nameof(DurationMs));
+        get => _settings.Scroll.Friction;
+        set => UpdateGlobalScroll(value, nameof(Friction));
     }
 
-    public double Smoothness
+    public double FastScrollBoostPercent
     {
-        get => _settings.Scroll.Smoothness;
-        set => UpdateGlobalScroll(value, nameof(Smoothness));
+        get => _settings.Scroll.BurstAcceleration * 100.0;
+        set => UpdateGlobalScroll(value, nameof(FastScrollBoostPercent));
     }
 
-    public double Acceleration
+    public double MaxVelocity
     {
-        get => _settings.Scroll.Acceleration;
-        set => UpdateGlobalScroll(value, nameof(Acceleration));
+        get => _settings.Scroll.MaxVelocity;
+        set => UpdateGlobalScroll(value, nameof(MaxVelocity));
     }
 
-    public EasingType EasingType
+    public double StopVelocityThreshold
     {
-        get => _settings.Scroll.EasingType;
-        set
-        {
-            if (_settings.Scroll.EasingType == value)
-            {
-                return;
-            }
+        get => _settings.Scroll.StopVelocityThreshold;
+        set => UpdateGlobalScroll(value, nameof(StopVelocityThreshold));
+    }
 
-            _settings.Scroll.EasingType = value;
-            SaveAndNotify(nameof(EasingType));
-        }
+    public double PrecisionMultiplier
+    {
+        get => _settings.Scroll.PrecisionMultiplier;
+        set => UpdateGlobalScroll(value, nameof(PrecisionMultiplier));
+    }
+
+    public double DirectionControlPercent
+    {
+        get => (1.0 - _settings.Scroll.DirectionChangeDamping) * 100.0;
+        set => UpdateGlobalScroll(value, nameof(DirectionControlPercent));
     }
 
     public bool EnableHorizontalScroll
@@ -275,9 +269,13 @@ public sealed class ProfilesViewModel : ObservableObject
         var scroll = _settings.Scroll;
         var previous = propertyName switch
         {
-            nameof(ScrollMultiplier) => scroll.ScrollMultiplier,
-            nameof(Smoothness) => scroll.Smoothness,
-            nameof(Acceleration) => scroll.Acceleration,
+            nameof(ScrollStrength) => scroll.DistanceMultiplier,
+            nameof(Friction) => scroll.Friction,
+            nameof(FastScrollBoostPercent) => scroll.BurstAcceleration * 100.0,
+            nameof(MaxVelocity) => scroll.MaxVelocity,
+            nameof(StopVelocityThreshold) => scroll.StopVelocityThreshold,
+            nameof(PrecisionMultiplier) => scroll.PrecisionMultiplier,
+            nameof(DirectionControlPercent) => (1.0 - scroll.DirectionChangeDamping) * 100.0,
             _ => value
         };
 
@@ -288,30 +286,30 @@ public sealed class ProfilesViewModel : ObservableObject
 
         switch (propertyName)
         {
-            case nameof(ScrollMultiplier):
-                scroll.ScrollMultiplier = value;
+            case nameof(ScrollStrength):
+                scroll.DistanceMultiplier = value;
                 break;
-            case nameof(Smoothness):
-                scroll.Smoothness = value;
+            case nameof(Friction):
+                scroll.Friction = value;
                 break;
-            case nameof(Acceleration):
-                scroll.Acceleration = value;
+            case nameof(FastScrollBoostPercent):
+                scroll.BurstAcceleration = value / 100.0;
+                break;
+            case nameof(MaxVelocity):
+                scroll.MaxVelocity = value;
+                break;
+            case nameof(StopVelocityThreshold):
+                scroll.StopVelocityThreshold = value;
+                break;
+            case nameof(PrecisionMultiplier):
+                scroll.PrecisionMultiplier = value;
+                break;
+            case nameof(DirectionControlPercent):
+                scroll.DirectionChangeDamping = 1.0 - (value / 100.0);
                 break;
         }
 
         scroll.Validate();
-        SaveAndNotify(propertyName);
-    }
-
-    private void UpdateGlobalScroll(int value, string propertyName)
-    {
-        if (_settings.Scroll.DurationMs == value)
-        {
-            return;
-        }
-
-        _settings.Scroll.DurationMs = value;
-        _settings.Scroll.Validate();
         SaveAndNotify(propertyName);
     }
 
@@ -334,11 +332,13 @@ public sealed class ProfilesViewModel : ObservableObject
             Name = NewScrollProfileName,
             Scroll = new ScrollSettings
             {
-                ScrollMultiplier = _settings.Scroll.ScrollMultiplier,
-                DurationMs = _settings.Scroll.DurationMs,
-                Smoothness = _settings.Scroll.Smoothness,
-                Acceleration = _settings.Scroll.Acceleration,
-                EasingType = _settings.Scroll.EasingType,
+                DistanceMultiplier = _settings.Scroll.DistanceMultiplier,
+                Friction = _settings.Scroll.Friction,
+                BurstAcceleration = _settings.Scroll.BurstAcceleration,
+                DirectionChangeDamping = _settings.Scroll.DirectionChangeDamping,
+                MaxVelocity = _settings.Scroll.MaxVelocity,
+                StopVelocityThreshold = _settings.Scroll.StopVelocityThreshold,
+                PrecisionMultiplier = _settings.Scroll.PrecisionMultiplier,
                 EnableHorizontalScroll = _settings.Scroll.EnableHorizontalScroll,
                 BypassSmoothingVirtualKeys = _settings.Scroll.BypassSmoothingVirtualKeys.ToList()
             }
@@ -397,11 +397,13 @@ public sealed class ProfilesViewModel : ObservableObject
     {
         return new ScrollSettings
         {
-            ScrollMultiplier = source.ScrollMultiplier,
-            DurationMs = source.DurationMs,
-            Smoothness = source.Smoothness,
-            Acceleration = source.Acceleration,
-            EasingType = source.EasingType,
+            DistanceMultiplier = source.DistanceMultiplier,
+            Friction = source.Friction,
+            BurstAcceleration = source.BurstAcceleration,
+            DirectionChangeDamping = source.DirectionChangeDamping,
+            MaxVelocity = source.MaxVelocity,
+            StopVelocityThreshold = source.StopVelocityThreshold,
+            PrecisionMultiplier = source.PrecisionMultiplier,
             EnableHorizontalScroll = source.EnableHorizontalScroll,
             BypassSmoothingVirtualKeys = source.BypassSmoothingVirtualKeys.ToList()
         };
@@ -426,11 +428,13 @@ public sealed class ProfilesViewModel : ObservableObject
     {
         _settings.Scroll = GlobalScrollProfile.Scroll;
         SaveAndNotify(
-            nameof(ScrollMultiplier),
-            nameof(DurationMs),
-            nameof(Smoothness),
-            nameof(Acceleration),
-            nameof(EasingType),
+            nameof(ScrollStrength),
+            nameof(Friction),
+            nameof(FastScrollBoostPercent),
+            nameof(MaxVelocity),
+            nameof(StopVelocityThreshold),
+            nameof(PrecisionMultiplier),
+            nameof(DirectionControlPercent),
             nameof(EnableHorizontalScroll));
     }
 
