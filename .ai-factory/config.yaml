@@ -41,8 +41,8 @@ paths:
   # Default: .ai-factory/ARCHITECTURE.md
   architecture: .ai-factory/ARCHITECTURE.md
 
-  # Detailed documentation directory used by /aif-docs
-  # README.md remains the landing page in the project root.
+  # Detailed project documentation directory used by /aif-docs.
+  # This repository keeps user documentation entirely in this directory.
   # Change this if you want docs pages under another folder like
   # documentation/, handbook/, or site/docs/.
   # Default: docs/

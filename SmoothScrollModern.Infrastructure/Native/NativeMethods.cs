@@ -19,6 +19,9 @@ internal static partial class NativeMethods
     internal static partial bool GetCursorPos(out POINT lpPoint);
 
     [LibraryImport("user32.dll")]
+    internal static partial short GetAsyncKeyState(int vKey);
+
+    [LibraryImport("user32.dll")]
     internal static partial uint GetWindowThreadProcessId(IntPtr hWnd, out uint lpdwProcessId);
 
     [DllImport("user32.dll", EntryPoint = "GetWindowTextW", CharSet = CharSet.Unicode)]

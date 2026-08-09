@@ -17,10 +17,12 @@ Dependencies flow as `Presentation → Application → Domain`. Infrastructure i
 
 ```text
 Wheel event → SharpHookInputService → ScrollDecisionService
-→ SmoothScrollEngine → IInputInjectionService → WindowsWheelDeliveryPlatform / Win32 → active window
+→ SmoothScrollEngine → IInputInjectionService → WindowsWheelDeliveryPlatform / Win32 → pointer window in the source root
 ```
 
 The decision service bypasses an event when smoothing is disabled, the target is automatically excluded full screen, a rule disables smoothing, or selected-applications-only mode has no matching enabled rule. Otherwise, the engine receives a settings snapshot and emits gradual deltas.
+
+Before every inertial delta, the delivery adapter confirms that the pointer is still inside the root window captured from the original event. It then posts the appropriate vertical or horizontal wheel message directly to the window under the pointer, preserving the current modifier and mouse-button state. If validation or delivery fails, the engine cancels the remaining motion.
 
 ## Settings flow
 

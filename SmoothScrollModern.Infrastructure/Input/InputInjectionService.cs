@@ -69,7 +69,7 @@ public sealed class InputInjectionService : IInputInjectionService
         string reason)
     {
         Debug.WriteLine(
-            $"Wheel delivery delta={delta}, horizontal={horizontal}, source=0x{sourceWindowHandle.ToInt64():X}, " +
+            $"[FIX:WheelDelivery] delta={delta}, horizontal={horizontal}, source=0x{sourceWindowHandle.ToInt64():X}, " +
             $"current=0x{currentWindowHandle.ToInt64():X}, delivered={delivered}, reason={reason}");
     }
 }
