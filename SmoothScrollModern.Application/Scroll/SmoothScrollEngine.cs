@@ -26,9 +26,8 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
     private double _verticalOutputRemainder;
     private double _horizontalOutputRemainder;
     private IntPtr _targetWindowHandle;
-    private int _targetScreenX;
-    private int _targetScreenY;
     private VirtualKey[] _bypassSmoothingVirtualKeys = [];
+    private long _motionGeneration;
 
     public SmoothScrollEngine(IInputInjectionService inputInjectionService)
     {
@@ -40,9 +39,7 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
         bool horizontal,
         ScrollSettingsSnapshot settings,
         ScrollDeliveryMode deliveryMode,
-        IntPtr targetWindowHandle,
-        int screenX,
-        int screenY)
+        IntPtr targetWindowHandle)
     {
         if (delta == 0 || horizontal && !settings.EnableHorizontalScroll)
         {
@@ -51,6 +48,8 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
 
         lock (_gate)
         {
+            _motionGeneration++;
+
             if (_deliveryMode != deliveryMode || IsDifferentTargetWindow(targetWindowHandle))
             {
                 ResetMotion();
@@ -58,8 +57,6 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
             }
 
             _targetWindowHandle = targetWindowHandle;
-            _targetScreenX = screenX;
-            _targetScreenY = screenY;
             _bypassSmoothingVirtualKeys = settings.BypassSmoothingVirtualKeys.ToArray();
             _options = ScrollPhysicsOptions.From(settings, deliveryMode);
 
@@ -85,6 +82,7 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
     {
         lock (_gate)
         {
+            _motionGeneration++;
             ResetMotion();
             _isPhysicsRunning = false;
             _physicsCancellation?.Cancel();
@@ -112,6 +110,8 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
                 return false;
             }
 
+            TraceMotionStopped(_motionGeneration, "bypass key was pressed");
+            _motionGeneration++;
             ResetMotion();
             _isPhysicsRunning = false;
             _physicsCancellation?.Cancel();
@@ -137,8 +137,7 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
                 int verticalDelta;
                 int horizontalDelta;
                 IntPtr targetWindowHandle;
-                int targetScreenX;
-                int targetScreenY;
+                long motionGeneration;
                 var isComplete = false;
 
                 lock (_gate)
@@ -153,23 +152,24 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
                     ApplyFriction(ref _velocityX, _options.Friction, dt, _options.StopVelocityThreshold);
 
                     targetWindowHandle = _targetWindowHandle;
-                    targetScreenX = _targetScreenX;
-                    targetScreenY = _targetScreenY;
+                    motionGeneration = _motionGeneration;
 
                     TraceFrame(dt, outputY, outputX, verticalDelta, horizontalDelta);
-
-                    if (IsMotionComplete())
-                    {
-                        ResetMotion();
-                        _isPhysicsRunning = false;
-                        isComplete = true;
-                    }
+                    isComplete = IsMotionComplete();
                 }
 
-                SendDelta(verticalDelta, horizontal: false, targetWindowHandle, targetScreenX, targetScreenY);
-                SendDelta(horizontalDelta, horizontal: true, targetWindowHandle, targetScreenX, targetScreenY);
+                if (!TrySendDelta(verticalDelta, horizontal: false, targetWindowHandle)
+                    || !TrySendDelta(horizontalDelta, horizontal: true, targetWindowHandle))
+                {
+                    if (CancelMotionIfCurrent(motionGeneration))
+                    {
+                        return;
+                    }
 
-                if (isComplete)
+                    continue;
+                }
+
+                if (isComplete && CompleteMotionIfCurrent(motionGeneration))
                 {
                     return;
                 }
@@ -266,11 +266,43 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
         return delta;
     }
 
-    private void SendDelta(int delta, bool horizontal, IntPtr targetWindowHandle, int screenX, int screenY)
+    private bool TrySendDelta(int delta, bool horizontal, IntPtr targetWindowHandle)
     {
-        if (delta != 0)
+        return delta == 0 || _inputInjectionService.SendWheel(delta, horizontal, targetWindowHandle);
+    }
+
+    private bool CancelMotionIfCurrent(long motionGeneration)
+    {
+        lock (_gate)
         {
-            _inputInjectionService.SendWheel(delta, horizontal, targetWindowHandle, screenX, screenY);
+            if (_motionGeneration != motionGeneration)
+            {
+                return false;
+            }
+
+            TraceMotionStopped(motionGeneration, "wheel delivery was rejected");
+            _motionGeneration++;
+            ResetMotion();
+            _isPhysicsRunning = false;
+            _physicsCancellation?.Cancel();
+            return true;
+        }
+    }
+
+    private bool CompleteMotionIfCurrent(long motionGeneration)
+    {
+        lock (_gate)
+        {
+            if (_motionGeneration != motionGeneration)
+            {
+                return false;
+            }
+
+            TraceMotionStopped(motionGeneration, "motion completed");
+            _motionGeneration++;
+            ResetMotion();
+            _isPhysicsRunning = false;
+            return true;
         }
     }
 
@@ -306,8 +338,6 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
         _horizontalOutputRemainder = 0;
         _verticalOutputRemainder = 0;
         _targetWindowHandle = IntPtr.Zero;
-        _targetScreenX = 0;
-        _targetScreenY = 0;
         _bypassSmoothingVirtualKeys = [];
     }
 
@@ -328,6 +358,12 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
             $"intDeltaY={intDeltaY}, intDeltaX={intDeltaX}, velocityX={_velocityX:0.###}, " +
             $"velocityY={_velocityY:0.###}, deliveryMode={_options.DeliveryMode}, " +
             $"target=0x{_targetWindowHandle.ToInt64():X}");
+    }
+
+    [Conditional("DEBUG")]
+    private static void TraceMotionStopped(long motionGeneration, string reason)
+    {
+        Debug.WriteLine($"SmoothScroll motion generation={motionGeneration} stopped: {reason}.");
     }
 
     private readonly record struct ScrollPhysicsOptions(

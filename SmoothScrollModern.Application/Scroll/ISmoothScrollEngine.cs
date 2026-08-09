@@ -9,9 +9,7 @@ public interface ISmoothScrollEngine : IDisposable
         bool horizontal,
         ScrollSettingsSnapshot settings,
         ScrollDeliveryMode deliveryMode,
-        IntPtr targetWindowHandle,
-        int screenX,
-        int screenY);
+        IntPtr targetWindowHandle);
 
     void Stop();
 

@@ -1,98 +1,75 @@
-using SharpHook;
-using SharpHook.Data;
+using System.Diagnostics;
 using SmoothScrollModern.Native;
 
 namespace SmoothScrollModern.Input;
 
 public sealed class InputInjectionService : IInputInjectionService
 {
-    private readonly IEventSimulator _eventSimulator = new EventSimulator();
+    private readonly IWheelDeliveryPlatform _platform;
 
-    public void SendWheel(int delta, bool horizontal, IntPtr targetWindowHandle, int screenX, int screenY)
+    public InputInjectionService()
+        : this(new WindowsWheelDeliveryPlatform())
+    {
+    }
+
+    internal InputInjectionService(IWheelDeliveryPlatform platform)
+    {
+        ArgumentNullException.ThrowIfNull(platform);
+        _platform = platform;
+    }
+
+    public bool SendWheel(int delta, bool horizontal, IntPtr targetWindowHandle)
     {
         if (delta == 0)
         {
-            return;
+            return true;
         }
 
-        if (!horizontal)
+        if (targetWindowHandle == IntPtr.Zero)
         {
-            SendWheelInput(delta, horizontal);
-            return;
-        }
-
-        if (targetWindowHandle != IntPtr.Zero
-            && TryPostWheelToCurrentPointerTarget(targetWindowHandle, delta, horizontal, screenX, screenY))
-        {
-            return;
-        }
-
-        SendWheelInput(delta, horizontal);
-    }
-
-    private void SendWheelInput(int delta, bool horizontal)
-    {
-        _eventSimulator.SimulateMouseWheel(
-            (short)Math.Clamp(delta, short.MinValue, short.MaxValue),
-            horizontal ? MouseWheelScrollDirection.Horizontal : MouseWheelScrollDirection.Vertical,
-            MouseWheelScrollType.UnitScroll);
-    }
-
-    private static bool TryPostWheelToCurrentPointerTarget(
-        IntPtr targetWindowHandle,
-        int delta,
-        bool horizontal,
-        int fallbackScreenX,
-        int fallbackScreenY)
-    {
-        var point = NativeMethods.GetCursorPos(out var cursorPoint)
-            ? cursorPoint
-            : new POINT(fallbackScreenX, fallbackScreenY);
-
-        var postWindowHandle = GetCurrentTargetWindow(targetWindowHandle, point);
-        if (postWindowHandle == IntPtr.Zero)
-        {
+            TraceDelivery(delta, horizontal, targetWindowHandle, IntPtr.Zero, delivered: false, "source window is unavailable");
             return false;
         }
 
-        var message = horizontal ? NativeConstants.WM_MOUSEHWHEEL : NativeConstants.WM_MOUSEWHEEL;
-        return NativeMethods.PostMessageW(
-            postWindowHandle,
-            (uint)message,
-            MakeWheelWParam(delta),
-            MakePointLParam(point.X, point.Y));
-    }
-
-    private static IntPtr GetCurrentTargetWindow(IntPtr originalTargetWindowHandle, POINT point)
-    {
-        var currentWindowHandle = NativeMethods.WindowFromPoint(point);
-        if (currentWindowHandle == IntPtr.Zero)
+        if (!_platform.TryGetCursorPosition(out var cursorPoint))
         {
-            return originalTargetWindowHandle;
+            TraceDelivery(delta, horizontal, targetWindowHandle, IntPtr.Zero, delivered: false, "cursor position is unavailable");
+            return false;
         }
 
-        var originalRoot = GetRootWindow(originalTargetWindowHandle);
-        var currentRoot = GetRootWindow(currentWindowHandle);
+        var currentWindowHandle = _platform.GetWindowAt(cursorPoint);
+        var sourceRootWindowHandle = _platform.GetRootWindow(targetWindowHandle);
+        var currentRootWindowHandle = _platform.GetRootWindow(currentWindowHandle);
+        if (currentWindowHandle == IntPtr.Zero
+            || sourceRootWindowHandle == IntPtr.Zero
+            || sourceRootWindowHandle != currentRootWindowHandle)
+        {
+            TraceDelivery(delta, horizontal, targetWindowHandle, currentWindowHandle, delivered: false, "pointer left the source root window");
+            return false;
+        }
 
-        return originalRoot == currentRoot
-            ? currentWindowHandle
-            : IntPtr.Zero;
+        var delivered = _platform.TryPostWheelMessage(currentWindowHandle, delta, horizontal, cursorPoint);
+        TraceDelivery(
+            delta,
+            horizontal,
+            targetWindowHandle,
+            currentWindowHandle,
+            delivered,
+            delivered ? "posted" : "PostMessageW failed");
+        return delivered;
     }
 
-    private static IntPtr GetRootWindow(IntPtr windowHandle)
+    [Conditional("DEBUG")]
+    private static void TraceDelivery(
+        int delta,
+        bool horizontal,
+        IntPtr sourceWindowHandle,
+        IntPtr currentWindowHandle,
+        bool delivered,
+        string reason)
     {
-        var root = NativeMethods.GetAncestor(windowHandle, NativeConstants.GA_ROOT);
-        return root == IntPtr.Zero ? windowHandle : root;
+        Debug.WriteLine(
+            $"Wheel delivery delta={delta}, horizontal={horizontal}, source=0x{sourceWindowHandle.ToInt64():X}, " +
+            $"current=0x{currentWindowHandle.ToInt64():X}, delivered={delivered}, reason={reason}");
     }
-
-    private static nuint MakeWheelWParam(int delta)
-    {
-        return (nuint)(unchecked((uint)(ushort)delta) << 16);
-    }
-
-    private static nint MakePointLParam(int x, int y)
-    {
-        return (nint)unchecked((int)(((uint)(ushort)y << 16) | (ushort)x));
-    }
-
 }

@@ -132,9 +132,7 @@ public sealed class AppBootstrapper : IDisposable
             mouseWheelEvent.IsHorizontal,
             settings,
             decision.DeliveryMode,
-            mouseWheelEvent.TargetWindowHandle,
-            mouseWheelEvent.ScreenX,
-            mouseWheelEvent.ScreenY);
+            mouseWheelEvent.TargetWindowHandle);
 
         return true;
     }

@@ -17,5 +17,6 @@
 
   <ItemGroup>
     <ProjectReference Include="..\SmoothScrollModern.Application\SmoothScrollModern.Application.csproj" />
+    <ProjectReference Include="..\SmoothScrollModern.Infrastructure\SmoothScrollModern.Infrastructure.csproj" />
   </ItemGroup>
 </Project>
