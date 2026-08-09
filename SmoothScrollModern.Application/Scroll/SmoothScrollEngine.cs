@@ -38,7 +38,7 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
     public void EnqueueWheel(
         int delta,
         bool horizontal,
-        ScrollSettings settings,
+        ScrollSettingsSnapshot settings,
         ScrollDeliveryMode deliveryMode,
         IntPtr targetWindowHandle,
         int screenX,
@@ -49,7 +49,6 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
             return;
         }
 
-        settings.Validate();
         lock (_gate)
         {
             if (_deliveryMode != deliveryMode || IsDifferentTargetWindow(targetWindowHandle))
@@ -353,7 +352,7 @@ public sealed class SmoothScrollEngine : ISmoothScrollEngine
             1.0,
             ScrollDeliveryMode.FineDelta);
 
-        public static ScrollPhysicsOptions From(ScrollSettings settings, ScrollDeliveryMode deliveryMode)
+        public static ScrollPhysicsOptions From(ScrollSettingsSnapshot settings, ScrollDeliveryMode deliveryMode)
         {
             return new ScrollPhysicsOptions(
                 SmoothScrollEngine.TargetFrameTimeMs,

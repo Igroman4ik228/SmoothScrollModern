@@ -13,6 +13,7 @@ namespace SmoothScrollModern.Widgets.Shell.ViewModels;
 public sealed partial class MainViewModel : ObservableObject, IDisposable
 {
     private readonly ISettingsService _settingsService;
+    private readonly IScrollConfigurationPublisher _configurationPublisher;
     private readonly DispatcherQueueTimer _activeApplicationTimer;
     private readonly DispatcherQueueTimer _saveTimer;
     private bool _disposed;
@@ -22,28 +23,31 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         ISettingsService settingsService,
         IActiveWindowService activeWindowService,
         IApplicationRulesService applicationRulesService,
-        IStartupService startupService)
+        IStartupService startupService,
+        IScrollConfigurationPublisher configurationPublisher)
     {
         Settings = settings;
         _settingsService = settingsService;
+        _configurationPublisher = configurationPublisher;
 
         var dispatcherQueue = DispatcherQueue.GetForCurrentThread();
-        Profiles = new ProfilesViewModel(Settings, dispatcherQueue, QueueSave);
+        Profiles = new ProfilesViewModel(Settings, dispatcherQueue, RequestConfigurationSave);
         ApplicationSettings = new ApplicationSettingsViewModel(
             settingsService,
             startupService,
             () => Settings,
             ReplaceSettings,
-            QueueSave,
+            RequestConfigurationSave,
             NotifyStateChanged,
-            ApplyTheme);
+            ApplyTheme,
+            PublishRuntimeConfiguration);
         Applications = new ApplicationRulesViewModel(
             Settings,
             activeWindowService,
             applicationRulesService,
             Profiles,
             dispatcherQueue,
-            QueueSave,
+            RequestConfigurationSave,
             NotifyStateChanged);
 
         _activeApplicationTimer = dispatcherQueue.CreateTimer();
@@ -56,6 +60,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         _saveTimer.Tick += OnSaveTimerTick;
 
         ApplicationSettings.LoadSettings();
+        PublishRuntimeConfiguration();
     }
 
     public event Action? StateChanged;
@@ -84,16 +89,6 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
     public void DisableCurrentApplication()
     {
         Applications.DisableCurrentApplication();
-    }
-
-    public bool TryGetScrollProfile(out ScrollSettings scrollSettings, out ScrollDeliveryMode deliveryMode)
-    {
-        return Applications.TryGetScrollProfile(IsEnabled, IsPaused, out scrollSettings, out deliveryMode);
-    }
-
-    public bool TryGetScrollProfile(IntPtr targetWindowHandle, out ScrollSettings scrollSettings, out ScrollDeliveryMode deliveryMode)
-    {
-        return Applications.TryGetScrollProfile(IsEnabled, IsPaused, targetWindowHandle, out scrollSettings, out deliveryMode);
     }
 
     public void Save()
@@ -127,6 +122,7 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         Profiles.LoadSettings(settings);
         Applications.LoadSettings(settings);
         ApplicationSettings.LoadSettings();
+        PublishRuntimeConfiguration();
         OnPropertyChanged(nameof(Settings));
         OnPropertyChanged(nameof(IsEnabled));
         OnPropertyChanged(nameof(IsPaused));
@@ -152,6 +148,19 @@ public sealed partial class MainViewModel : ObservableObject, IDisposable
         _saveTimer.Stop();
         _saveTimer.Start();
         NotifyStateChanged();
+    }
+
+    private void RequestConfigurationSave()
+    {
+        PublishRuntimeConfiguration();
+        QueueSave();
+    }
+
+    private void PublishRuntimeConfiguration()
+    {
+        Applications.SyncToSettings();
+        Profiles.SyncToSettings();
+        _configurationPublisher.Publish(Settings, ApplicationSettings.PausedUntilUtc);
     }
 
     private void ApplyTheme(string theme)

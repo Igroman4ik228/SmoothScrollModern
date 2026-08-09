@@ -210,18 +210,6 @@ public sealed class ProfilesViewModel : ObservableObject
         UpdateNewScrollProfileNameError();
     }
 
-    public ScrollSettings GetScrollSettings(string scrollProfileId)
-    {
-        if (string.IsNullOrWhiteSpace(scrollProfileId))
-        {
-            return _settings.Scroll;
-        }
-
-        return UserScrollProfiles.FirstOrDefault(profile =>
-                string.Equals(profile.Id, scrollProfileId, StringComparison.OrdinalIgnoreCase))
-            ?.Scroll ?? _settings.Scroll;
-    }
-
     public void NormalizeApplicationRuleProfileReferences(IEnumerable<ApplicationRule> rules)
     {
         foreach (var rule in rules)

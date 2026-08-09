@@ -13,4 +13,5 @@
   <Project Path="SmoothScrollModern.Domain/SmoothScrollModern.Domain.csproj" />
   <Project Path="SmoothScrollModern.Application/SmoothScrollModern.Application.csproj" />
   <Project Path="SmoothScrollModern.Infrastructure/SmoothScrollModern.Infrastructure.csproj" />
+  <Project Path="SmoothScrollModern.Application.Tests/SmoothScrollModern.Application.Tests.csproj" />
 </Solution>

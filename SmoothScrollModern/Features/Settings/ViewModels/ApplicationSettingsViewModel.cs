@@ -16,6 +16,7 @@ public sealed class ApplicationSettingsViewModel : ObservableObject
     private readonly Action _requestSave;
     private readonly Action _stateChanged;
     private readonly Action<string> _themeChanged;
+    private readonly Action _runtimeConfigurationChanged;
     private string _settingsImportErrorText = string.Empty;
     private DateTimeOffset? _pausedUntil;
 
@@ -26,7 +27,8 @@ public sealed class ApplicationSettingsViewModel : ObservableObject
         Action<AppSettings> replaceSettings,
         Action requestSave,
         Action stateChanged,
-        Action<string> themeChanged)
+        Action<string> themeChanged,
+        Action runtimeConfigurationChanged)
     {
         _settingsService = settingsService;
         _startupService = startupService;
@@ -35,6 +37,7 @@ public sealed class ApplicationSettingsViewModel : ObservableObject
         _requestSave = requestSave;
         _stateChanged = stateChanged;
         _themeChanged = themeChanged;
+        _runtimeConfigurationChanged = runtimeConfigurationChanged;
 
         ToggleEnabledCommand = new RelayCommand(() => IsEnabled = !IsEnabled);
         PauseCommand = new RelayCommand(() => PauseFor(TimeSpan.FromMinutes(Core.Constants.TrayPauseMinutes)));
@@ -76,6 +79,8 @@ public sealed class ApplicationSettingsViewModel : ObservableObject
     }
 
     public bool IsPaused => _pausedUntil is not null && _pausedUntil > DateTimeOffset.Now;
+
+    public DateTimeOffset? PausedUntilUtc => _pausedUntil?.ToUniversalTime();
 
     public string StatusText => IsPaused
         ? $"Пауза до {_pausedUntil:HH:mm}"
@@ -185,6 +190,7 @@ public sealed class ApplicationSettingsViewModel : ObservableObject
     public void PauseFor(TimeSpan duration)
     {
         _pausedUntil = DateTimeOffset.Now.Add(duration);
+        _runtimeConfigurationChanged();
         OnPropertyChanged(nameof(IsPaused));
         OnPropertyChanged(nameof(StatusText));
         _stateChanged();
@@ -198,6 +204,7 @@ public sealed class ApplicationSettingsViewModel : ObservableObject
         }
 
         _pausedUntil = null;
+        _runtimeConfigurationChanged();
         OnPropertyChanged(nameof(IsPaused));
         OnPropertyChanged(nameof(StatusText));
         _stateChanged();

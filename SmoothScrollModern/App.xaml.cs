@@ -49,12 +49,18 @@ namespace SmoothScrollModern
             services.AddSingleton<ISettingsService, JsonSettingsService>();
             services.AddSingleton(provider => provider.GetRequiredService<ISettingsService>().Load());
 
+            services.AddSingleton<IWindowIdentityResolver, WindowIdentityResolver>();
             services.AddSingleton<IActiveWindowService, ActiveWindowService>();
             services.AddSingleton<IApplicationRulesService, ApplicationRulesService>();
             services.AddSingleton<IStartupService, WindowsStartupService>();
             services.AddSingleton<IInputInjectionService, InputInjectionService>();
             services.AddSingleton<IGlobalInputHookService, SharpHookInputService>();
             services.AddSingleton<ISmoothScrollEngine, SmoothScrollEngine>();
+            services.AddSingleton<ScrollConfigurationSnapshotFactory>();
+            services.AddSingleton<ScrollConfigurationStore>();
+            services.AddSingleton<IScrollConfigurationProvider>(provider => provider.GetRequiredService<ScrollConfigurationStore>());
+            services.AddSingleton<IScrollConfigurationPublisher>(provider => provider.GetRequiredService<ScrollConfigurationStore>());
+            services.AddSingleton<IScrollDecisionService, ScrollDecisionService>();
             services.AddSingleton<ITrayService, TrayService>();
 
             services.AddSingleton<MainViewModel>();

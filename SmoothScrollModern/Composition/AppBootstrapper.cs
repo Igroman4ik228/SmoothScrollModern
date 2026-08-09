@@ -13,6 +13,7 @@ namespace SmoothScrollModern.Composition;
 public sealed class AppBootstrapper : IDisposable
 {
     private readonly ISmoothScrollEngine _smoothScrollEngine;
+    private readonly IScrollDecisionService _scrollDecisionService;
     private readonly IGlobalInputHookService _inputHookService;
     private readonly ITrayService _trayService;
     private bool _inputHookWarningShown;
@@ -22,6 +23,7 @@ public sealed class AppBootstrapper : IDisposable
     public AppBootstrapper(
         AppSettings settings,
         ISmoothScrollEngine smoothScrollEngine,
+        IScrollDecisionService scrollDecisionService,
         IGlobalInputHookService inputHookService,
         ITrayService trayService,
         MainViewModel mainViewModel,
@@ -29,6 +31,7 @@ public sealed class AppBootstrapper : IDisposable
     {
         Settings = settings;
         _smoothScrollEngine = smoothScrollEngine;
+        _scrollDecisionService = scrollDecisionService;
         _inputHookService = inputHookService;
         _trayService = trayService;
         MainViewModel = mainViewModel;
@@ -110,13 +113,15 @@ public sealed class AppBootstrapper : IDisposable
 
     private bool OnMouseWheel(MouseWheelEvent mouseWheelEvent)
     {
-        if (!MainViewModel.TryGetScrollProfile(mouseWheelEvent.TargetWindowHandle, out var scrollSettings, out var deliveryMode))
+        var decision = _scrollDecisionService.Decide(mouseWheelEvent.TargetWindowHandle);
+        if (!decision.ShouldSmooth)
         {
             _smoothScrollEngine.Stop();
             return false;
         }
 
-        if (ShouldBypassSmoothScrollForShortcutWheel(scrollSettings))
+        var settings = decision.Settings!;
+        if (ShouldBypassSmoothScrollForShortcutWheel(settings))
         {
             _smoothScrollEngine.Stop();
             return false;
@@ -125,8 +130,8 @@ public sealed class AppBootstrapper : IDisposable
         _smoothScrollEngine.EnqueueWheel(
             mouseWheelEvent.Delta,
             mouseWheelEvent.IsHorizontal,
-            scrollSettings,
-            deliveryMode,
+            settings,
+            decision.DeliveryMode,
             mouseWheelEvent.TargetWindowHandle,
             mouseWheelEvent.ScreenX,
             mouseWheelEvent.ScreenY);
@@ -134,9 +139,9 @@ public sealed class AppBootstrapper : IDisposable
         return true;
     }
 
-    private bool ShouldBypassSmoothScrollForShortcutWheel(ScrollSettings scrollSettings)
+    private bool ShouldBypassSmoothScrollForShortcutWheel(ScrollSettingsSnapshot settings)
     {
-        return _inputHookService.IsAnyShortcutKeyDown(scrollSettings.BypassSmoothingVirtualKeys);
+        return _inputHookService.IsAnyShortcutKeyDown(settings.BypassSmoothingVirtualKeys);
     }
 
     private void EnsureInputHookStarted()

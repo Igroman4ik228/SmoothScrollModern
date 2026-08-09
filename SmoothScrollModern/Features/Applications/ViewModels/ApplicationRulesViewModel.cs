@@ -266,6 +266,12 @@ public sealed partial class ApplicationRulesViewModel : ObservableObject
         var activeApplication = await GetActiveApplicationAsync().ConfigureAwait(false);
         await RunOnDispatcherAsync(() =>
         {
+            if (IsOwnApplication(activeApplication))
+            {
+                ApplyCurrentApplication(activeApplication);
+                return;
+            }
+
             ApplyCurrentApplication(activeApplication);
             if (!CanDisableCurrentApplication())
             {
@@ -290,10 +296,9 @@ public sealed partial class ApplicationRulesViewModel : ObservableObject
 
         var previousApplication = _currentApplication;
         var previousRule = _currentApplicationRule;
-        if (!IsOwnApplication(activeApplication))
-        {
-            _currentApplication = activeApplication;
-        }
+        _currentApplication = IsOwnApplication(activeApplication)
+            ? ApplicationInfo.Empty
+            : activeApplication;
 
         RefreshCurrentApplicationRule();
 
@@ -307,55 +312,6 @@ public sealed partial class ApplicationRulesViewModel : ObservableObject
         DisableCurrentApplicationCommand.NotifyCanExecuteChanged();
         RemoveRuleCommand.NotifyCanExecuteChanged();
         _stateChanged();
-    }
-
-    public bool TryGetScrollProfile(bool isEnabled, bool isPaused, out ScrollSettings scrollSettings, out ScrollDeliveryMode deliveryMode)
-    {
-        return TryGetScrollProfile(isEnabled, isPaused, IntPtr.Zero, out scrollSettings, out deliveryMode);
-    }
-
-    public bool TryGetScrollProfile(
-        bool isEnabled,
-        bool isPaused,
-        IntPtr targetWindowHandle,
-        out ScrollSettings scrollSettings,
-        out ScrollDeliveryMode deliveryMode)
-    {
-        scrollSettings = _settings.Scroll;
-        deliveryMode = ScrollDeliveryMode.FineDelta;
-
-        if (!isEnabled || isPaused)
-        {
-            return false;
-        }
-
-        var targetApplication = targetWindowHandle == IntPtr.Zero
-            ? _activeWindowService.GetActiveApplication()
-            : _activeWindowService.GetApplicationFromWindow(targetWindowHandle);
-        if (IsOwnApplication(targetApplication))
-        {
-            return false;
-        }
-
-        var rule = FindApplicationRule(targetApplication);
-        if (SelectedApplicationListMode == ApplicationListMode.SelectedOnly && rule is not { IsRuleEnabled: true })
-        {
-            return false;
-        }
-
-        if (rule is { IsRuleEnabled: true, IsSmoothScrollDisabled: true }
-            || _applicationRulesService.ShouldBypass(targetApplication, _settings))
-        {
-            return false;
-        }
-
-        if (rule is { IsRuleEnabled: true })
-        {
-            scrollSettings = _profilesViewModel.GetScrollSettings(rule.ScrollProfileId);
-            deliveryMode = rule.DeliveryMode;
-        }
-
-        return true;
     }
 
     public void SyncToSettings()
@@ -573,7 +529,12 @@ public sealed partial class ApplicationRulesViewModel : ObservableObject
 
     private ApplicationRule? FindApplicationRule(ApplicationInfo application)
     {
-        return _settings.ApplicationRules.FirstOrDefault(rule => ApplicationRulesService.Matches(rule, application));
+        return _settings.ApplicationRules.FirstOrDefault(rule =>
+                   !string.IsNullOrWhiteSpace(rule.ExecutablePath)
+                   && ApplicationRulesService.Matches(rule, application))
+               ?? _settings.ApplicationRules.FirstOrDefault(rule =>
+                   string.IsNullOrWhiteSpace(rule.ExecutablePath)
+                   && ApplicationRulesService.Matches(rule, application));
     }
 
     private void RefreshCurrentApplicationRule()

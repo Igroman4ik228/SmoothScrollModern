@@ -7,92 +7,49 @@ namespace SmoothScrollModern.Applications;
 public sealed class ActiveWindowService : IActiveWindowService
 {
     private const int WindowTextCapacity = 512;
-    private static readonly TimeSpan ProcessInfoCacheDuration = TimeSpan.FromSeconds(10);
-    private readonly Dictionary<int, CachedProcessInfo> _processInfoCache = [];
-    private readonly object _processInfoCacheGate = new();
+    private readonly IWindowIdentityResolver _windowIdentityResolver;
+
+    public ActiveWindowService(IWindowIdentityResolver windowIdentityResolver)
+    {
+        _windowIdentityResolver = windowIdentityResolver;
+    }
 
     public ApplicationInfo GetActiveApplication()
     {
-        var hwnd = NativeMethods.GetForegroundWindow();
-        return GetApplicationFromWindow(hwnd);
+        return GetApplicationFromWindow(NativeMethods.GetForegroundWindow());
     }
 
-    public ApplicationInfo GetApplicationFromWindow(IntPtr hwnd)
+    public ApplicationInfo GetApplicationFromWindow(IntPtr windowHandle)
     {
-        if (hwnd == IntPtr.Zero)
+        var identity = _windowIdentityResolver.Resolve(windowHandle);
+        if (identity == WindowIdentity.Empty)
         {
             return ApplicationInfo.Empty;
         }
 
-        NativeMethods.GetWindowThreadProcessId(hwnd, out var processIdRaw);
-        if (processIdRaw == 0)
-        {
-            return ApplicationInfo.Empty;
-        }
-
-        var processId = unchecked((int)processIdRaw);
-        var processInfo = GetProcessInfo(processId);
-
-        var title = GetWindowTitle(hwnd);
+        var title = GetWindowTitle(identity.WindowHandle);
         return new ApplicationInfo(
-            hwnd,
-            processId,
-            processInfo.ProcessName,
-            processInfo.ExecutablePath,
-            string.IsNullOrWhiteSpace(processInfo.DisplayName) ? processInfo.ProcessName : processInfo.DisplayName,
+            identity.WindowHandle,
+            GetProcessId(identity.WindowHandle),
+            identity.ProcessName,
+            identity.ExecutablePath,
+            TryGetDisplayName(identity.ExecutablePath) ?? identity.ProcessName,
             string.IsNullOrWhiteSpace(title) ? "Без заголовка окна" : title,
-            IsFullscreen(hwnd));
+            identity.IsFullscreen);
     }
 
-    private CachedProcessInfo GetProcessInfo(int processId)
+    private static int GetProcessId(IntPtr windowHandle)
     {
-        var now = DateTimeOffset.UtcNow;
-        lock (_processInfoCacheGate)
-        {
-            if (_processInfoCache.TryGetValue(processId, out var cached)
-                && now - cached.CachedAt <= ProcessInfoCacheDuration)
-            {
-                return cached;
-            }
-        }
-
-        var processInfo = ReadProcessInfo(processId, now);
-        lock (_processInfoCacheGate)
-        {
-            _processInfoCache[processId] = processInfo;
-            PruneProcessInfoCache(now);
-        }
-
-        return processInfo;
+        NativeMethods.GetWindowThreadProcessId(windowHandle, out var processId);
+        return unchecked((int)processId);
     }
 
-    private static CachedProcessInfo ReadProcessInfo(int processId, DateTimeOffset cachedAt)
+    private static string GetWindowTitle(IntPtr windowHandle)
     {
-        try
-        {
-            using var process = Process.GetProcessById(processId);
-            var processName = $"{process.ProcessName}.exe".ToLowerInvariant();
-            var executablePath = TryGetExecutablePath(process) ?? string.Empty;
-            var displayName = TryGetDisplayName(executablePath) ?? processName;
-            return new CachedProcessInfo(processName, executablePath, displayName, cachedAt);
-        }
-        catch (Exception)
-        {
-            var processName = $"pid:{processId}";
-            return new CachedProcessInfo(processName, string.Empty, processName, cachedAt);
-        }
-    }
-
-    private static string? TryGetExecutablePath(Process process)
-    {
-        try
-        {
-            return process.MainModule?.FileName;
-        }
-        catch (Exception)
-        {
-            return null;
-        }
+        var builder = new StringBuilder(WindowTextCapacity);
+        return NativeMethods.GetWindowText(windowHandle, builder, builder.Capacity) > 0
+            ? builder.ToString()
+            : string.Empty;
     }
 
     private static string? TryGetDisplayName(string executablePath)
@@ -112,60 +69,4 @@ public sealed class ActiveWindowService : IActiveWindowService
             return null;
         }
     }
-
-    private void PruneProcessInfoCache(DateTimeOffset now)
-    {
-        if (_processInfoCache.Count <= 128)
-        {
-            return;
-        }
-
-        foreach (var processId in _processInfoCache
-                     .Where(item => now - item.Value.CachedAt > ProcessInfoCacheDuration)
-                     .Select(item => item.Key)
-                     .ToList())
-        {
-            _processInfoCache.Remove(processId);
-        }
-    }
-
-    private static string GetWindowTitle(IntPtr hwnd)
-    {
-        var builder = new StringBuilder(WindowTextCapacity);
-        return NativeMethods.GetWindowText(hwnd, builder, builder.Capacity) > 0
-            ? builder.ToString()
-            : string.Empty;
-    }
-
-    private static bool IsFullscreen(IntPtr hwnd)
-    {
-        if (!NativeMethods.GetWindowRect(hwnd, out var windowRect))
-        {
-            return false;
-        }
-
-        var monitor = NativeMethods.MonitorFromWindow(hwnd, NativeConstants.MONITOR_DEFAULTTONEAREST);
-        if (monitor == IntPtr.Zero)
-        {
-            return false;
-        }
-
-        var monitorInfo = new MONITORINFO { CbSize = (uint)System.Runtime.InteropServices.Marshal.SizeOf<MONITORINFO>() };
-        if (!NativeMethods.GetMonitorInfoW(monitor, ref monitorInfo))
-        {
-            return false;
-        }
-
-        const int tolerance = 2;
-        return Math.Abs(windowRect.Left - monitorInfo.RcMonitor.Left) <= tolerance
-               && Math.Abs(windowRect.Top - monitorInfo.RcMonitor.Top) <= tolerance
-               && Math.Abs(windowRect.Width - monitorInfo.RcMonitor.Width) <= tolerance
-               && Math.Abs(windowRect.Height - monitorInfo.RcMonitor.Height) <= tolerance;
-    }
-
-    private sealed record CachedProcessInfo(
-        string ProcessName,
-        string ExecutablePath,
-        string DisplayName,
-        DateTimeOffset CachedAt);
 }

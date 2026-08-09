@@ -104,7 +104,7 @@ public static class ShortcutKeys
             VirtualKey.Menu => [VirtualKey.LeftMenu, VirtualKey.RightMenu],
             _ => [virtualKey]
         };
-    }   
+    }
 
     public static string Format(VirtualKey key)
     {
